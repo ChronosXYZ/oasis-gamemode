@@ -22,7 +22,7 @@
 ```bash
 cd docker
 docker compose build
-docker compose run --rm builder
+make
 ```
 
 You may need to set up some directories first:
@@ -46,7 +46,6 @@ Build the server strictly after building C++ part.
 cd server
 sampctl ensure
 sampctl build
-cp ../docker/build/liboasis-gm.so components
 ```
 
 Run the server!
