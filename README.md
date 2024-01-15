@@ -15,7 +15,9 @@
   <img alt="Discord" src="https://img.shields.io/discord/1081202778245976124?logo=discord&logoColor=fff&label=%5Bopen.mp%5D%20Oasis%20Freeroam&labelColor=f00&color=5865F2">
   </a>
 
-## Building with Docker
+## Building
+
+### 1. Building C++ part with Docker
 
 ```bash
 cd docker
@@ -34,3 +36,21 @@ sudo chown 1000 conan
 
 The output is in `docker/build/`
 
+### 2. Building the server
+
+You should have [sampctl](https://github.com/Southclaws/sampctl) installed.
+
+Build the server strictly after building C++ part.
+
+```bash
+cd server
+sampctl ensure
+sampctl build
+cp ../docker/build/liboasis-gm.so components
+```
+
+Run the server!
+
+```bash
+sampctl run
+```
