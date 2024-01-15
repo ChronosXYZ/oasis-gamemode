@@ -1,0 +1,11 @@
+# open.mp stuff
+announce
+samp03svr
+server.cfg
+log.txt
+bans.json
+
+# folders
+gamemodes
+components
+dependencies

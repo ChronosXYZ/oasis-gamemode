@@ -1,0 +1,20 @@
+site: ""
+user: ChronosXYZ
+repo: oasis
+tag: 0.0.1
+entry: src/oasis.pwn
+output: gamemodes/oasis.amx
+dependencies:
+    - openmultiplayer/omp-stdlib
+    - pawn-lang/samp-stdlib@open.mp
+    - pawn-lang/pawn-stdlib@open.mp
+local: true
+runtime:
+    version: openmp
+builds:
+    - name: main
+      compiler:
+          site: github.com
+          user: ChronosXYZ
+          repo: pawn-compiler-binary
+          version: 3.10.11

@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  builder:
+    image: open.mp/builder
+    build: ./ubuntu-22.04
+    working_dir: /code
+    volumes:
+      - ./..:/code
+      - ./build:/code/build
+      - ./conan:/home/user/.conan
