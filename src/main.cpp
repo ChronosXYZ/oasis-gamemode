@@ -3,8 +3,6 @@
 #include <ctime>
 #include <cstdlib>
 
-// Include the vehicle component information.
-// #include <Server/Components/Vehicles/vehicles.hpp>
 #include <Server/Components/Classes/classes.hpp>
 
 #include "constants.hpp"
@@ -12,23 +10,15 @@
 class OasisGamemodeComponent final : public IComponent, public PlayerSpawnEventHandler, public PlayerConnectEventHandler, public PlayerTextEventHandler
 {
 private:
-	// Hold a reference to the main server core.
 	ICore* core_ = nullptr;
 	IPlayerPool* playerPool = nullptr;
 
 public:
-	// Visit https://open.mp/uid to generate a new unique ID.
 	PROVIDE_UID(OASIS_GM_UID);
 
 	// When this component is destroyed we need to tell any linked components this it is gone.
 	~OasisGamemodeComponent()
 	{
-		// Clean up what you did above.
-		// if (vehicles_)
-		// {
-		// 	vehicles_->getPoolEventDispatcher().removeEventHandler(this);
-		// }
-
 		playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 		playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 		playerPool->getPlayerTextDispatcher().removeEventHandler(this);
@@ -103,7 +93,7 @@ public:
 
 	void reset() override
 	{
-		// Resets data when the mode changes.
+		// Resets data when the mode changes (GMX).
 	}
 };
 

@@ -9,6 +9,7 @@ RUN \
     python3-pip \
     gcc-multilib \
     g++-multilib \
+    gettext \
     libstdc++-11-dev:i386 \
     && \
     useradd -m user && \

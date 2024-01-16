@@ -269,7 +269,7 @@ __pycache__/
 *.rule
 *.filters
 *.vcxproj
-*.cmake
+#*.cmake
 *.bin
 /Win32-Debug
 /includes/fmat
