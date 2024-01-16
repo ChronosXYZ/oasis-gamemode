@@ -5,6 +5,8 @@ services:
     image: open.mp/builder
     build: ./ubuntu-22.04
     working_dir: /code
+    environment:
+      - SKIP_CMAKE
     volumes:
       - ./..:/code
       - ./build:/code/build

@@ -292,3 +292,4 @@ __pycache__/
 *.i
 .vscode/
 docker/conan
+.env
