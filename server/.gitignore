@@ -1,6 +1,7 @@
 # open.mp stuff
 announce
 samp03svr
+samp-npc
 server.cfg
 log.txt
 bans.json
@@ -9,3 +10,4 @@ bans.json
 gamemodes
 components
 dependencies
+plugins

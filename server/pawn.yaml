@@ -1,20 +1,26 @@
 site: ""
 user: ChronosXYZ
 repo: oasis
-tag: 0.0.1
 entry: src/oasis.pwn
 output: gamemodes/oasis.amx
 dependencies:
     - openmultiplayer/omp-stdlib
     - pawn-lang/samp-stdlib@open.mp
     - pawn-lang/pawn-stdlib@open.mp
+    - samp-incognito/samp-streamer-plugin:v2.9.6
 local: true
 runtime:
     version: openmp
+    mode: server
+    rcon_password: password
+    port: 8192
+    hostname: SA-MP Server
+    maxplayers: 50
+    language: ""
 builds:
     - name: main
       compiler:
-          site: github.com
-          user: ChronosXYZ
-          repo: pawn-compiler-binary
-          version: 3.10.11
+        site: github.com
+        user: ChronosXYZ
+        repo: pawn-compiler-binary
+        version: 3.10.11
