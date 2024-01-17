@@ -45,13 +45,16 @@ include(cmake/gettext_helpers.cmake)
 #                       OPTIONS "boost:without_url=True"
 #                       OPTIONS "boost:without_wave=True")
 
-# conan_cmake_autodetect(settings ARCH x86)
+conan_cmake_configure(REQUIRES libpqxx/7.8.1
+                        GENERATORS CMakeDeps)
 
-# conan_cmake_install(PATH_OR_REFERENCE .
-#                     BUILD missing
-#                     REMOTE conancenter
-#                     PROFILE_BUILD default
-#                     SETTINGS ${settings})
+conan_cmake_autodetect(settings ARCH x86)
+
+conan_cmake_install(PATH_OR_REFERENCE .
+                    BUILD missing
+                    REMOTE conancenter
+                    PROFILE_BUILD default
+                    SETTINGS ${settings})
 
 
 add_subdirectory(sdk)

@@ -2,16 +2,20 @@
 #include <sdk.hpp>
 #include <ctime>
 #include <cstdlib>
+#include <memory>
 
 #include <Server/Components/Classes/classes.hpp>
 
 #include "constants.hpp"
+#include "core/CoreManager.hpp"
 
 class OasisGamemodeComponent final : public IComponent, public PlayerSpawnEventHandler, public PlayerConnectEventHandler, public PlayerTextEventHandler
 {
 private:
 	ICore* core_ = nullptr;
 	IPlayerPool* playerPool = nullptr;
+
+	unique_ptr<Core::CoreManager> coreManager;
 
 public:
 	PROVIDE_UID(OASIS_GM_UID);
@@ -22,6 +26,8 @@ public:
 		playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 		playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 		playerPool->getPlayerTextDispatcher().removeEventHandler(this);
+		core_ = nullptr;
+		playerPool = nullptr;
 	}
 
 	// Implement the main component API.
@@ -49,6 +55,8 @@ public:
 		playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 		playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 		playerPool->getPlayerTextDispatcher().addEventHandler(this);
+
+		this->coreManager = make_unique<Core::CoreManager>(components, playerPool);
 
 		srand(time(NULL));
 	}

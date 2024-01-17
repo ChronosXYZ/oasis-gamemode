@@ -7,6 +7,7 @@ services:
     working_dir: /code
     environment:
       - SKIP_CMAKE
+      - CONFIG
     volumes:
       - ./..:/code
       - ./build:/code/build

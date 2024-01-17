@@ -1,6 +1,6 @@
 set(PROJECT Server)
 
-file(GLOB_RECURSE source_list "*.cpp" "*.hpp")
+file(GLOB_RECURSE source_list CONFIGURE_DEPENDS "./*.cpp" "./*.hpp")
 
 # configure_gettext(
 #     DOMAIN "domain-name"
