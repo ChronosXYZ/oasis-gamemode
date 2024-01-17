@@ -1,14 +1,23 @@
 #include "CoreManager.hpp"
-#include "Player.hpp"
 
 using namespace Core;
 
 CoreManager::CoreManager(IComponentList* components, IPlayerPool* playerPool)
 	: components(components)
 	, playerPool(playerPool)
+	, _dialogManager(make_shared<DialogManager>(components))
 {
-	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
-	dialogManager = make_unique<DialogManager>(components);
+	playerPool->getPlayerConnectDispatcher()
+		.addEventHandler(this);
+
+	this->_dbConnection = make_shared<pqxx::connection>(getenv("DB_CONNECTION_STRING"));
+}
+
+shared_ptr<CoreManager> CoreManager::create(IComponentList* components, IPlayerPool* playerPool)
+{
+	shared_ptr<CoreManager> pManager(new CoreManager(components, playerPool));
+	pManager->initHandlers();
+	return pManager;
 }
 
 CoreManager::~CoreManager()
@@ -21,45 +30,32 @@ CoreManager::~CoreManager()
 
 void CoreManager::addRegisteredPlayer(unique_ptr<Player> player)
 {
-	this->players[player->serverPlayer.getID()] = move(player);
+	this->_players[player->serverPlayer.getID()] = move(player);
 }
 
 void CoreManager::onPlayerConnect(IPlayer& player)
 {
-	this->dialogManager->createDialog(player,
-		DialogStyle_PASSWORD,
-		"Registration",
-		"Enter the password:",
-		"OK",
-		"Quit",
-		[&](DialogResponse resp, int listItem, StringView inputText)
-		{
-			switch (resp)
-			{
-			case DialogResponse_Left:
-			{
-				player.sendClientMessage(Colour::White(), "You have been registered!");
-				player.spawn();
-				break;
-			}
-			case DialogResponse_Right:
-			{
-				player.kick();
-				break;
-			}
-			}
-		});
-
-	unique_ptr<PlayerData>
-		pData(new PlayerData);
-	unique_ptr<Player> wrappedPlayer(new Player(move(pData), player));
-	this->addRegisteredPlayer(move(wrappedPlayer));
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
 {
-	if (this->players.count(player.getID()) != 0)
+	if (this->_players.count(player.getID()) != 0)
 	{
-		this->players.erase(player.getID());
+		this->_players.erase(player.getID());
 	}
+}
+
+shared_ptr<DialogManager> CoreManager::getDialogManager()
+{
+	return std::shared_ptr<DialogManager>(this->_dialogManager);
+}
+
+void CoreManager::initHandlers()
+{
+	_authHandler = make_unique<AuthHandler>(playerPool, weak_from_this());
+}
+
+shared_ptr<pqxx::connection> CoreManager::getDBConnection()
+{
+	return this->_dbConnection;
 }

@@ -2,33 +2,44 @@
 
 #include <memory>
 #include <map>
-#include <Server/Components/Dialogs/dialogs.hpp>
+#include <pqxx/pqxx>
+#include <sdk.hpp>
 
 #include "Player.hpp"
 #include "DialogManager.hpp"
+#include "auth/AuthHandler.hpp"
 
 using namespace std;
 
 namespace Core
 {
-class CoreManager : public PlayerConnectEventHandler
+class CoreManager : public PlayerConnectEventHandler, public std::enable_shared_from_this<CoreManager>
 {
 public:
-	IComponentList* components;
+	const IComponentList* components;
 
-	CoreManager(IComponentList* components, IPlayerPool* playerPool);
+	static shared_ptr<CoreManager> create(IComponentList* components, IPlayerPool* playerPool);
 	~CoreManager();
 
 	void addRegisteredPlayer(unique_ptr<Player> player);
+	shared_ptr<DialogManager> getDialogManager();
+	shared_ptr<pqxx::connection> getDBConnection();
 
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
 
 private:
+	CoreManager(IComponentList* components, IPlayerPool* playerPool);
+
+	void initHandlers();
+
 	IPlayerPool* playerPool = nullptr;
 
-	unique_ptr<DialogManager> dialogManager;
-	map<unsigned int, unique_ptr<Player>>
-		players;
+	map<unsigned int, unique_ptr<Player>> _players;
+	shared_ptr<DialogManager> _dialogManager;
+	shared_ptr<pqxx::connection> _dbConnection;
+
+	// Handlers
+	unique_ptr<AuthHandler> _authHandler;
 };
 }

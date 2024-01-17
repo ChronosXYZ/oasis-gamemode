@@ -12,7 +12,6 @@ DialogManager::DialogManager(IComponentList* components)
 DialogManager::~DialogManager()
 {
 	this->dialogsComponent->getEventDispatcher().removeEventHandler(this);
-	this->dialogsComponent = nullptr;
 }
 
 void DialogManager::onDialogResponse(IPlayer& player, int dialogId, DialogResponse response, int listItem, StringView inputText)
