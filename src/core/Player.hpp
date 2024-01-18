@@ -4,22 +4,28 @@
 
 #include <memory>
 
-#include "PlayerData.hpp"
+#include "player.hpp"
+#include "player/PlayerModel.hpp"
 
 namespace Core
 {
 class Player
 {
 public:
-	std::unique_ptr<PlayerData> data;
+	std::unique_ptr<PlayerModel> data;
 
-	Player(std::unique_ptr<PlayerData> playerData, IPlayer& serverPlayer)
+	Player(std::unique_ptr<PlayerModel> playerData, IPlayer& serverPlayer)
 		: data(std::move(playerData))
 		, serverPlayer(serverPlayer)
 	{
 	}
 
-public:
+	Player(IPlayer& player)
+		: serverPlayer(player)
+	{
+		Player(make_unique<PlayerModel>(), player);
+	}
+
 	IPlayer& serverPlayer;
 };
 }

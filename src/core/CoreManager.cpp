@@ -28,9 +28,16 @@ CoreManager::~CoreManager()
 	playerPool = nullptr;
 }
 
-void CoreManager::addRegisteredPlayer(unique_ptr<Player> player)
+void CoreManager::addRegisteredPlayer(shared_ptr<Player> player)
 {
 	this->_players[player->serverPlayer.getID()] = move(player);
+}
+
+optional<shared_ptr<Player>> CoreManager::getPlayerData(unsigned int id)
+{
+	if (this->_players.contains(id))
+		return this->_players[id];
+	return {};
 }
 
 void CoreManager::onPlayerConnect(IPlayer& player)

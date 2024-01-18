@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <iostream>
+#include <string>
 
 #include <sdk.hpp>
 #include <Server/Components/Dialogs/dialogs.hpp>
+#include <spdlog/spdlog.h>
 
 namespace Core
 {

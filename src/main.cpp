@@ -81,6 +81,8 @@ public:
 
 	void onPlayerSpawn(IPlayer& player) override
 	{
+		if (auto pData = this->coreManager->getPlayerData(player.getID()))
+			player.setSkin(pData->get()->data->lastSkinId);
 		player.setPosition(consts::randomSpawnArray[rand() % consts::randomSpawnArray.size()]);
 		player.sendClientMessage(Colour::White(), "Hello, World!");
 	}
