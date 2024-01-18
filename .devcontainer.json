@@ -1,0 +1,23 @@
+{
+    "dockerComposeFile": [
+        "./docker/docker-compose.yaml",
+        "./docker/docker-compose.devcontainer.yaml"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-vscode.cmake-tools",
+                "ms-vscode.makefile-tools"
+            ]
+        }
+    },
+    "service": "builder_devenv",
+    "workspaceFolder": "/code",
+    "shutdownAction": "stopCompose",
+    "runServices": [
+        "db"
+    ],
+    "initializeCommand": "echo Initialize....",
+    "onCreateCommand": "git config --global --add safe.directory /code"
+}

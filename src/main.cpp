@@ -68,7 +68,7 @@ public:
 	{
 	}
 
-	bool onPlayerCommandText(IPlayer& player, StringView message)
+	bool onPlayerCommandText(IPlayer& player, StringView message) override
 	{
 		if (message == "/kill")
 		{

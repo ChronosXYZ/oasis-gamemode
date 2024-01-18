@@ -291,5 +291,8 @@ __pycache__/
 *.amx
 *.i
 .vscode/
+
+/.cache
 docker/conan
 .env
+compile_commands.json
