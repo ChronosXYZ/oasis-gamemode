@@ -50,7 +50,9 @@ include(cmake/gettext_helpers.cmake)
 #                       OPTIONS "boost:without_url=True"
 #                       OPTIONS "boost:without_wave=True")
 
-conan_cmake_configure(REQUIRES libpqxx/7.8.1
+conan_cmake_configure(REQUIRES 
+                            libpqxx/7.8.1
+                            spdlog/1.13.0
                         GENERATORS CMakeDeps)
 
 conan_cmake_autodetect(settings ARCH x86)
