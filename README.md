@@ -36,6 +36,14 @@ sudo chown 1000 conan
 
 The output is in `docker/build/`
 
+#### VSCode Dev Container feature
+
+This repository supports Dev Container feature. Use the `Dev Containers: Reopen in Container` command from the Command Palette (`F1`, `Ctrl+Shift+P`).
+
+**IMPORTANT**! At the very first, you should build base Docker container. Go to `docker` folder and type `docker compose build`!
+
+To build gamemode inside Dev Container environment, use `make` in the workspace root folder. Further use `SKIP_CMAKE` environment variable to prevent repeated CMake configuration process.
+
 ### 2. Building the server
 
 You should have [sampctl](https://github.com/Southclaws/sampctl) installed.
@@ -53,3 +61,6 @@ Run the server!
 ```bash
 sampctl run
 ```
+
+If you are in VSCode Dev Container environment, use `make run` in the workspace root folder to run the server.
+
