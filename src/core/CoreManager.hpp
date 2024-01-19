@@ -6,7 +6,6 @@
 #include <sdk.hpp>
 #include <optional>
 
-#include "Player.hpp"
 #include "player/PlayerExtension.hpp"
 #include "DialogManager.hpp"
 #include "auth/AuthHandler.hpp"
@@ -23,10 +22,10 @@ public:
 	static shared_ptr<CoreManager> create(IComponentList* components, IPlayerPool* playerPool);
 	~CoreManager();
 
-	void attachPlayerData(IPlayer& player, std::shared_ptr<PlayerModel> data);
-	optional<shared_ptr<PlayerModel>> getPlayerData(IPlayer& player);
+	shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
 	shared_ptr<DialogManager> getDialogManager();
 	shared_ptr<pqxx::connection> getDBConnection();
+	bool refreshPlayerData(IPlayer& player);
 
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;

@@ -31,7 +31,7 @@ struct PlayerModel
 
 	PlayerModel() = default;
 
-	PlayerModel(const pqxx::row& row)
+	void updateFromRow(const pqxx::row& row)
 	{
 		account_id = row["id"].as<unsigned long>();
 		name = row["name"].c_str();

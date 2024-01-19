@@ -1,8 +1,13 @@
 #pragma once
 
+#include <map>
+#include <regex>
+#include <string>
+#include <string_view>
 #include <types.hpp>
 #include <sdk.hpp>
 #include <array>
+#include <unordered_map>
 
 #define OASIS_GM_UID 0xF09FC558499EF9D7
 
@@ -51,4 +56,23 @@ const std::array<Vector3, 23>
 		Vector3(1705.2347, 1025.6808, 10.8203)
 	};
 
+const inline std::array<std::string_view, 3> LANGUAGES {
+	"English",
+	"Portuguese",
+	"Russian"
+};
+
+static const std::map<unsigned int, std::string> LANGUAGE_CODE_NAME = {
+	{ 0, "en" },
+	{ 1, "pt" },
+	{ 2, "ru" }
+};
+
+static const std::map<std::string, std::string> LANGUAGE_CHARSETS = {
+	{ "en", "ANSI" },
+	{ "pt", "ANSI" },
+	{ "ru", "CP1251" }
+};
+
+static const std::regex EMAIL_REGEX("(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?:(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
 }

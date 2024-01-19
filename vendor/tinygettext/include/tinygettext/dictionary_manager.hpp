@@ -29,74 +29,76 @@
 #include "dictionary.hpp"
 #include "language.hpp"
 
-namespace tinygettext {
+namespace tinygettext
+{
 
 class FileSystem;
 
 /** Manager class for dictionaries, you give it a bunch of directories
-    with .po files and it will then automatically load the right file
-    on demand depending on which language was set. */
+	with .po files and it will then automatically load the right file
+	on demand depending on which language was set. */
 class DictionaryManager
 {
 private:
-  typedef std::unordered_map<Language, Dictionary*, Language_hash> Dictionaries;
-  Dictionaries dictionaries;
+	typedef std::unordered_map<Language, Dictionary*, Language_hash> Dictionaries;
+	Dictionaries dictionaries;
 
-  typedef std::deque<std::string> SearchPath;
-  SearchPath search_path;
+	typedef std::deque<std::string> SearchPath;
+	SearchPath search_path;
 
-  std::string charset;
-  bool        use_fuzzy;
+	std::string charset;
+	bool use_fuzzy;
 
-  Language    current_language;
-  Dictionary* current_dict;
+	Language current_language;
+	Dictionary* current_dict;
 
-  Dictionary  empty_dict;
+	Dictionary empty_dict;
 
-  std::unique_ptr<FileSystem> filesystem;
+	std::unique_ptr<FileSystem> filesystem;
 
-  void clear_cache();
+	void clear_cache();
 
 public:
-  DictionaryManager(const std::string& charset_ = "UTF-8");
-  DictionaryManager(std::unique_ptr<FileSystem> filesystem, const std::string& charset_ = "UTF-8");
-  ~DictionaryManager();
+	DictionaryManager(const std::string& charset_ = "UTF-8");
+	DictionaryManager(std::unique_ptr<FileSystem> filesystem, const std::string& charset_ = "UTF-8");
+	~DictionaryManager();
 
-  /** Return the currently active dictionary, if none is set, an empty
-      dictionary is returned. */
-  Dictionary& get_dictionary();
+	/** Return the currently active dictionary, if none is set, an empty
+		dictionary is returned. */
+	Dictionary& get_dictionary();
 
-  /** Get dictionary for language */
-  Dictionary& get_dictionary(const Language& language);
+	/** Get dictionary for language */
+	Dictionary& get_dictionary(const Language& language, const std::string& charset);
+	Dictionary& get_dictionary(const Language& language);
 
-  /** Set a language based on a four? letter country code */
-  void set_language(const Language& language);
+	/** Set a language based on a four? letter country code */
+	void set_language(const Language& language);
 
-  /** returns the (normalized) country code of the currently used language */
-  Language get_language() const;
+	/** returns the (normalized) country code of the currently used language */
+	Language get_language() const;
 
-  void set_use_fuzzy(bool t);
-  bool get_use_fuzzy() const;
+	void set_use_fuzzy(bool t);
+	bool get_use_fuzzy() const;
 
-  /** Set a charset that will be set on the returned dictionaries */
-  void set_charset(const std::string& charset);
+	/** Set a charset that will be set on the returned dictionaries */
+	void set_charset(const std::string& charset);
 
-  /** Add a directory to the search path for dictionaries, earlier
-      added directories have higher priority then later added ones.
-      Set @p precedence to true to invert this for a single addition. */
-  void add_directory(const std::string& pathname, bool precedence = false);
+	/** Add a directory to the search path for dictionaries, earlier
+		added directories have higher priority then later added ones.
+		Set @p precedence to true to invert this for a single addition. */
+	void add_directory(const std::string& pathname, bool precedence = false);
 
-  /** Remove a directory from the search path */
-  void remove_directory(const std::string& pathname);
+	/** Remove a directory from the search path */
+	void remove_directory(const std::string& pathname);
 
-  /** Return a set of the available languages in their country code */
-  std::set<Language> get_languages();
+	/** Return a set of the available languages in their country code */
+	std::set<Language> get_languages();
 
-  std::string convertFilename2Language(const std::string &s_in) const;
+	std::string convertFilename2Language(const std::string& s_in) const;
 
 private:
-  DictionaryManager (const DictionaryManager&);
-  DictionaryManager& operator= (const DictionaryManager&);
+	DictionaryManager(const DictionaryManager&);
+	DictionaryManager& operator=(const DictionaryManager&);
 };
 
 } // namespace tinygettext

@@ -15,7 +15,7 @@ private:
 
 public:
 	PROVIDE_EXT_UID(0xBE727855C7D51E32)
-	void setPlayerData(std::shared_ptr<PlayerModel> data)
+	OasisPlayerDataExt(std::shared_ptr<PlayerModel> data)
 	{
 		_playerData = data;
 	}

@@ -7,13 +7,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-19 06:14+0000\n"
+"POT-Creation-Date: 2024-01-19 20:08+0000\n"
 "PO-Revision-Date: 2024-01-19 06:02+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Portuguese <translation-team-pt@lists.sourceforge.net>\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ASCII\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -21,7 +21,7 @@ msgstr ""
 msgid "Hello, World!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:82
+#: src/core/auth/AuthHandler.cpp:39
 #, c-format
 msgid ""
 "{999999}Welcome to {FF0000}Oasis {FFFFFF}Freeroam, {ff9933}%s\n"
@@ -37,15 +37,15 @@ msgid ""
 "{ff9933}oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:90
-msgid "Register"
+#: src/core/auth/AuthHandler.cpp:47 src/core/auth/AuthHandler.cpp:219
+msgid "Enter"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:91 src/core/auth/AuthHandler.cpp:128
+#: src/core/auth/AuthHandler.cpp:48 src/core/auth/AuthHandler.cpp:85
 msgid "Quit"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:115
+#: src/core/auth/AuthHandler.cpp:72
 #, c-format
 msgid ""
 "{FF0000}Wrong Password {D3D3D3}entered for {FFFFFF}%s {FF0000}[%d/3]\n"
@@ -56,7 +56,7 @@ msgid ""
 "{ff9933}oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:121
+#: src/core/auth/AuthHandler.cpp:78
 #, c-format
 msgid ""
 "{D3D3D3}Welcome back to {FF0000}Oasis {FFFFFF}Freeroam {ff9933}%s\n"
@@ -71,10 +71,28 @@ msgid ""
 "{ff9933}oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:127
+#: src/core/auth/AuthHandler.cpp:84
 msgid "Login"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:173
+#: src/core/auth/AuthHandler.cpp:130
 msgid "Error: Password length must be between 6-48"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:213
+msgid ""
+"{D3D3D3}Please enter your {FFFFFF}Email address{D3D3D3}.\n"
+"\n"
+"Use a correct email address as it can be used for password recovery\n"
+"to restore your account incase you forget your password\n"
+"You can skip entering email, but account features will be limited! Use "
+"{D3D3D3}/verify{FFFFFF} later"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:220
+msgid "Skip"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:245
+msgid "[ERROR] {FFFFFF} Invalid email!"
 msgstr ""

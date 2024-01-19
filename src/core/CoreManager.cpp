@@ -2,6 +2,7 @@
 #include "component.hpp"
 #include "player.hpp"
 #include "player/PlayerModel.hpp"
+#include <memory>
 
 using namespace Core;
 
@@ -31,16 +32,7 @@ CoreManager::~CoreManager()
 	playerPool = nullptr;
 }
 
-void CoreManager::attachPlayerData(IPlayer& player, std::shared_ptr<PlayerModel> data)
-{
-	auto ext = queryExtension<OasisPlayerDataExt>(player);
-	if (ext)
-	{
-		ext->setPlayerData(data);
-	}
-}
-
-optional<shared_ptr<PlayerModel>> CoreManager::getPlayerData(IPlayer& player)
+shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
 {
 	auto ext = queryExtension<OasisPlayerDataExt>(player);
 	if (ext)
@@ -55,7 +47,7 @@ optional<shared_ptr<PlayerModel>> CoreManager::getPlayerData(IPlayer& player)
 
 void CoreManager::onPlayerConnect(IPlayer& player)
 {
-	player.addExtension(new OasisPlayerDataExt(), true);
+	player.addExtension(new OasisPlayerDataExt(std::shared_ptr<PlayerModel>(new PlayerModel())), true);
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
@@ -75,4 +67,41 @@ void CoreManager::initHandlers()
 shared_ptr<pqxx::connection> CoreManager::getDBConnection()
 {
 	return this->_dbConnection;
+}
+
+bool CoreManager::refreshPlayerData(IPlayer& player)
+{
+	auto db = this->getDBConnection();
+	pqxx::work txn(*db);
+	pqxx::result res = txn.exec_params("SELECT id, \
+					name, \
+					users.password_hash, \
+					\"language\", \
+					email, \
+					last_skin_id, \
+					last_ip, \
+					last_login_at, \
+					bans.reason as \"ban_reason\", \
+					bans.by as \"banned_by\", \
+					bans.expires_at as \"ban_expires_at\", \
+					admins.\"level\" as \"admin_level\", \
+					admins.password_hash as \"admin_pass_hash\" \
+					FROM users \
+					LEFT JOIN bans \
+					ON users.id = bans.user_id \
+					LEFT JOIN admins \
+					ON users.id = admins.user_id \
+					WHERE name=$1",
+		player.getName().to_string());
+
+	if (res.size() == 0)
+	{
+		return false;
+	}
+	spdlog::info("Found player data for " + player.getName().to_string() + " in DB");
+
+	auto row = res[0];
+	this->getPlayerData(player)->updateFromRow(row);
+	txn.commit();
+	return true;
 }

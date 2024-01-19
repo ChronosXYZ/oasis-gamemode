@@ -31,233 +31,235 @@
 #include "tinygettext/po_parser.hpp"
 #include "tinygettext/unix_file_system.hpp"
 
-namespace tinygettext {
+namespace tinygettext
+{
 
 static bool has_suffix(const std::string& lhs, const std::string& rhs)
 {
-  if (lhs.length() < rhs.length())
-    return false;
-  else
-    return lhs.compare(lhs.length() - rhs.length(), rhs.length(), rhs) == 0;
+	if (lhs.length() < rhs.length())
+		return false;
+	else
+		return lhs.compare(lhs.length() - rhs.length(), rhs.length(), rhs) == 0;
 }
 
-DictionaryManager::DictionaryManager(const std::string& charset_) :
-  DictionaryManager(std::unique_ptr<FileSystem>(new UnixFileSystem), charset_)
+DictionaryManager::DictionaryManager(const std::string& charset_)
+	: DictionaryManager(std::unique_ptr<FileSystem>(new UnixFileSystem), charset_)
 {
 }
 
-DictionaryManager::DictionaryManager(std::unique_ptr<FileSystem> filesystem_, const std::string& charset_) :
-  dictionaries(),
-  search_path(),
-  charset(charset_),
-  use_fuzzy(true),
-  current_language(),
-  current_dict(nullptr),
-  empty_dict(),
-  filesystem(std::move(filesystem_))
+DictionaryManager::DictionaryManager(std::unique_ptr<FileSystem> filesystem_, const std::string& charset_)
+	: dictionaries()
+	, search_path()
+	, charset(charset_)
+	, use_fuzzy(true)
+	, current_language()
+	, current_dict(nullptr)
+	, empty_dict()
+	, filesystem(std::move(filesystem_))
 {
 }
 
 DictionaryManager::~DictionaryManager()
 {
-  for(Dictionaries::iterator i = dictionaries.begin(); i != dictionaries.end(); ++i)
-  {
-    delete i->second;
-  }
+	for (Dictionaries::iterator i = dictionaries.begin(); i != dictionaries.end(); ++i)
+	{
+		delete i->second;
+	}
 }
 
-void
-DictionaryManager::clear_cache()
+void DictionaryManager::clear_cache()
 {
-  for(Dictionaries::iterator i = dictionaries.begin(); i != dictionaries.end(); ++i)
-  {
-    delete i->second;
-  }
-  dictionaries.clear();
+	for (Dictionaries::iterator i = dictionaries.begin(); i != dictionaries.end(); ++i)
+	{
+		delete i->second;
+	}
+	dictionaries.clear();
 
-  current_dict = nullptr;
+	current_dict = nullptr;
 }
 
 Dictionary&
 DictionaryManager::get_dictionary()
 {
-  if (current_dict)
-  {
-    return *current_dict;
-  }
-  else
-  {
-    if (current_language)
-    {
-      current_dict = &get_dictionary(current_language);
-      return *current_dict;
-    }
-    else
-    {
-      return empty_dict;
-    }
-  }
+	if (current_dict)
+	{
+		return *current_dict;
+	}
+	else
+	{
+		if (current_language)
+		{
+			current_dict = &get_dictionary(current_language);
+			return *current_dict;
+		}
+		else
+		{
+			return empty_dict;
+		}
+	}
+}
+
+Dictionary&
+DictionaryManager::get_dictionary(const Language& language, const std::string& charset_)
+{
+	// log_debug << "Dictionary for language \"" << spec << "\" requested" << std::endl;
+	// log_debug << "...normalized as \"" << lang << "\"" << std::endl;
+	assert(language);
+
+	Dictionaries::iterator i = dictionaries.find(language);
+	if (i != dictionaries.end())
+	{
+		return *i->second;
+	}
+	else // Dictionary for languages lang isn't loaded, so we load it
+	{
+		// log_debug << "get_dictionary: " << lang << std::endl;
+		Dictionary* dict = new Dictionary(charset_);
+
+		dictionaries[language] = dict;
+
+		for (SearchPath::reverse_iterator p = search_path.rbegin(); p != search_path.rend(); ++p)
+		{
+			std::vector<std::string> files = filesystem->open_directory(*p);
+
+			std::string best_filename;
+			int best_score = 0;
+
+			for (std::vector<std::string>::iterator filename = files.begin(); filename != files.end(); ++filename)
+			{
+				// check if filename matches requested language
+				if (has_suffix(*filename, ".po"))
+				{ // ignore anything that isn't a .po file
+
+					Language po_language = Language::from_env(convertFilename2Language(*filename));
+
+					if (!po_language)
+					{
+						log_warning << *filename << ": warning: ignoring, unknown language" << std::endl;
+					}
+					else
+					{
+						int score = Language::match(language, po_language);
+
+						if (score > best_score)
+						{
+							best_score = score;
+							best_filename = *filename;
+						}
+					}
+				}
+			}
+
+			if (!best_filename.empty())
+			{
+				std::string pofile = *p + "/" + best_filename;
+				try
+				{
+					std::unique_ptr<std::istream> in = filesystem->open_file(pofile);
+					if (!in)
+					{
+						log_error << "error: failure opening: " << pofile << std::endl;
+					}
+					else
+					{
+						POParser::parse(pofile, *in, *dict);
+					}
+				}
+				catch (std::exception& e)
+				{
+					log_error << "error: failure parsing: " << pofile << std::endl;
+					log_error << e.what() << "" << std::endl;
+				}
+			}
+		}
+
+		if (!language.get_country().empty())
+		{
+			// printf("Adding language fallback %s\n", language.get_language().c_str());
+			dict->addFallback(&get_dictionary(Language::from_spec(language.get_language())));
+		}
+		return *dict;
+	}
 }
 
 Dictionary&
 DictionaryManager::get_dictionary(const Language& language)
 {
-  //log_debug << "Dictionary for language \"" << spec << "\" requested" << std::endl;
-  //log_debug << "...normalized as \"" << lang << "\"" << std::endl;
-  assert(language);
-
-  Dictionaries::iterator i = dictionaries.find(language);
-  if (i != dictionaries.end())
-  {
-    return *i->second;
-  }
-  else // Dictionary for languages lang isn't loaded, so we load it
-  {
-    //log_debug << "get_dictionary: " << lang << std::endl;
-    Dictionary* dict = new Dictionary(charset);
-
-    dictionaries[language] = dict;
-
-    for (SearchPath::reverse_iterator p = search_path.rbegin(); p != search_path.rend(); ++p)
-    {
-      std::vector<std::string> files = filesystem->open_directory(*p);
-
-      std::string best_filename;
-      int best_score = 0;
-
-      for (std::vector<std::string>::iterator filename = files.begin(); filename != files.end(); ++filename)
-      {
-        // check if filename matches requested language
-        if (has_suffix(*filename, ".po"))
-        { // ignore anything that isn't a .po file
-
-          Language po_language = Language::from_env(convertFilename2Language(*filename));
-
-          if (!po_language)
-          {
-            log_warning << *filename << ": warning: ignoring, unknown language" << std::endl;
-          }
-          else
-          {
-            int score = Language::match(language, po_language);
-
-            if (score > best_score)
-            {
-              best_score = score;
-              best_filename = *filename;
-            }
-          }
-        }
-      }
-
-      if (!best_filename.empty())
-      {
-        std::string pofile = *p + "/" + best_filename;
-        try
-        {
-          std::unique_ptr<std::istream> in = filesystem->open_file(pofile);
-          if (!in)
-          {
-            log_error << "error: failure opening: " << pofile << std::endl;
-          }
-          else
-          {
-            POParser::parse(pofile, *in, *dict);
-          }
-        }
-        catch(std::exception& e)
-        {
-          log_error << "error: failure parsing: " << pofile << std::endl;
-          log_error << e.what() << "" << std::endl;
-        }
-      }
-    }
-
-    if (!language.get_country().empty())
-    {
-        // printf("Adding language fallback %s\n", language.get_language().c_str());
-        dict->addFallback( &get_dictionary(Language::from_spec(language.get_language())) );
-    }
-    return *dict;
-  }
+	return this->get_dictionary(language, charset);
 }
 
 std::set<Language>
 DictionaryManager::get_languages()
 {
-  std::set<Language> languages;
+	std::set<Language> languages;
 
-  for (SearchPath::iterator p = search_path.begin(); p != search_path.end(); ++p)
-  {
-    std::vector<std::string> files = filesystem->open_directory(*p);
+	for (SearchPath::iterator p = search_path.begin(); p != search_path.end(); ++p)
+	{
+		std::vector<std::string> files = filesystem->open_directory(*p);
 
-    for(std::vector<std::string>::iterator file = files.begin(); file != files.end(); ++file)
-    {
-      if (has_suffix(*file, ".po"))
-      {
-        languages.insert(Language::from_env(file->substr(0, file->size()-3)));
-      }
-    }
-  }
-  return languages;
+		for (std::vector<std::string>::iterator file = files.begin(); file != files.end(); ++file)
+		{
+			if (has_suffix(*file, ".po"))
+			{
+				languages.insert(Language::from_env(file->substr(0, file->size() - 3)));
+			}
+		}
+	}
+	return languages;
 }
 
-void
-DictionaryManager::set_language(const Language& language)
+void DictionaryManager::set_language(const Language& language)
 {
-  if (current_language != language)
-  {
-    current_language = language;
-    current_dict     = nullptr;
-  }
+	if (current_language != language)
+	{
+		current_language = language;
+		current_dict = nullptr;
+	}
 }
 
 Language
 DictionaryManager::get_language() const
 {
-  return current_language;
+	return current_language;
 }
 
-void
-DictionaryManager::set_charset(const std::string& charset_)
+void DictionaryManager::set_charset(const std::string& charset_)
 {
-  clear_cache(); // changing charset invalidates cache
-  charset = charset_;
+	clear_cache(); // changing charset invalidates cache
+	charset = charset_;
 }
 
-void
-DictionaryManager::set_use_fuzzy(bool t)
+void DictionaryManager::set_use_fuzzy(bool t)
 {
-  clear_cache();
-  use_fuzzy = t;
+	clear_cache();
+	use_fuzzy = t;
 }
 
-bool
-DictionaryManager::get_use_fuzzy() const
+bool DictionaryManager::get_use_fuzzy() const
 {
-  return use_fuzzy;
+	return use_fuzzy;
 }
 
-void
-DictionaryManager::add_directory(const std::string& pathname, bool precedence /* = false */)
+void DictionaryManager::add_directory(const std::string& pathname, bool precedence /* = false */)
 {
-  if(std::find(search_path.begin(), search_path.end(), pathname) == search_path.end()) {
-    clear_cache(); // adding directories invalidates cache
-    if(precedence)
-      search_path.push_front(pathname);
-    else
-      search_path.push_back(pathname);
-  }
+	if (std::find(search_path.begin(), search_path.end(), pathname) == search_path.end())
+	{
+		clear_cache(); // adding directories invalidates cache
+		if (precedence)
+			search_path.push_front(pathname);
+		else
+			search_path.push_back(pathname);
+	}
 }
 
-void
-DictionaryManager::remove_directory(const std::string& pathname)
+void DictionaryManager::remove_directory(const std::string& pathname)
 {
-  SearchPath::iterator it = find(search_path.begin(), search_path.end(), pathname);
-  if(it != search_path.end()) {
-    clear_cache(); // removing directories invalidates cache
-    search_path.erase(it);
-  }
+	SearchPath::iterator it = find(search_path.begin(), search_path.end(), pathname);
+	if (it != search_path.end())
+	{
+		clear_cache(); // removing directories invalidates cache
+		search_path.erase(it);
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -268,35 +270,33 @@ DictionaryManager::remove_directory(const std::string& pathname)
  *  upper case, otherwise tinygettext does not identify the country
  *  correctly.
  */
-std::string DictionaryManager::convertFilename2Language(const std::string &s_in) const
+std::string DictionaryManager::convertFilename2Language(const std::string& s_in) const
 {
-    std::string s;
-    if(s_in.substr(s_in.size()-3, 3)==".po")
-        s = s_in.substr(0, s_in.size()-3);
-    else
-        s = s_in;
+	std::string s;
+	if (s_in.substr(s_in.size() - 3, 3) == ".po")
+		s = s_in.substr(0, s_in.size() - 3);
+	else
+		s = s_in;
 
-    bool underscore_found = false;
-    for(unsigned int i=0; i<s.size(); i++)
-    {
-        if(underscore_found)
-        {
-            // If we get a non-alphanumerical character/
-            // we are done (en_GB.UTF-8) - only convert
-            // the 'gb' part ... if we ever get this kind
-            // of filename.
-            if(!::isalpha(s[i]))
-                break;
-            s[i] = static_cast<char>(::toupper(s[i]));
-        }
-        else
-            underscore_found = s[i]=='_';
-    }
-    return s;
-}   // convertFilename2Language
-
+	bool underscore_found = false;
+	for (unsigned int i = 0; i < s.size(); i++)
+	{
+		if (underscore_found)
+		{
+			// If we get a non-alphanumerical character/
+			// we are done (en_GB.UTF-8) - only convert
+			// the 'gb' part ... if we ever get this kind
+			// of filename.
+			if (!::isalpha(s[i]))
+				break;
+			s[i] = static_cast<char>(::toupper(s[i]));
+		}
+		else
+			underscore_found = s[i] == '_';
+	}
+	return s;
+} // convertFilename2Language
 
 } // namespace tinygettext
-
 
 /* EOF */

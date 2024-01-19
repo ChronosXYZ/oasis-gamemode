@@ -4,10 +4,16 @@
 #include <iostream>
 #include <string>
 #include <format>
+#include <exception>
+#include <string>
+#include <regex>
 
 #include <sdk.hpp>
 #include <player.hpp>
 #include <Server/Components/Dialogs/dialogs.hpp>
+#include <spdlog/spdlog.h>
+#include <network.hpp>
+#include <fmt/printf.h>
 #include <spdlog/spdlog.h>
 
 #include "../../constants.hpp"
@@ -29,10 +35,15 @@ private:
 	IPlayerPool* const playerPool;
 	std::weak_ptr<CoreManager> coreManager;
 
-	bool loadPlayerData(IPlayer& player);
+	void showLanguageDialog(IPlayer& player);
 	void showRegistrationDialog(IPlayer& player);
+	void showEmailDialog(IPlayer& player);
 	void showLoginDialog(IPlayer& player, bool wrongPass);
+
+	// Callbacks
 	void onLoginSubmit(IPlayer& player, const std::string& password);
-	void onRegistrationSubmit(IPlayer& player, const std::string& password);
+	void onPasswordSubmit(IPlayer& player, const std::string& password);
+	void onEmailSubmit(IPlayer& player, const std::string& email);
+	void onRegistrationSubmit(IPlayer& player);
 };
 }

@@ -1,11 +1,8 @@
 #include "AuthHandler.hpp"
 #include "../CoreManager.hpp"
-#include "network.hpp"
+#include "Server/Components/Dialogs/dialogs.hpp"
 #include "player.hpp"
-#include <exception>
 #include <fmt/printf.h>
-#include <spdlog/spdlog.h>
-#include <string>
 
 using namespace Core;
 
@@ -21,50 +18,11 @@ AuthHandler::~AuthHandler()
 	playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 }
 
-bool AuthHandler::loadPlayerData(IPlayer& player)
-{
-	auto db = this->coreManager.lock()->getDBConnection();
-	pqxx::work txn(*db);
-	pqxx::result res = txn.exec_params("SELECT id, \
-					name, \
-					users.password_hash, \
-					\"language\", \
-					email, \
-					last_skin_id, \
-					last_ip, \
-					last_login_at, \
-					bans.reason as \"ban_reason\", \
-					bans.by as \"banned_by\", \
-					bans.expires_at as \"ban_expires_at\", \
-					admins.\"level\" as \"admin_level\", \
-					admins.password_hash as \"admin_pass_hash\" \
-					FROM users \
-					LEFT JOIN bans \
-					ON users.id = bans.user_id \
-					LEFT JOIN admins \
-					ON users.id = admins.user_id \
-					WHERE name=$1",
-		player.getName().to_string());
-
-	if (res.size() == 0)
-	{
-		return false;
-	}
-	spdlog::info("Found player data for " + player.getName().to_string() + " in DB");
-
-	auto row = res[0];
-	std::shared_ptr<PlayerModel> playerData(new PlayerModel(row));
-
-	this->coreManager.lock()->attachPlayerData(player, playerData);
-	txn.commit();
-	return true;
-}
-
 void AuthHandler::onPlayerConnect(IPlayer& player)
 {
-	if (!loadPlayerData(player))
+	if (!this->coreManager.lock()->refreshPlayerData(player))
 	{
-		this->showRegistrationDialog(player);
+		this->showLanguageDialog(player);
 		return;
 	}
 	else
@@ -87,7 +45,7 @@ void AuthHandler::showRegistrationDialog(IPlayer& player)
 					   "{ff9933}oasisfreeroam.xyz",
 						 player),
 			player.getName().to_string()),
-		_("Register", player),
+		_("Enter", player),
 		_("Quit", player),
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
@@ -95,7 +53,7 @@ void AuthHandler::showRegistrationDialog(IPlayer& player)
 			{
 			case DialogResponse_Left:
 			{
-				onRegistrationSubmit(player, inputText.to_string());
+				onPasswordSubmit(player, inputText.to_string());
 				break;
 			}
 			case DialogResponse_Right:
@@ -148,7 +106,7 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 {
 	if (password.length() > 5)
 	{
-		auto playerData = this->coreManager.lock()->getPlayerData(player)->get();
+		auto playerData = this->coreManager.lock()->getPlayerData(player);
 		if (Utils::argon2VerifyEncodedHash(playerData->passwordHash, password))
 		{
 			player.sendClientMessage(Colour::White(), "You have been logged in!");
@@ -166,7 +124,7 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 	}
 }
 
-void AuthHandler::onRegistrationSubmit(IPlayer& player, const std::string& password)
+void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
 {
 	if (password.length() <= 5 || password.length() > 48)
 	{
@@ -175,13 +133,20 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player, const std::string& passw
 		return;
 	}
 	auto hashedPassword = Utils::argon2HashPassword(password);
+	auto pData = this->coreManager.lock()->getPlayerData(player);
+	pData->passwordHash = hashedPassword;
+	this->showEmailDialog(player);
+}
 
+void AuthHandler::onRegistrationSubmit(IPlayer& player)
+{
 	auto db = this->coreManager.lock()->getDBConnection();
 
 	pqxx::work txn(*db);
 
 	PeerAddress::AddressString ipString;
 	PeerNetworkData peerData = player.getNetworkData();
+	auto pData = this->coreManager.lock()->getPlayerData(player);
 	peerData.networkID.address.ToString(peerData.networkID.address, ipString);
 	try
 	{
@@ -189,9 +154,9 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player, const std::string& passw
 										   "(\"name\", password_hash, \"language\", email, last_skin_id, last_ip) "
 										   "VALUES($1, $2, $3, $4, $5, $6)",
 			player.getName().to_string(),
-			hashedPassword,
-			"en",
-			"",
+			pData->passwordHash,
+			pData->language,
+			pData->email,
 			1,
 			ipString.data());
 		txn.commit();
@@ -204,6 +169,85 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player, const std::string& passw
 		player.kick();
 		return;
 	}
-	loadPlayerData(player);
+	this->coreManager.lock()->refreshPlayerData(player);
 	player.spawn();
+}
+
+void AuthHandler::showLanguageDialog(IPlayer& player)
+{
+	std::string languagesList;
+	for (auto lang : consts::LANGUAGES)
+	{
+		languagesList.append(fmt::sprintf("%s\n", lang));
+	}
+	this->coreManager.lock()->getDialogManager()->createDialog(player,
+		DialogStyle_LIST,
+		"" DIALOG_HEADER " | Select language",
+		languagesList,
+		"Select",
+		"Quit",
+		[&](DialogResponse resp, int listItem, StringView inputText)
+		{
+			switch (resp)
+			{
+			case DialogResponse_Left:
+			{
+				auto pData = this->coreManager.lock()->getPlayerData(player);
+				pData->language = consts::LANGUAGE_CODE_NAME.at(listItem);
+				showRegistrationDialog(player);
+				break;
+			}
+			case DialogResponse_Right:
+			{
+				player.kick();
+				break;
+			}
+			}
+		});
+}
+
+void AuthHandler::showEmailDialog(IPlayer& player)
+{
+	this->coreManager.lock()->getDialogManager()->createDialog(player,
+		DialogStyle_PASSWORD,
+		"" DIALOG_HEADER " | Email",
+		fmt::sprintf(_("{D3D3D3}Please enter your {FFFFFF}Email address{D3D3D3}.\n\n"
+					   "Use a correct email address as it can be used for password recovery\n"
+					   "to restore your account incase you forget your password\n"
+					   "You can skip entering email, but account features will be limited! Use {D3D3D3}/verify{FFFFFF} later",
+						 player),
+			player.getName().to_string()),
+		_("Enter", player),
+		_("Skip", player),
+		[&](DialogResponse resp, int listItem, StringView inputText)
+		{
+			switch (resp)
+			{
+			case DialogResponse_Left:
+			{
+				onEmailSubmit(player, inputText.to_string());
+				break;
+			}
+			case DialogResponse_Right:
+			{
+				onRegistrationSubmit(player);
+				break;
+			}
+			}
+		});
+}
+
+void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
+{
+	std::smatch m;
+	if (!std::regex_match(email, m, consts::EMAIL_REGEX))
+	{
+		this->showEmailDialog(player);
+		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] {FFFFFF} Invalid email!", player));
+		return;
+	}
+
+	auto data = this->coreManager.lock()->getPlayerData(player);
+	data->email = email;
+	onRegistrationSubmit(player);
 }

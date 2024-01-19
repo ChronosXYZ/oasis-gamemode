@@ -39,7 +39,7 @@ struct string_traits<Utils::timestamp>
 		auto str = Utils::to_iso8601_str(value);
 		if (internal::cmp_greater_equal(std::size(str), end - begin))
 			throw conversion_overrun {
-				"Could not convert string to string: too long for buffer."
+				"Could not convert timestamp to string: too long for buffer."
 			};
 		// Include the trailing zero.
 		str.copy(begin, std::size(str));

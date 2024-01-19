@@ -55,6 +55,12 @@ static std::string argon2HashPassword(const std::string& password)
 		throw std::runtime_error(std::format("argon2id hashing didn't succeed, result {}", result));
 	}
 
+	// trim trailing zero byte
+	while (encodedHash.back() == '\0')
+	{
+		encodedHash.pop_back();
+	}
+
 	return std::string(encodedHash.data());
 }
 
