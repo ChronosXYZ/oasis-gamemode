@@ -1,4 +1,4 @@
-.PHONY: build copy_output
+.PHONY: build copy_output update_locales
 .ONESHELL:
 
 all: build copy_output
@@ -13,3 +13,6 @@ copy_output:
 run:
 	cd ${CURDIR}/server
 	./samp03svr
+
+update_locales:
+	@./utils/update_translations.sh ./src ./server/locale ./server/locale/po messages en pt ru
