@@ -1,5 +1,6 @@
 #pragma once
 
+#include <date/date.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -7,6 +8,7 @@
 
 #include "AdminData.hpp"
 #include "BanData.hpp"
+#include "../utils/PgTimestamp.hpp"
 
 using namespace std;
 
@@ -22,6 +24,7 @@ struct PlayerModel
 	string email;
 	string lastIP;
 	unsigned short lastSkinId;
+	Utils::timestamp lastLoginAt;
 
 	unique_ptr<Ban> ban;
 	unique_ptr<AdminData> adminData;
@@ -37,6 +40,7 @@ struct PlayerModel
 		email = row["email"].c_str();
 		lastIP = row["last_ip"].c_str();
 		lastSkinId = row["last_skin_id"].as<unsigned short>();
+		lastLoginAt = row["last_login_at"].as<Utils::timestamp>();
 
 		if (!row["ban_expires_at"].is_null())
 		{
@@ -47,7 +51,10 @@ struct PlayerModel
 		}
 
 		adminData = make_unique<AdminData>();
-		adminData->level = row["admin_level"].as<unsigned short>();
+		if (!row["admin_level"].is_null())
+			adminData->level = row["admin_level"].as<unsigned short>();
+		else
+			adminData->level = 0;
 		if (!row["admin_pass_hash"].is_null())
 			adminData->passwordHash = row["admin_pass_hash"].as<string>();
 	}

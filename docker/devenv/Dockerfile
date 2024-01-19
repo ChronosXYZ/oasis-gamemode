@@ -11,6 +11,6 @@ RUN curl -s https://api.github.com/repos/Southclaws/sampctl/releases/latest | \
     dpkg -i tmp.deb && \
     rm tmp.deb
 
-USER user
+USER ubuntu
 
 ENTRYPOINT ["/bin/bash", "-l", "-c"]

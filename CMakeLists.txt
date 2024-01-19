@@ -53,6 +53,9 @@ include(cmake/conan.cmake)
 conan_cmake_configure(REQUIRES 
                             libpqxx/7.8.1
                             spdlog/1.13.0
+                            argon2/20190702
+                            date/3.0.1
+                            fmt/10.2.1
                         GENERATORS CMakeDeps)
 
 conan_cmake_autodetect(settings ARCH x86)

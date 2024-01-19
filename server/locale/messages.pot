@@ -1,0 +1,80 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-19 06:14+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/main.cpp:97
+msgid "Hello, World!"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:82
+#, c-format
+msgid ""
+"{999999}Welcome to {FF0000}Oasis {FFFFFF}Freeroam, {ff9933}%s\n"
+"\n"
+"\n"
+"{D3D3D3}> This name is not registered\n"
+"{D3D3D3}> Please register with a valid password\n"
+"{D3D3D3}> Acceptable passwords are at least 6 characters long\n"
+"\n"
+"\n"
+"{D3D3D3}> If you have any trouble, please visit our discord server or "
+"contact any staff member:\n"
+"{ff9933}oasisfreeroam.xyz"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:90
+msgid "Register"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:91 src/core/auth/AuthHandler.cpp:128
+msgid "Quit"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:115
+#, c-format
+msgid ""
+"{FF0000}Wrong Password {D3D3D3}entered for {FFFFFF}%s {FF0000}[%d/3]\n"
+"{D3D3D3}Please re-write the correct password in the field below to login.\n"
+"\n"
+"{D3D3D3}- If you have forgotten your password, request a password recovery "
+"at our discord server:\n"
+"{ff9933}oasisfreeroam.xyz"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:121
+#, c-format
+msgid ""
+"{D3D3D3}Welcome back to {FF0000}Oasis {FFFFFF}Freeroam {ff9933}%s\n"
+"\n"
+"\n"
+"- {D3D3D3}Your name is registered in our database\n"
+"- {D3D3D3}Login by entering your password\n"
+"\n"
+"\n"
+"- {D3D3D3}If you have forgotten your password, request a password recovery "
+"at our discord server:\n"
+"{ff9933}oasisfreeroam.xyz"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:127
+msgid "Login"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:173
+msgid "Error: Password length must be between 6-48"
+msgstr ""

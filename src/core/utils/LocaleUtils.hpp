@@ -25,8 +25,11 @@ static inline std::string _(const std::string& message, IPlayer& player)
 	if (ext)
 	{
 		auto data = ext->getPlayerData();
-		auto& dict = Locale::getDictionary(data->language);
-		return dict.translate(message);
+		if (data)
+		{
+			auto& dict = Locale::getDictionary(data->language);
+			return dict.translate(message);
+		}
 	}
 	return message;
 }

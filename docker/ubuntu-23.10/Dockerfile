@@ -1,21 +1,20 @@
-FROM ubuntu:22.04
+FROM ubuntu:23.10
 RUN \
     dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y \
     cmake \
     ninja-build \
-    clang-11 \
+    g++-13 \
     python3-pip \
     gcc-multilib \
     g++-multilib \
     gettext \
-    libstdc++-11-dev:i386 \
+    libstdc++-13-dev:i386 \
     && \
-    useradd -m user && \
-    su user -c 'pip3 install --user conan==1.62.0'
+    su ubuntu -c 'pip3 install --break-system-packages --user conan==1.62.0'
 
-USER user
+USER ubuntu
 
 ENV PATH=~/.local/bin:${PATH}
 

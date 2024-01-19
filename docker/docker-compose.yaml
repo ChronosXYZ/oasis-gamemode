@@ -3,7 +3,7 @@ version: "3"
 services:
   builder:
     image: open.mp/builder
-    build: ./ubuntu-22.04
+    build: ./ubuntu-23.10
     working_dir: /code
     environment:
       - SKIP_CMAKE
