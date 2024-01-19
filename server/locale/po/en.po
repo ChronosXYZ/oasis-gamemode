@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-19 20:08+0000\n"
+"POT-Creation-Date: 2024-01-19 21:18+0000\n"
 "PO-Revision-Date: 2024-01-19 06:02+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: English\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "Hello, World!"
 msgstr "Hello, World!"
 
-#: src/core/auth/AuthHandler.cpp:39
+#: src/core/auth/AuthHandler.cpp:40
 #, c-format
 msgid ""
 "{999999}Welcome to {FF0000}Oasis {FFFFFF}Freeroam, {ff9933}%s\n"
@@ -48,15 +48,15 @@ msgstr ""
 "contact any staff member:\n"
 "{ff9933}oasisfreeroam.xyz"
 
-#: src/core/auth/AuthHandler.cpp:47 src/core/auth/AuthHandler.cpp:219
+#: src/core/auth/AuthHandler.cpp:48 src/core/auth/AuthHandler.cpp:220
 msgid "Enter"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:48 src/core/auth/AuthHandler.cpp:85
+#: src/core/auth/AuthHandler.cpp:49 src/core/auth/AuthHandler.cpp:86
 msgid "Quit"
 msgstr "Quit"
 
-#: src/core/auth/AuthHandler.cpp:72
+#: src/core/auth/AuthHandler.cpp:73
 #, c-format
 msgid ""
 "{FF0000}Wrong Password {D3D3D3}entered for {FFFFFF}%s {FF0000}[%d/3]\n"
@@ -73,7 +73,7 @@ msgstr ""
 "at our discord server:\n"
 "{ff9933}oasisfreeroam.xyz"
 
-#: src/core/auth/AuthHandler.cpp:78
+#: src/core/auth/AuthHandler.cpp:79
 #, fuzzy, c-format
 msgid ""
 "{D3D3D3}Welcome back to {FF0000}Oasis {FFFFFF}Freeroam {ff9933}%s\n"
@@ -98,15 +98,15 @@ msgstr ""
 "at our discord server:\n"
 "{ff9933}oasisfreeroam.xyz"
 
-#: src/core/auth/AuthHandler.cpp:84
+#: src/core/auth/AuthHandler.cpp:85
 msgid "Login"
 msgstr "Login"
 
-#: src/core/auth/AuthHandler.cpp:130
+#: src/core/auth/AuthHandler.cpp:131
 msgid "Error: Password length must be between 6-48"
 msgstr "Error: Password length must be between 6-48"
 
-#: src/core/auth/AuthHandler.cpp:213
+#: src/core/auth/AuthHandler.cpp:214
 msgid ""
 "{D3D3D3}Please enter your {FFFFFF}Email address{D3D3D3}.\n"
 "\n"
@@ -116,12 +116,12 @@ msgid ""
 "{D3D3D3}/verify{FFFFFF} later"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:220
+#: src/core/auth/AuthHandler.cpp:221
 msgid "Skip"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:245
-msgid "[ERROR] {FFFFFF} Invalid email!"
+#: src/core/auth/AuthHandler.cpp:246
+msgid "[ERROR]{FFFFFF} Invalid email!"
 msgstr ""
 
 #~ msgid "Register"

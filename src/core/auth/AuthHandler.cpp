@@ -36,7 +36,7 @@ void AuthHandler::showRegistrationDialog(IPlayer& player)
 {
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
-		"" DIALOG_HEADER " Registration",
+		"" DIALOG_HEADER "Registration",
 		fmt::sprintf(_("{999999}Welcome to {FF0000}Oasis {FFFFFF}Freeroam, {ff9933}%s\n\n\n"
 					   "{D3D3D3}> This name is not registered\n"
 					   "{D3D3D3}> Please register with a valid password\n"
@@ -69,7 +69,7 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 {
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
-		"" DIALOG_HEADER " Login",
+		"" DIALOG_HEADER "Login",
 		wrongPass ? fmt::sprintf(_("{FF0000}Wrong Password {D3D3D3}entered for {FFFFFF}%s {FF0000}[%d/3]\n"
 								   "{D3D3D3}Please re-write the correct password in the field below to login.\n\n"
 								   "{D3D3D3}- If you have forgotten your password, request a password recovery at our discord server:\n"
@@ -182,7 +182,7 @@ void AuthHandler::showLanguageDialog(IPlayer& player)
 	}
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_LIST,
-		"" DIALOG_HEADER " | Select language",
+		"" DIALOG_HEADER "| Select language",
 		languagesList,
 		"Select",
 		"Quit",
@@ -210,7 +210,7 @@ void AuthHandler::showEmailDialog(IPlayer& player)
 {
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
-		"" DIALOG_HEADER " | Email",
+		"" DIALOG_HEADER "| Email",
 		fmt::sprintf(_("{D3D3D3}Please enter your {FFFFFF}Email address{D3D3D3}.\n\n"
 					   "Use a correct email address as it can be used for password recovery\n"
 					   "to restore your account incase you forget your password\n"
@@ -243,7 +243,7 @@ void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
 	if (!std::regex_match(email, m, consts::EMAIL_REGEX))
 	{
 		this->showEmailDialog(player);
-		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] {FFFFFF} Invalid email!", player));
+		player.sendClientMessage(consts::RED_COLOR, _("[ERROR]{FFFFFF} Invalid email!", player));
 		return;
 	}
 
