@@ -1,6 +1,7 @@
 #include "CoreManager.hpp"
 #include "component.hpp"
 #include "player.hpp"
+#include "player/PlayerExtension.hpp"
 #include "player/PlayerModel.hpp"
 #include <memory>
 
@@ -34,7 +35,7 @@ CoreManager::~CoreManager()
 
 shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
 {
-	auto ext = queryExtension<OasisPlayerDataExt>(player);
+	auto ext = queryExtension<OasisPlayerExt>(player);
 	if (ext)
 	{
 		if (auto data = ext->getPlayerData())
@@ -45,9 +46,14 @@ shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
 	return {};
 }
 
+OasisPlayerExt* CoreManager::getPlayerExt(IPlayer& player)
+{
+	return queryExtension<OasisPlayerExt>(player);
+}
+
 void CoreManager::onPlayerConnect(IPlayer& player)
 {
-	player.addExtension(new OasisPlayerDataExt(std::shared_ptr<PlayerModel>(new PlayerModel())), true);
+	player.addExtension(new OasisPlayerExt(std::shared_ptr<PlayerModel>(new PlayerModel()), player), true);
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)

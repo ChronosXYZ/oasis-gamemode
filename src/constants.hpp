@@ -69,8 +69,8 @@ static const std::map<unsigned int, std::string> LANGUAGE_CODE_NAME = {
 };
 
 static const std::map<std::string, std::string> LANGUAGE_CHARSETS = {
-	{ "en", "ANSI" },
-	{ "pt", "ANSI" },
+	{ "en", "ASCII" },
+	{ "pt", "ASCII" },
 	{ "ru", "CP1251" }
 };
 

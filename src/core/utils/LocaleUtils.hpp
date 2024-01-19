@@ -22,7 +22,7 @@ static inline std::string _(const std::string& message, IPlayer& player)
 {
 	if (!Locale::gDictionaryManager)
 		return message;
-	auto ext = queryExtension<Core::OasisPlayerDataExt>(player);
+	auto ext = queryExtension<Core::OasisPlayerExt>(player);
 	if (ext)
 	{
 		auto data = ext->getPlayerData();

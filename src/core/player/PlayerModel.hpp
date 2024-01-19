@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <pqxx/pqxx>
+#include <variant>
 
 #include "AdminData.hpp"
 #include "BanData.hpp"
@@ -14,7 +15,7 @@ using namespace std;
 
 namespace Core
 {
-
+typedef std::variant<int, float, std::string> PrimitiveType;
 struct PlayerModel
 {
 	unsigned long account_id;
@@ -28,6 +29,7 @@ struct PlayerModel
 
 	unique_ptr<Ban> ban;
 	unique_ptr<AdminData> adminData;
+	std::unordered_map<std::string, PrimitiveType> tempData;
 
 	PlayerModel() = default;
 
@@ -57,6 +59,28 @@ struct PlayerModel
 			adminData->level = 0;
 		if (!row["admin_pass_hash"].is_null())
 			adminData->passwordHash = row["admin_pass_hash"].as<string>();
+	}
+
+	void setTempData(const std::string& key, const PrimitiveType& value)
+	{
+		tempData[key] = value;
+	}
+
+	void deleteTempData(const std::string& key)
+	{
+		if (tempData.contains(key))
+		{
+			tempData.erase(key);
+		}
+	}
+
+	std::optional<const PrimitiveType> getTempData(const std::string& key)
+	{
+		if (tempData.contains(key))
+		{
+			return tempData.at(key);
+		}
+		return {};
 	}
 };
 

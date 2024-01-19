@@ -21,7 +21,7 @@ update_translations() {
         po_file="${po_folder}/${locale}.po"
         if [[ -e "${po_file}" ]]; then
             echo "Updating ${locale} .po file.."
-            msgmerge -U "${po_file}" "${pot_file}"
+            msgmerge "${po_file}" "${pot_file}" --output-file="${po_file}"
         else
             echo "Creating ${locale} .po file.."
             msginit --input="${pot_file}" --locale="${locale}" --output-file="${po_file}"

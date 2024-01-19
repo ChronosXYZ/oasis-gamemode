@@ -23,6 +23,7 @@ public:
 	~CoreManager();
 
 	shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
+	OasisPlayerExt* getPlayerExt(IPlayer& player);
 	shared_ptr<DialogManager> getDialogManager();
 	shared_ptr<pqxx::connection> getDBConnection();
 	bool refreshPlayerData(IPlayer& player);

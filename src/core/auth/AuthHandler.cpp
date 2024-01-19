@@ -1,10 +1,14 @@
 #include "AuthHandler.hpp"
 #include "../CoreManager.hpp"
 #include "Server/Components/Dialogs/dialogs.hpp"
+#include "component.hpp"
 #include "player.hpp"
+#include "types.hpp"
 #include <fmt/printf.h>
 
 using namespace Core;
+
+const std::string LOGIN_ATTEMPTS_KEY = "login_attempts";
 
 AuthHandler::AuthHandler(IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager)
 	: coreManager(coreManager)
@@ -27,6 +31,8 @@ void AuthHandler::onPlayerConnect(IPlayer& player)
 	}
 	else
 	{
+		auto data = this->coreManager.lock()->getPlayerData(player);
+		data->setTempData(LOGIN_ATTEMPTS_KEY, 0);
 		showLoginDialog(player, false);
 		return;
 	}
@@ -67,6 +73,12 @@ void AuthHandler::showRegistrationDialog(IPlayer& player)
 
 void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 {
+	int loginAttempts = 0;
+	if (wrongPass)
+	{
+		auto data = this->coreManager.lock()->getPlayerData(player);
+		loginAttempts = std::get<int>(data->getTempData(LOGIN_ATTEMPTS_KEY).value());
+	}
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
 		"" DIALOG_HEADER "Login",
@@ -75,7 +87,7 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 								   "{D3D3D3}- If you have forgotten your password, request a password recovery at our discord server:\n"
 								   "{ff9933}oasisfreeroam.xyz",
 									 player),
-			player.getName().to_string(), 0) // TODO login attempts
+			player.getName().to_string(), loginAttempts) // TODO login attempts
 				  : fmt::sprintf(_("{D3D3D3}Welcome back to {FF0000}Oasis {FFFFFF}Freeroam {ff9933}%s\n\n\n"
 								   "- {D3D3D3}Your name is registered in our database\n"
 								   "- {D3D3D3}Login by entering your password\n\n\n"
@@ -104,24 +116,28 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 
 void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 {
+	auto playerData = this->coreManager.lock()->getPlayerData(player);
+	auto playerExt = this->coreManager.lock()->getPlayerExt(player);
 	if (password.length() > 5)
 	{
-		auto playerData = this->coreManager.lock()->getPlayerData(player);
 		if (Utils::argon2VerifyEncodedHash(playerData->passwordHash, password))
 		{
-			player.sendClientMessage(Colour::White(), "You have been logged in!");
+			player.sendClientMessage(Colour::White(), _("You have been logged in!", player));
 			player.spawn();
-		}
-		else
-		{
-			this->showLoginDialog(player, true);
+			playerData->deleteTempData(LOGIN_ATTEMPTS_KEY);
+			return;
 		}
 	}
-	else
+
+	auto loginAttempts = std::get<int>(playerData->getTempData(LOGIN_ATTEMPTS_KEY).value());
+	playerData->setTempData(LOGIN_ATTEMPTS_KEY, ++loginAttempts);
+	if (loginAttempts > 3)
 	{
-		this->showLoginDialog(player, true);
+		player.sendClientMessage(consts::RED_COLOR, "[ERROR]{FFFFFF} Too much login attempts!");
+		playerExt->delayedKick();
 		return;
 	}
+	this->showLoginDialog(player, true);
 }
 
 void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
@@ -140,6 +156,7 @@ void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
 
 void AuthHandler::onRegistrationSubmit(IPlayer& player)
 {
+	auto playerExt = this->coreManager.lock()->getPlayerExt(player);
 	auto db = this->coreManager.lock()->getDBConnection();
 
 	pqxx::work txn(*db);
@@ -166,7 +183,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 		txn.abort();
 		spdlog::error(std::format("Error occurred when trying to create new user entry in DB. Error: {}", e.what()));
 		player.sendClientMessage(consts::RED_COLOR, "Error occurred when trying to create user!");
-		player.kick();
+		playerExt->delayedKick();
 		return;
 	}
 	this->coreManager.lock()->refreshPlayerData(player);
@@ -214,7 +231,7 @@ void AuthHandler::showEmailDialog(IPlayer& player)
 		fmt::sprintf(_("{D3D3D3}Please enter your {FFFFFF}Email address{D3D3D3}.\n\n"
 					   "Use a correct email address as it can be used for password recovery\n"
 					   "to restore your account incase you forget your password\n"
-					   "You can skip entering email, but account features will be limited! Use {D3D3D3}/verify{FFFFFF} later",
+					   "You can skip entering email, but account features will be limited! Use {FFFFFF}/verify{D3D3D3} later",
 						 player),
 			player.getName().to_string()),
 		_("Enter", player),
