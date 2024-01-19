@@ -1,4 +1,7 @@
 #include "CoreManager.hpp"
+#include "component.hpp"
+#include "player.hpp"
+#include "player/PlayerModel.hpp"
 
 using namespace Core;
 
@@ -28,28 +31,35 @@ CoreManager::~CoreManager()
 	playerPool = nullptr;
 }
 
-void CoreManager::addRegisteredPlayer(shared_ptr<Player> player)
+void CoreManager::attachPlayerData(IPlayer& player, std::shared_ptr<PlayerModel> data)
 {
-	this->_players[player->serverPlayer.getID()] = move(player);
+	auto ext = queryExtension<OasisPlayerDataExt>(player);
+	if (ext)
+	{
+		ext->setPlayerData(data);
+	}
 }
 
-optional<shared_ptr<Player>> CoreManager::getPlayerData(unsigned int id)
+optional<shared_ptr<PlayerModel>> CoreManager::getPlayerData(IPlayer& player)
 {
-	if (this->_players.contains(id))
-		return this->_players[id];
+	auto ext = queryExtension<OasisPlayerDataExt>(player);
+	if (ext)
+	{
+		if (auto data = ext->getPlayerData())
+		{
+			return data;
+		}
+	}
 	return {};
 }
 
 void CoreManager::onPlayerConnect(IPlayer& player)
 {
+	player.addExtension(new OasisPlayerDataExt(), true);
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
 {
-	if (this->_players.count(player.getID()) != 0)
-	{
-		this->_players.erase(player.getID());
-	}
 }
 
 shared_ptr<DialogManager> CoreManager::getDialogManager()

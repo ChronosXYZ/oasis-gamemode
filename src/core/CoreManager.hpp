@@ -4,8 +4,10 @@
 #include <map>
 #include <pqxx/pqxx>
 #include <sdk.hpp>
+#include <optional>
 
 #include "Player.hpp"
+#include "player/PlayerExtension.hpp"
 #include "DialogManager.hpp"
 #include "auth/AuthHandler.hpp"
 
@@ -21,8 +23,8 @@ public:
 	static shared_ptr<CoreManager> create(IComponentList* components, IPlayerPool* playerPool);
 	~CoreManager();
 
-	void addRegisteredPlayer(shared_ptr<Player> player);
-	optional<shared_ptr<Player>> getPlayerData(unsigned int id);
+	void attachPlayerData(IPlayer& player, std::shared_ptr<PlayerModel> data);
+	optional<shared_ptr<PlayerModel>> getPlayerData(IPlayer& player);
 	shared_ptr<DialogManager> getDialogManager();
 	shared_ptr<pqxx::connection> getDBConnection();
 
@@ -36,7 +38,6 @@ private:
 
 	IPlayerPool* playerPool = nullptr;
 
-	map<unsigned int, shared_ptr<Player>> _players;
 	shared_ptr<DialogManager> _dialogManager;
 	shared_ptr<pqxx::connection> _dbConnection;
 
