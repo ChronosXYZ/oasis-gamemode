@@ -9,6 +9,8 @@
 #include "constants.hpp"
 #include "core/CoreManager.hpp"
 #include "core/utils/dotenv.h"
+#include "core/utils/LocaleUtils.hpp"
+#include "tinygettext/dictionary_manager.hpp"
 
 class OasisGamemodeComponent final : public IComponent, public PlayerSpawnEventHandler, public PlayerConnectEventHandler, public PlayerTextEventHandler
 {
@@ -48,6 +50,14 @@ public:
 		core_ = c;
 		playerPool = &core_->getPlayers();
 		core_->printLn("Oasis Gamemode loaded.");
+
+		this->initTinygettext();
+	}
+
+	void initTinygettext()
+	{
+		Locale::gDictionaryManager.reset(new tinygettext::DictionaryManager());
+		Locale::gDictionaryManager->add_directory("locale/po");
 	}
 
 	void onInit(IComponentList* components) override
@@ -81,10 +91,10 @@ public:
 
 	void onPlayerSpawn(IPlayer& player) override
 	{
-		if (auto pData = this->coreManager->getPlayerData(player.getID()))
-			player.setSkin(pData->get()->data->lastSkinId);
+		if (auto pData = this->coreManager->getPlayerData(player))
+			player.setSkin(pData->get()->lastSkinId);
 		player.setPosition(consts::randomSpawnArray[rand() % consts::randomSpawnArray.size()]);
-		player.sendClientMessage(Colour::White(), "Hello, World!");
+		player.sendClientMessage(Colour::White(), _("Hello, World!", player));
 	}
 
 	void onReady() override
