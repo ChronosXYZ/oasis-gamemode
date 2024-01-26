@@ -1,36 +1,34 @@
 #include "CoreManager.hpp"
-#include "component.hpp"
-#include "player.hpp"
-#include "player/PlayerExtension.hpp"
-#include "player/PlayerModel.hpp"
+#include "utils/Common.hpp"
+#include <functional>
 #include <memory>
+#include <type_traits>
 
 using namespace Core;
 
-CoreManager::CoreManager(IComponentList* components, IPlayerPool* playerPool)
+CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* playerPool)
 	: components(components)
-	, playerPool(playerPool)
+	, _core(core)
+	, _playerPool(playerPool)
 	, _dialogManager(make_shared<DialogManager>(components))
 {
-	playerPool->getPlayerConnectDispatcher()
-		.addEventHandler(this);
+	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
+	playerPool->getPlayerTextDispatcher().addEventHandler(this);
 
 	this->_dbConnection = make_shared<pqxx::connection>(getenv("DB_CONNECTION_STRING"));
 }
 
-shared_ptr<CoreManager> CoreManager::create(IComponentList* components, IPlayerPool* playerPool)
+shared_ptr<CoreManager> CoreManager::create(IComponentList* components, ICore* core, IPlayerPool* playerPool)
 {
-	shared_ptr<CoreManager> pManager(new CoreManager(components, playerPool));
+	shared_ptr<CoreManager> pManager(new CoreManager(components, core, playerPool));
 	pManager->initHandlers();
 	return pManager;
 }
 
 CoreManager::~CoreManager()
 {
-	playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
-
-	components = nullptr;
-	playerPool = nullptr;
+	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
+	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
 }
 
 shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
@@ -67,12 +65,25 @@ shared_ptr<DialogManager> CoreManager::getDialogManager()
 
 void CoreManager::initHandlers()
 {
-	_authHandler = make_unique<AuthHandler>(playerPool, weak_from_this());
+	_authHandler = make_unique<AuthHandler>(_playerPool, weak_from_this());
+
+	this->addCommand("kill", [](reference_wrapper<IPlayer> player)
+		{
+			player.get().setHealth(0.0);
+			player.get().sendClientMessage(Colour::Yellow(), "You have killed yourself!");
+		});
 }
 
 shared_ptr<pqxx::connection> CoreManager::getDBConnection()
 {
 	return this->_dbConnection;
+}
+
+template <typename F>
+void CoreManager::addCommand(string name, F handler)
+{
+	// static_assert(is_invocable_v<F>, "HER");
+	this->_commandHandlers["/" + name] = std::unique_ptr<Utils::CommandCallback>(new Utils::CommandCallback(handler));
 }
 
 bool CoreManager::refreshPlayerData(IPlayer& player)
@@ -110,4 +121,60 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 	this->getPlayerData(player)->updateFromRow(row);
 	txn.commit();
 	return true;
+}
+
+bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
+{
+	auto cmdText = commandText.to_string();
+	auto cmdParts = Utils::Strings::split(cmdText, ' ');
+	assert(!cmdParts.empty());
+
+	// get command name and pop the first element from the vector
+	auto commandName = cmdParts.at(0);
+	cmdParts.erase(cmdParts.begin());
+
+	if (!this->_commandHandlers.contains(commandName))
+	{
+		return false;
+	}
+	Utils::CallbackValuesType args;
+	args.push_back(player);
+	for (auto& part : cmdParts)
+	{
+		if (Utils::Strings::isNumber(part))
+		{
+			try
+			{
+				args.push_back(atoi(part.c_str()));
+			}
+			catch (...)
+			{
+				spdlog::debug("invalid number passed to the command");
+			}
+			continue;
+		}
+		else if (Utils::Strings::isDouble(part))
+		{
+			args.push_back(std::stod(part));
+		}
+		else
+		{
+			args.push_back(part);
+		}
+	}
+	try
+	{
+		this->callCommandHandler(commandName, args);
+	}
+	catch (exception& e)
+	{
+		spdlog::debug("Failed to invoke command: {}", e.what());
+		player.sendClientMessage(consts::RED_COLOR, "Invalid command parameters!");
+	}
+	return true;
+}
+
+void CoreManager::callCommandHandler(string cmdName, Utils::CallbackValuesType args)
+{
+	(*this->_commandHandlers[cmdName])(args);
 }

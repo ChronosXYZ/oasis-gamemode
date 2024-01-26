@@ -1,4 +1,5 @@
 // Required for most of open.mp.
+#include <functional>
 #include <sdk.hpp>
 #include <ctime>
 #include <cstdlib>
@@ -10,12 +11,13 @@
 #include "core/CoreManager.hpp"
 #include "core/utils/dotenv.h"
 #include "core/utils/LocaleUtils.hpp"
+#include "player.hpp"
 #include "tinygettext/dictionary_manager.hpp"
 
 class OasisGamemodeComponent final : public IComponent, public PlayerSpawnEventHandler, public PlayerConnectEventHandler, public PlayerTextEventHandler
 {
 private:
-	ICore* core_ = nullptr;
+	ICore* _core = nullptr;
 	IPlayerPool* playerPool = nullptr;
 
 	shared_ptr<Core::CoreManager> coreManager;
@@ -28,8 +30,7 @@ public:
 	{
 		playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 		playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
-		playerPool->getPlayerTextDispatcher().removeEventHandler(this);
-		core_ = nullptr;
+		_core = nullptr;
 		playerPool = nullptr;
 	}
 
@@ -47,9 +48,9 @@ public:
 	void onLoad(ICore* c) override
 	{
 		// Cache core, player pool here
-		core_ = c;
-		playerPool = &core_->getPlayers();
-		core_->printLn("Oasis Gamemode loaded.");
+		_core = c;
+		playerPool = &_core->getPlayers();
+		_core->printLn("Oasis Gamemode loaded.");
 
 		this->initTinygettext();
 	}
@@ -63,30 +64,19 @@ public:
 	void onInit(IComponentList* components) override
 	{
 		dotenv::init();
+		spdlog::set_level(spdlog::level::debug);
 
 		// dispatch player callbacks
 		playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 		playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
-		playerPool->getPlayerTextDispatcher().addEventHandler(this);
 
-		this->coreManager = Core::CoreManager::create(components, playerPool);
+		this->coreManager = Core::CoreManager::create(components, _core, playerPool);
 
 		srand(time(NULL));
 	}
 
 	void onPlayerConnect(IPlayer& player) override
 	{
-	}
-
-	bool onPlayerCommandText(IPlayer& player, StringView message) override
-	{
-		if (message == "/kill")
-		{
-			player.setHealth(0.0);
-			player.sendClientMessage(Colour::Yellow(), "You have killed yourself!");
-			return true;
-		}
-		return false;
 	}
 
 	void onPlayerSpawn(IPlayer& player) override
@@ -100,8 +90,14 @@ public:
 	void onReady() override
 	{
 		// Fire events here at earliest.
-		core_->setData(SettableCoreDataType::ModeText, "Oasis Freeroam");
-		*core_->getConfig().getBool("game.use_entry_exit_markers") = false;
+		_core->setData(SettableCoreDataType::ModeText, "Oasis Freeroam");
+		*_core->getConfig().getBool("game.use_entry_exit_markers") = false;
+
+		// this->coreManager->addCommand("kill", [](reference_wrapper<IPlayer> player)
+		// 	{
+		// 		player.get().setHealth(0.0);
+		// 		player.get().sendClientMessage(Colour::Yellow(), "You have killed yourself!");
+		// 	});
 	}
 
 	void onFree(IComponent* component) override
