@@ -44,6 +44,7 @@ public:
 	shared_ptr<pqxx::connection> getDBConnection();
 
 	template <typename F>
+		requires Utils::callback_function<F, reference_wrapper<IPlayer>, double>
 	void addCommand(string name, F handler);
 	bool refreshPlayerData(IPlayer& player);
 

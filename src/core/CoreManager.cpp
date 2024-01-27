@@ -67,6 +67,7 @@ void CoreManager::initHandlers()
 {
 	_authHandler = make_unique<AuthHandler>(_playerPool, weak_from_this());
 
+	// FIXME move this definition outta here
 	this->addCommand("kill", [](reference_wrapper<IPlayer> player)
 		{
 			player.get().setHealth(0.0);
@@ -80,9 +81,9 @@ shared_ptr<pqxx::connection> CoreManager::getDBConnection()
 }
 
 template <typename F>
+	requires Utils::callback_function<F, reference_wrapper<IPlayer>, double>
 void CoreManager::addCommand(string name, F handler)
 {
-	// static_assert(is_invocable_v<F>, "HER");
 	this->_commandHandlers["/" + name] = std::unique_ptr<Utils::CommandCallback>(new Utils::CommandCallback(handler));
 }
 

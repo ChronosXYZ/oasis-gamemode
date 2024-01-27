@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bits/utility.h>
 #include <functional>
 #include <stdexcept>
 #include <string>
@@ -13,6 +14,25 @@ namespace Utils
 
 using CallbackValueType = std::variant<std::reference_wrapper<IPlayer>, std::string, int, double>;
 using CallbackValuesType = std::vector<CallbackValueType>;
+
+// Helper concept to check if a type is one of the allowed types
+template <typename T, typename... AllowedTypes>
+concept allowed_type
+	= (std::is_same_v<AllowedTypes, T> || ...);
+
+template <typename... Allowed>
+struct callback_function_check_helper
+{
+	template <typename R, allowed_type<Allowed...>... Args>
+	auto operator()(std::function<R(Args...)> t) -> void;
+};
+
+template <typename T, typename... Allowed>
+concept callback_function = requires(T t, callback_function_check_helper<Allowed...> h) {
+	{
+		h(std::function(t))
+	} -> std::same_as<void>;
+};
 
 struct CommandCallback
 {
