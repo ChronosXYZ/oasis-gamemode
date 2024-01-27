@@ -14,6 +14,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 include(cmake/conan.cmake)
+include(cmake/CMakeRC.cmake)
 
 # conan_cmake_configure(REQUIRES boost/1.83.0 
 #                       GENERATORS CMakeDeps
@@ -67,9 +68,40 @@ conan_cmake_install(PATH_OR_REFERENCE .
                     SETTINGS ${settings})
 
 
+file(GLOB_RECURSE resources_list CONFIGURE_DEPENDS "./resources/*.sql")
+
+cmrc_add_resource_library(
+    ${PROJECT_NAME}-resources
+
+    ALIAS ${PROJECT_NAME}::rc
+    NAMESPACE oasis
+
+    ${resources_list}
+)                    
+
 add_subdirectory(vendor/sdk)
 add_subdirectory(vendor/network)
 add_subdirectory(vendor/tinygettext)
-add_subdirectory(src)
 
+file(GLOB_RECURSE source_list CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.hpp")
+
+find_package(libpqxx REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(argon2 REQUIRED CONFIG)
+find_package(date REQUIRED)
+find_package(fmt REQUIRED)
+
+add_library(${PROJECT_NAME} SHARED ${source_list})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    OMP-SDK
+    tinygettext
+    libpqxx::pqxx
+    spdlog::spdlog
+    argon2::argon2
+    date::date
+    fmt::fmt
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}::rc)
 

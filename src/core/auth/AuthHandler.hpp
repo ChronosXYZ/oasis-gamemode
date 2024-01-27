@@ -19,6 +19,8 @@
 #include "../../constants.hpp"
 #include "../utils/LocaleUtils.hpp"
 #include "../utils/Hash.hpp"
+#include "../SQLQueryManager.hpp"
+#include "../utils/QueryNames.hpp"
 
 namespace Core
 {

@@ -8,7 +8,7 @@ build:
 
 copy_output:
 	mkdir -p ${CURDIR}/server/components
-	cp ${CURDIR}/build/src/liboasis-gm.so ${CURDIR}/server/components
+	cp ${CURDIR}/build/liboasis-gm.so ${CURDIR}/server/components
 
 run:
 	cd ${CURDIR}/server

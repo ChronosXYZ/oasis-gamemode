@@ -9,6 +9,7 @@
 
 #include "constants.hpp"
 #include "core/CoreManager.hpp"
+#include "core/SQLQueryManager.hpp"
 #include "core/utils/dotenv.h"
 #include "core/utils/LocaleUtils.hpp"
 #include "player.hpp"
@@ -92,12 +93,6 @@ public:
 		// Fire events here at earliest.
 		_core->setData(SettableCoreDataType::ModeText, "Oasis Freeroam");
 		*_core->getConfig().getBool("game.use_entry_exit_markers") = false;
-
-		// this->coreManager->addCommand("kill", [](reference_wrapper<IPlayer> player)
-		// 	{
-		// 		player.get().setHealth(0.0);
-		// 		player.get().sendClientMessage(Colour::Yellow(), "You have killed yourself!");
-		// 	});
 	}
 
 	void onFree(IComponent* component) override

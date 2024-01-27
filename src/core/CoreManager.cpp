@@ -1,5 +1,7 @@
 #include "CoreManager.hpp"
+#include "SQLQueryManager.hpp"
 #include "utils/Common.hpp"
+#include "utils/QueryNames.hpp"
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -91,26 +93,7 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 {
 	auto db = this->getDBConnection();
 	pqxx::work txn(*db);
-	pqxx::result res = txn.exec_params("SELECT id, \
-					name, \
-					users.password_hash, \
-					\"language\", \
-					email, \
-					last_skin_id, \
-					last_ip, \
-					last_login_at, \
-					bans.reason as \"ban_reason\", \
-					bans.by as \"banned_by\", \
-					bans.expires_at as \"ban_expires_at\", \
-					admins.\"level\" as \"admin_level\", \
-					admins.password_hash as \"admin_pass_hash\" \
-					FROM users \
-					LEFT JOIN bans \
-					ON users.id = bans.user_id \
-					LEFT JOIN admins \
-					ON users.id = admins.user_id \
-					WHERE name=$1",
-		player.getName().to_string());
+	pqxx::result res = txn.exec_params(SQLQueryManager::Get()->getQueryByName(Utils::SQL::Queries::LOAD_PLAYER).value(), player.getName().to_string());
 
 	if (res.size() == 0)
 	{

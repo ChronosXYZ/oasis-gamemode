@@ -167,9 +167,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 	peerData.networkID.address.ToString(peerData.networkID.address, ipString);
 	try
 	{
-		pqxx::result res = txn.exec_params("INSERT INTO users "
-										   "(\"name\", password_hash, \"language\", email, last_skin_id, last_ip) "
-										   "VALUES($1, $2, $3, $4, $5, $6)",
+		pqxx::result res = txn.exec_params(SQLQueryManager::Get()->getQueryByName(Utils::SQL::Queries::CREATE_PLAYER).value(),
 			player.getName().to_string(),
 			pData->passwordHash,
 			pData->language,
