@@ -5,8 +5,6 @@
 #include <functional>
 #include <memory>
 #include <map>
-#include <optional>
-#include <algorithm>
 #include <exception>
 #include <stdexcept>
 #include <variant>
@@ -22,9 +20,11 @@
 #include "player/PlayerExtension.hpp"
 #include "player/PlayerModel.hpp"
 #include "DialogManager.hpp"
+#include "SQLQueryManager.hpp"
 #include "auth/AuthHandler.hpp"
 #include "utils/Common.hpp"
 #include "utils/Strings.hpp"
+#include "utils/QueryNames.hpp"
 
 using namespace std;
 
@@ -44,8 +44,8 @@ public:
 	shared_ptr<pqxx::connection> getDBConnection();
 
 	template <typename F>
-		requires Utils::callback_function<F, reference_wrapper<IPlayer>, double>
-	void addCommand(string name, F handler);
+		requires Utils::callback_function<F, reference_wrapper<IPlayer>, double, int, std::string>
+	void addCommand(std::string name, F handler);
 	bool refreshPlayerData(IPlayer& player);
 
 	void onPlayerConnect(IPlayer& player) override;

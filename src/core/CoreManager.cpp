@@ -1,10 +1,5 @@
 #include "CoreManager.hpp"
-#include "SQLQueryManager.hpp"
-#include "utils/Common.hpp"
-#include "utils/QueryNames.hpp"
-#include <functional>
-#include <memory>
-#include <type_traits>
+#include <string>
 
 using namespace Core;
 
@@ -83,7 +78,7 @@ shared_ptr<pqxx::connection> CoreManager::getDBConnection()
 }
 
 template <typename F>
-	requires Utils::callback_function<F, reference_wrapper<IPlayer>, double>
+	requires Utils::callback_function<F, reference_wrapper<IPlayer>, double, int, string>
 void CoreManager::addCommand(string name, F handler)
 {
 	this->_commandHandlers["/" + name] = std::unique_ptr<Utils::CommandCallback>(new Utils::CommandCallback(handler));
