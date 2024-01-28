@@ -1,7 +1,8 @@
 #include "PgTimestamp.hpp"
+#include <bits/chrono.h>
 #include <chrono>
 
-namespace Utils
+namespace Utils::SQL
 {
 timestamp from_iso8601_str(const std::string& s)
 {
@@ -53,5 +54,11 @@ unsigned int to_unix_time(const timestamp& ts)
 	return std::chrono::duration_cast<
 		std::chrono::seconds>(ts.time_since_epoch())
 		.count();
+}
+
+timestamp get_current_timestamp()
+{
+	using namespace std::chrono;
+	return timestamp { duration_cast<microseconds>(system_clock::now().time_since_epoch()) };
 }
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <any>
 #include <concepts>
 #include <functional>
 #include <memory>
@@ -52,18 +51,23 @@ public:
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
 	bool onPlayerCommandText(IPlayer& player, StringView commandText) override;
 
+	void onFree(IComponent* component);
+
 private:
 	CoreManager(IComponentList* components, ICore* core, IPlayerPool* playerPool);
 
 	void initHandlers();
-
 	void callCommandHandler(string cmdName, Utils::CallbackValuesType args);
+	void savePlayer(IPlayer& player);
+	void savePlayer(std::shared_ptr<PlayerModel> data);
+	void saveAllPlayers();
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;
 
 	shared_ptr<DialogManager> _dialogManager;
 	shared_ptr<pqxx::connection> _dbConnection;
+	std::map<unsigned int, shared_ptr<PlayerModel>> _playerData;
 
 	// Handlers
 	unique_ptr<AuthHandler> _authHandler;

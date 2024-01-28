@@ -7,97 +7,112 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-19 22:32+0000\n"
-"PO-Revision-Date: 2024-01-19 06:02+0000\n"
+"POT-Creation-Date: 2024-01-28 14:52+0000\n"
+"PO-Revision-Date: 2024-01-28 13:50+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/main.cpp:97
+#: src/main.cpp:87
 msgid "Hello, World!"
-msgstr "Привет, мир!"
+msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:46
+#: src/core/auth/AuthHandler.cpp:47
 #, c-format
 msgid ""
-"{999999}Welcome to {FF0000}Oasis {FFFFFF}Freeroam, {ff9933}%s\n"
+"{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
 "\n"
 "\n"
-"{D3D3D3}> This name is not registered\n"
-"{D3D3D3}> Please register with a valid password\n"
-"{D3D3D3}> Acceptable passwords are at least 6 characters long\n"
+"#LIGHT_GRAY#> This name is not registered\n"
+"#LIGHT_GRAY#> Please register with a valid password\n"
+"#LIGHT_GRAY#> Acceptable passwords are at least 6 characters long\n"
 "\n"
 "\n"
-"{D3D3D3}> If you have any trouble, please visit our discord server or "
+"#LIGHT_GRAY#> If you have any trouble, please visit our discord server or "
 "contact any staff member:\n"
-"{ff9933}oasisfreeroam.xyz"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:54 src/core/auth/AuthHandler.cpp:237
+#: src/core/auth/AuthHandler.cpp:55 src/core/auth/AuthHandler.cpp:238
 msgid "Enter"
-msgstr "Ввести"
+msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:55 src/core/auth/AuthHandler.cpp:98
+#: src/core/auth/AuthHandler.cpp:56 src/core/auth/AuthHandler.cpp:99
 msgid "Quit"
-msgstr "Выйти"
-
-#: src/core/auth/AuthHandler.cpp:85
-#, c-format
-msgid ""
-"{FF0000}Wrong Password {D3D3D3}entered for {FFFFFF}%s {FF0000}[%d/3]\n"
-"{D3D3D3}Please re-write the correct password in the field below to login.\n"
-"\n"
-"{D3D3D3}- If you have forgotten your password, request a password recovery "
-"at our discord server:\n"
-"{ff9933}oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:91
+#: src/core/auth/AuthHandler.cpp:86
 #, c-format
 msgid ""
-"{D3D3D3}Welcome back to {FF0000}Oasis {FFFFFF}Freeroam {ff9933}%s\n"
+"#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
+"#LIGHT_GRAY#Please re-write the correct password in the field below to "
+"login.\n"
 "\n"
-"\n"
-"- {D3D3D3}Your name is registered in our database\n"
-"- {D3D3D3}Login by entering your password\n"
-"\n"
-"\n"
-"- {D3D3D3}If you have forgotten your password, request a password recovery "
-"at our discord server:\n"
-"{ff9933}oasisfreeroam.xyz"
+"#LIGHT_GRAY#- If you have forgotten your password, request a password "
+"recovery at our discord server:\n"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:97
+#: src/core/auth/AuthHandler.cpp:92
+#, c-format
+msgid ""
+"#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
+"\n"
+"#LIGHT_GRAY#- Your name is registered in our database\n"
+"#LIGHT_GRAY#- Login by entering your password\n"
+"\n"
+"#LIGHT_GRAY#- If you have forgotten your password, request a password "
+"recovery at our discord server:\n"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:98
 msgid "Login"
-msgstr "Логин"
+msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:125
+#: src/core/auth/AuthHandler.cpp:126
 msgid "You have been logged in!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:147
-msgid "Error: Password length must be between 6-48"
+#: src/core/auth/AuthHandler.cpp:139
+msgid "[Error] #WHITE#Too much login attempts!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:231
+#: src/core/auth/AuthHandler.cpp:150
+msgid "[Error] #WHITE#Password length must be between 6-48"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:232
 msgid ""
-"{D3D3D3}Please enter your {FFFFFF}Email address{D3D3D3}.\n"
+"#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
 "Use a correct email address as it can be used for password recovery\n"
 "to restore your account incase you forget your password\n"
 "You can skip entering email, but account features will be limited! Use "
-"{FFFFFF}/verify{D3D3D3} later"
+"#WHITE#/verify#LIGHT_GRAY# later"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:238
+#: src/core/auth/AuthHandler.cpp:239
 msgid "Skip"
-msgstr "Пропустить"
+msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:263
-msgid "[ERROR]{FFFFFF} Invalid email!"
+#: src/core/auth/AuthHandler.cpp:264
+msgid "[ERROR] #WHITE#Invalid email!"
+msgstr ""
+
+#: src/core/CoreManager.cpp:81
+msgid "[ERROR] #WHITE#Invalid skin ID!"
+msgstr ""
+
+#: src/core/CoreManager.cpp:158
+msgid "[ERROR] #WHITE#Invalid command parameters!"
+msgstr ""
+
+#: src/core/CoreManager.cpp:163
+msgid "[Error] #WHITE#Failed to invoke command!"
 msgstr ""

@@ -1,8 +1,7 @@
 #include "CoreManager.hpp"
-#include <string>
 
-using namespace Core;
-
+namespace Core
+{
 CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* playerPool)
 	: components(components)
 	, _core(core)
@@ -24,6 +23,7 @@ shared_ptr<CoreManager> CoreManager::create(IComponentList* components, ICore* c
 
 CoreManager::~CoreManager()
 {
+	saveAllPlayers();
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
 }
@@ -48,16 +48,20 @@ OasisPlayerExt* CoreManager::getPlayerExt(IPlayer& player)
 
 void CoreManager::onPlayerConnect(IPlayer& player)
 {
-	player.addExtension(new OasisPlayerExt(std::shared_ptr<PlayerModel>(new PlayerModel()), player), true);
+	auto data = std::shared_ptr<PlayerModel>(new PlayerModel());
+	this->_playerData[player.getID()] = data;
+	player.addExtension(new OasisPlayerExt(data, player), true);
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
 {
+	this->savePlayer(player);
+	this->_playerData.erase(player.getID());
 }
 
 shared_ptr<DialogManager> CoreManager::getDialogManager()
 {
-	return std::shared_ptr<DialogManager>(this->_dialogManager);
+	return this->_dialogManager;
 }
 
 void CoreManager::initHandlers()
@@ -69,6 +73,18 @@ void CoreManager::initHandlers()
 		{
 			player.get().setHealth(0.0);
 			player.get().sendClientMessage(Colour::Yellow(), "You have killed yourself!");
+		});
+	this->addCommand("skin", [&](reference_wrapper<IPlayer> player, int skinId)
+		{
+			if (skinId < 0 || skinId > 311)
+			{
+				player.get().sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid skin ID!", player));
+				return;
+			}
+			player.get().setSkin(skinId);
+			auto data = this->getPlayerData(player.get());
+			data->lastSkinId = skinId;
+			player.get().sendClientMessage(Colour::Yellow(), fmt::sprintf("You have changed your skin to ID: %d!", skinId));
 		});
 }
 
@@ -120,21 +136,13 @@ bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
 	args.push_back(player);
 	for (auto& part : cmdParts)
 	{
-		if (Utils::Strings::isNumber(part))
+		if (Utils::Strings::isNumber<int>(part))
 		{
-			try
-			{
-				args.push_back(atoi(part.c_str()));
-			}
-			catch (...)
-			{
-				spdlog::debug("invalid number passed to the command");
-			}
-			continue;
+			args.push_back(stoi(part));
 		}
-		else if (Utils::Strings::isDouble(part))
+		else if (Utils::Strings::isNumber<double>(part))
 		{
-			args.push_back(std::stod(part));
+			args.push_back(stod(part));
 		}
 		else
 		{
@@ -145,10 +153,14 @@ bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
 	{
 		this->callCommandHandler(commandName, args);
 	}
-	catch (exception& e)
+	catch (const std::bad_variant_access&)
+	{
+		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid command parameters!", player));
+	}
+	catch (const exception& e)
 	{
 		spdlog::debug("Failed to invoke command: {}", e.what());
-		player.sendClientMessage(consts::RED_COLOR, "Invalid command parameters!");
+		player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Failed to invoke command!", player));
 	}
 	return true;
 }
@@ -156,4 +168,43 @@ bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
 void CoreManager::callCommandHandler(string cmdName, Utils::CallbackValuesType args)
 {
 	(*this->_commandHandlers[cmdName])(args);
+}
+
+void CoreManager::savePlayer(shared_ptr<PlayerModel> data)
+{
+	auto db = this->getDBConnection();
+	pqxx::work txn(*db);
+
+	txn.exec_params(
+		SQLQueryManager::Get()->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER).value(),
+		data->language,
+		data->lastSkinId,
+		data->lastIP,
+		data->lastLoginAt,
+		data->account_id);
+
+	txn.commit();
+}
+
+void CoreManager::saveAllPlayers()
+{
+	for (const auto& [id, playerData] : this->_playerData)
+	{
+		this->savePlayer(playerData);
+	}
+	spdlog::info("Saved all player data!");
+}
+
+void CoreManager::savePlayer(IPlayer& player)
+{
+	savePlayer(this->_playerData[player.getID()]);
+}
+
+void CoreManager::onFree(IComponent* component)
+{
+	if (component->getUID() == DialogsComponent_UID)
+	{
+		this->_dialogManager.reset();
+	}
+}
 }

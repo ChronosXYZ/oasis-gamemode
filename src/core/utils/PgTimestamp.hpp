@@ -7,7 +7,7 @@
 #include <sstream>
 #include <stdexcept> // std::invalid_argument
 
-namespace Utils
+namespace Utils::SQL
 {
 using timestamp = std::chrono::sys_time<std::chrono::microseconds>;
 
@@ -18,25 +18,26 @@ std::string to_http_ts_str(const timestamp&);
 
 timestamp from_unix_time(unsigned int);
 unsigned int to_unix_time(const timestamp&);
+timestamp get_current_timestamp();
 }
 
 namespace pqxx
 {
 template <>
-struct nullness<Utils::timestamp> : no_null<Utils::timestamp>
+struct nullness<Utils::SQL::timestamp> : no_null<Utils::SQL::timestamp>
 {
 };
 
 template <>
-struct string_traits<Utils::timestamp>
+struct string_traits<Utils::SQL::timestamp>
 {
-	using subject_type = Utils::timestamp;
+	using subject_type = Utils::SQL::timestamp;
 	static constexpr bool converts_to_string { true };
 	static constexpr bool converts_from_string { true };
 
-	static char* into_buf(char* begin, char* end, Utils::timestamp const& value)
+	static char* into_buf(char* begin, char* end, Utils::SQL::timestamp const& value)
 	{
-		auto str = Utils::to_iso8601_str(value);
+		auto str = Utils::SQL::to_iso8601_str(value);
 		if (internal::cmp_greater_equal(std::size(str), end - begin))
 			throw conversion_overrun {
 				"Could not convert timestamp to string: too long for buffer."
@@ -52,9 +53,9 @@ struct string_traits<Utils::timestamp>
 		return generic_to_buf(begin, end, value);
 	}
 
-	static Utils::timestamp from_string(std::string_view text)
+	static Utils::SQL::timestamp from_string(std::string_view text)
 	{
-		auto str = Utils::from_iso8601_str(std::string(text));
+		auto str = Utils::SQL::from_iso8601_str(std::string(text));
 		return str;
 		// throw argument_error {
 		// 	"Failed conversion to "
@@ -65,14 +66,14 @@ struct string_traits<Utils::timestamp>
 		// };
 	}
 
-	static std::string to_string(const Utils::timestamp& ts)
+	static std::string to_string(const Utils::SQL::timestamp& ts)
 	{
-		return Utils::to_iso8601_str(ts);
+		return Utils::SQL::to_iso8601_str(ts);
 	}
 
-	static std::size_t size_buffer(Utils::timestamp const& value) noexcept
+	static std::size_t size_buffer(Utils::SQL::timestamp const& value) noexcept
 	{
-		return Utils::to_iso8601_str(value).length() + 1;
+		return Utils::SQL::to_iso8601_str(value).length() + 1;
 	}
 };
 }

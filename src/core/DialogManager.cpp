@@ -1,6 +1,7 @@
 #include "DialogManager.hpp"
 
-using namespace Core;
+namespace Core
+{
 
 DialogManager::DialogManager(IComponentList* components)
 {
@@ -43,4 +44,6 @@ void DialogManager::createDialog(IPlayer& player,
 
 	IPlayerDialogData* dialogData = queryExtension<IPlayerDialogData>(player);
 	dialogData->show(player, MAGIC_DIALOG_ID, style, title, body, button1, button2);
+}
+
 }

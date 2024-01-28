@@ -20,6 +20,7 @@ class OasisGamemodeComponent final : public IComponent, public PlayerSpawnEventH
 private:
 	ICore* _core = nullptr;
 	IPlayerPool* playerPool = nullptr;
+	bool _savedPlayerData = false;
 
 	shared_ptr<Core::CoreManager> coreManager;
 
@@ -31,8 +32,6 @@ public:
 	{
 		playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 		playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
-		_core = nullptr;
-		playerPool = nullptr;
 	}
 
 	// Implement the main component API.
@@ -97,6 +96,7 @@ public:
 
 	void onFree(IComponent* component) override
 	{
+		this->coreManager->onFree(component);
 	}
 
 	void free() override

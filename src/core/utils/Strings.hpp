@@ -1,5 +1,6 @@
 #pragma once
 
+#include <regex>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -26,22 +27,26 @@ namespace Strings
 		return separatedStrings;
 	};
 
+	template <typename Numeric>
 	inline bool isNumber(const std::string& s)
 	{
-		return !s.empty() && std::ranges::find_if(s.begin(), s.end(), [](unsigned char c)
-								 {
-									 return !std::isdigit(c);
-								 })
-			== s.end();
-	}
-
-	inline bool isDouble(const std::string& s)
-	{
 		std::istringstream iss(s);
-		double f;
+		Numeric f;
 		iss >> std::noskipws >> f; // noskipws considers leading whitespace invalid
 		// Check the entire string was consumed and if either failbit or badbit is set
 		return iss.eof() && !iss.fail();
+	}
+
+	inline std::vector<std::smatch> findAllMatches(const std::regex& regexp, const std::string& str)
+	{
+		std::vector<std::smatch> matches;
+		std::sregex_iterator iter(str.begin(), str.end(), regexp);
+		std::sregex_iterator end;
+		for (std::sregex_iterator i = iter; i != end; ++i)
+		{
+			matches.push_back(*i);
+		}
+		return matches;
 	}
 }
 }

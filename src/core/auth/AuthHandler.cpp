@@ -4,6 +4,7 @@
 #include "component.hpp"
 #include "player.hpp"
 #include "types.hpp"
+#include <chrono>
 #include <fmt/printf.h>
 
 using namespace Core;
@@ -43,12 +44,12 @@ void AuthHandler::showRegistrationDialog(IPlayer& player)
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
 		"" DIALOG_HEADER "Registration",
-		fmt::sprintf(_("{999999}Welcome to {FF0000}Oasis {FFFFFF}Freeroam, {ff9933}%s\n\n\n"
-					   "{D3D3D3}> This name is not registered\n"
-					   "{D3D3D3}> Please register with a valid password\n"
-					   "{D3D3D3}> Acceptable passwords are at least 6 characters long\n\n\n"
-					   "{D3D3D3}> If you have any trouble, please visit our discord server or contact any staff member:\n"
-					   "{ff9933}oasisfreeroam.xyz",
+		fmt::sprintf(_("{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n\n\n"
+					   "#LIGHT_GRAY#> This name is not registered\n"
+					   "#LIGHT_GRAY#> Please register with a valid password\n"
+					   "#LIGHT_GRAY#> Acceptable passwords are at least 6 characters long\n\n\n"
+					   "#LIGHT_GRAY#> If you have any trouble, please visit our discord server or contact any staff member:\n"
+					   "#DEEP_SAFFRON#oasisfreeroam.xyz",
 						 player),
 			player.getName().to_string()),
 		_("Enter", player),
@@ -82,16 +83,16 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
 		"" DIALOG_HEADER "Login",
-		wrongPass ? fmt::sprintf(_("{FF0000}Wrong Password {D3D3D3}entered for {FFFFFF}%s {FF0000}[%d/3]\n"
-								   "{D3D3D3}Please re-write the correct password in the field below to login.\n\n"
-								   "{D3D3D3}- If you have forgotten your password, request a password recovery at our discord server:\n"
-								   "{ff9933}oasisfreeroam.xyz",
+		wrongPass ? fmt::sprintf(_("#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
+								   "#LIGHT_GRAY#Please re-write the correct password in the field below to login.\n\n"
+								   "#LIGHT_GRAY#- If you have forgotten your password, request a password recovery at our discord server:\n"
+								   "#DEEP_SAFFRON#oasisfreeroam.xyz",
 									 player),
 			player.getName().to_string(), loginAttempts) // TODO login attempts
-				  : fmt::sprintf(_("{D3D3D3}Welcome back to {FF0000}Oasis {FFFFFF}Freeroam {ff9933}%s\n\n\n"
-								   "- {D3D3D3}Your name is registered in our database\n"
-								   "- {D3D3D3}Login by entering your password\n\n\n"
-								   "- {D3D3D3}If you have forgotten your password, request a password recovery at our discord server:\n{ff9933}oasisfreeroam.xyz",
+				  : fmt::sprintf(_("#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n\n"
+								   "#LIGHT_GRAY#- Your name is registered in our database\n"
+								   "#LIGHT_GRAY#- Login by entering your password\n\n"
+								   "#LIGHT_GRAY#- If you have forgotten your password, request a password recovery at our discord server:\n#DEEP_SAFFRON#oasisfreeroam.xyz",
 									 player),
 					  player.getName().to_string()),
 		_("Login", player),
@@ -123,6 +124,8 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 		if (Utils::argon2VerifyEncodedHash(playerData->passwordHash, password))
 		{
 			player.sendClientMessage(Colour::White(), _("You have been logged in!", player));
+			auto data = this->coreManager.lock()->getPlayerData(player);
+			data->lastLoginAt = Utils::SQL::get_current_timestamp();
 			player.spawn();
 			playerData->deleteTempData(LOGIN_ATTEMPTS_KEY);
 			return;
@@ -133,7 +136,7 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 	playerData->setTempData(LOGIN_ATTEMPTS_KEY, ++loginAttempts);
 	if (loginAttempts > 3)
 	{
-		player.sendClientMessage(consts::RED_COLOR, "[ERROR]{FFFFFF} Too much login attempts!");
+		player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Too much login attempts!", player));
 		playerExt->delayedKick();
 		return;
 	}
@@ -144,7 +147,7 @@ void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
 {
 	if (password.length() <= 5 || password.length() > 48)
 	{
-		player.sendClientMessage(consts::RED_COLOR, _("Error: Password length must be between 6-48", player));
+		player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Password length must be between 6-48", player));
 		this->showRegistrationDialog(player);
 		return;
 	}
@@ -226,10 +229,10 @@ void AuthHandler::showEmailDialog(IPlayer& player)
 	this->coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
 		"" DIALOG_HEADER "| Email",
-		fmt::sprintf(_("{D3D3D3}Please enter your {FFFFFF}Email address{D3D3D3}.\n\n"
+		fmt::sprintf(_("#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n\n"
 					   "Use a correct email address as it can be used for password recovery\n"
 					   "to restore your account incase you forget your password\n"
-					   "You can skip entering email, but account features will be limited! Use {FFFFFF}/verify{D3D3D3} later",
+					   "You can skip entering email, but account features will be limited! Use #WHITE#/verify#LIGHT_GRAY# later",
 						 player),
 			player.getName().to_string()),
 		_("Enter", player),
@@ -258,7 +261,7 @@ void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
 	if (!std::regex_match(email, m, consts::EMAIL_REGEX))
 	{
 		this->showEmailDialog(player);
-		player.sendClientMessage(consts::RED_COLOR, _("[ERROR]{FFFFFF} Invalid email!", player));
+		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid email!", player));
 		return;
 	}
 

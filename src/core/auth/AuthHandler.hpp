@@ -7,6 +7,7 @@
 #include <exception>
 #include <string>
 #include <regex>
+#include <chrono>
 
 #include <sdk.hpp>
 #include <player.hpp>

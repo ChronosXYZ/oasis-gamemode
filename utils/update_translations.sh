@@ -21,7 +21,11 @@ update_translations() {
         po_file="${po_folder}/${locale}.po"
         if [[ -e "${po_file}" ]]; then
             echo "Updating ${locale} .po file.."
-            msgmerge "${po_file}" "${pot_file}" --output-file="${po_file}"
+            if [ "$locale" == "en" ]; then # check if locale is english
+                msginit --no-translator --locale=en --input="${pot_file}" --output-file="${po_file}"
+            else 
+                msgmerge -U "${po_file}" "${pot_file}"
+            fi
         else
             echo "Creating ${locale} .po file.."
             msginit --input="${pot_file}" --locale="${locale}" --output-file="${po_file}"

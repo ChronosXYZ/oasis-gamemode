@@ -25,7 +25,7 @@ struct PlayerModel
 	string email;
 	string lastIP;
 	unsigned short lastSkinId;
-	Utils::timestamp lastLoginAt;
+	Utils::SQL::timestamp lastLoginAt;
 
 	unique_ptr<Ban> ban;
 	unique_ptr<AdminData> adminData;
@@ -42,7 +42,7 @@ struct PlayerModel
 		email = row["email"].c_str();
 		lastIP = row["last_ip"].c_str();
 		lastSkinId = row["last_skin_id"].as<unsigned short>();
-		lastLoginAt = row["last_login_at"].as<Utils::timestamp>();
+		lastLoginAt = row["last_login_at"].as<Utils::SQL::timestamp>();
 
 		if (!row["ban_expires_at"].is_null())
 		{
