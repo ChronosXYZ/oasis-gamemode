@@ -31,12 +31,14 @@ using namespace std;
 
 namespace Core
 {
-const inline static std::string CLASS_SELECTION = "class_selection";
+const inline static std::string CLASS_SELECTION = "classSelection";
+const inline static std::string CURRENT_MODE = "currentMode";
 
 class CoreManager : public PlayerConnectEventHandler,
 					public PlayerTextEventHandler,
 					public std::enable_shared_from_this<CoreManager>,
-					public ClassEventHandler
+					public ClassEventHandler,
+					public PlayerSpawnEventHandler
 {
 public:
 	IComponentList* const components;
@@ -58,6 +60,7 @@ public:
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
 	bool onPlayerCommandText(IPlayer& player, StringView commandText) override;
 	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
+	bool onPlayerRequestSpawn(IPlayer& player) override;
 
 	void onPlayerLoggedIn(IPlayer& player);
 
@@ -72,6 +75,7 @@ private:
 	void savePlayer(IPlayer& player);
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
+	void showModeSelectionDialog(IPlayer& player);
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;

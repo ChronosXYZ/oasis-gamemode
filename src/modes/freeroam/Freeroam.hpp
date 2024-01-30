@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <player.hpp>
+#include <string>
 
 #include "../../constants.hpp"
 
@@ -13,6 +14,8 @@ class CoreManager;
 
 namespace Modes::Freeroam
 {
+const inline static std::string MODE_NAME = "freeroam";
+
 class FreeroamHandler : public PlayerSpawnEventHandler
 {
 	std::weak_ptr<Core::CoreManager> _coreManager;
@@ -22,7 +25,6 @@ public:
 	FreeroamHandler(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
 	~FreeroamHandler();
 
-	bool onPlayerRequestSpawn(IPlayer& player) override;
 	void onPlayerSpawn(IPlayer& player) override;
 };
 }

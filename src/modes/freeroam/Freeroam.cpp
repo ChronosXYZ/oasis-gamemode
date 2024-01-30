@@ -16,21 +16,14 @@ FreeroamHandler::~FreeroamHandler()
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 }
 
-bool FreeroamHandler::onPlayerRequestSpawn(IPlayer& player)
-{
-	auto pData = _coreManager.lock()->getPlayerData(player);
-	if (pData->getTempData(Core::CLASS_SELECTION).has_value())
-	{
-		pData->deleteTempData(Core::CLASS_SELECTION);
-	}
-
-	pData->lastSkinId = player.getSkin();
-
-	return true;
-}
-
 void FreeroamHandler::onPlayerSpawn(IPlayer& player)
 {
+	auto pData = _coreManager.lock()->getPlayerData(player);
+	std::string mode = std::get<string>(pData->getTempData(Core::CURRENT_MODE).value());
+	if (mode != Freeroam::MODE_NAME)
+	{
+		return;
+	}
 	player.setPosition(consts::randomSpawnArray[random() % consts::randomSpawnArray.size()]);
 }
 }

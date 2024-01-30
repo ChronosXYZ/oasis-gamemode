@@ -15,6 +15,7 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 
 	_playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 	_playerPool->getPlayerTextDispatcher().addEventHandler(this);
+	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 
 	_classesComponent->getEventDispatcher().addEventHandler(this);
 
@@ -33,6 +34,7 @@ CoreManager::~CoreManager()
 	saveAllPlayers();
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
+	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 
 	_classesComponent->getEventDispatcher().removeEventHandler(this);
 }
@@ -262,5 +264,47 @@ void CoreManager::onPlayerLoggedIn(IPlayer& player)
 		classSelectionPoint.z));
 
 	auto pData = this->getPlayerData(player);
+}
+
+bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
+{
+	auto pData = this->getPlayerData(player);
+	if (pData->getTempData(Core::CLASS_SELECTION))
+	{
+		pData->deleteTempData(Core::CLASS_SELECTION);
+	}
+	pData->lastSkinId = player.getSkin();
+
+	showModeSelectionDialog(player);
+
+	return false;
+}
+
+void CoreManager::showModeSelectionDialog(IPlayer& player)
+{
+	this->getDialogManager()->createDialog(player, DialogStyle::DialogStyle_LIST, _("Modes", player),
+		_("Freeroam\nDeathmatch\nProtect the President\nDerby\nCops and Robbers", player),
+		_("Select", player),
+		"",
+		[&](DialogResponse resp, int listItem, StringView inputText)
+		{
+			auto pData = this->getPlayerData(player);
+			switch (listItem)
+			{
+			case 0:
+			{
+				pData->setTempData(CURRENT_MODE, Modes::Freeroam::MODE_NAME);
+				player.setVirtualWorld(0);
+				player.spawn();
+				break;
+			}
+			default:
+			{
+				player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Mode is not implemented yet!", player));
+				this->showModeSelectionDialog(player);
+				break;
+			}
+			}
+		});
 }
 }

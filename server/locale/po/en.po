@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-28 14:57+0000\n"
-"PO-Revision-Date: 2024-01-28 14:57+0000\n"
+"POT-Creation-Date: 2024-01-30 22:19+0000\n"
+"PO-Revision-Date: 2024-01-30 22:19+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -16,10 +16,6 @@ msgstr ""
 "Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: src/main.cpp:87
-msgid "Hello, World!"
-msgstr "Hello, World!"
 
 #: src/core/auth/AuthHandler.cpp:47
 #, c-format
@@ -136,14 +132,40 @@ msgstr "Skip"
 msgid "[ERROR] #WHITE#Invalid email!"
 msgstr "[ERROR] #WHITE#Invalid email!"
 
-#: src/core/CoreManager.cpp:81
+#: src/core/CoreManager.cpp:94
 msgid "[ERROR] #WHITE#Invalid skin ID!"
 msgstr "[ERROR] #WHITE#Invalid skin ID!"
 
-#: src/core/CoreManager.cpp:158
+#: src/core/CoreManager.cpp:171
 msgid "[ERROR] #WHITE#Invalid command parameters!"
 msgstr "[ERROR] #WHITE#Invalid command parameters!"
 
-#: src/core/CoreManager.cpp:163
+#: src/core/CoreManager.cpp:176
 msgid "[Error] #WHITE#Failed to invoke command!"
 msgstr "[Error] #WHITE#Failed to invoke command!"
+
+#: src/core/CoreManager.cpp:285
+msgid "Modes"
+msgstr "Modes"
+
+#: src/core/CoreManager.cpp:286
+msgid ""
+"Freeroam\n"
+"Deathmatch\n"
+"Protect the President\n"
+"Derby\n"
+"Cops and Robbers"
+msgstr ""
+"Freeroam\n"
+"Deathmatch\n"
+"Protect the President\n"
+"Derby\n"
+"Cops and Robbers"
+
+#: src/core/CoreManager.cpp:287
+msgid "Select"
+msgstr "Select"
+
+#: src/core/CoreManager.cpp:303
+msgid "[Error] #WHITE#Mode is not implemented yet!"
+msgstr "[Error] #WHITE#Mode is not implemented yet!"
