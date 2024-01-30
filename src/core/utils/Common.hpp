@@ -2,6 +2,7 @@
 
 #include <bits/utility.h>
 #include <functional>
+#include <numbers>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -100,4 +101,9 @@ private:
 	{
 	};
 };
+
+const inline double deg2Rad(const double& degrees)
+{
+	return degrees * std::numbers::pi / 180;
+}
 }

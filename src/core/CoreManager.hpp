@@ -14,6 +14,7 @@
 #include <spdlog/spdlog.h>
 #include <pqxx/pqxx>
 #include <sdk.hpp>
+#include <Server/Components/Classes/classes.hpp>
 
 #include "player/PlayerExtension.hpp"
 #include "player/PlayerExtension.hpp"
@@ -24,15 +25,21 @@
 #include "utils/Common.hpp"
 #include "utils/Strings.hpp"
 #include "utils/QueryNames.hpp"
+#include "../modes/freeroam/Freeroam.hpp"
 
 using namespace std;
 
 namespace Core
 {
-class CoreManager : public PlayerConnectEventHandler, public PlayerTextEventHandler, public std::enable_shared_from_this<CoreManager>
+const inline static std::string CLASS_SELECTION = "class_selection";
+
+class CoreManager : public PlayerConnectEventHandler,
+					public PlayerTextEventHandler,
+					public std::enable_shared_from_this<CoreManager>,
+					public ClassEventHandler
 {
 public:
-	const IComponentList* components;
+	IComponentList* const components;
 
 	static shared_ptr<CoreManager> create(IComponentList* components, ICore* core, IPlayerPool* playerPool);
 	~CoreManager();
@@ -50,6 +57,9 @@ public:
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
 	bool onPlayerCommandText(IPlayer& player, StringView commandText) override;
+	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
+
+	void onPlayerLoggedIn(IPlayer& player);
 
 	void onFree(IComponent* component);
 
@@ -57,6 +67,7 @@ private:
 	CoreManager(IComponentList* components, ICore* core, IPlayerPool* playerPool);
 
 	void initHandlers();
+	void initSkinSelection();
 	void callCommandHandler(string cmdName, Utils::CallbackValuesType args);
 	void savePlayer(IPlayer& player);
 	void savePlayer(std::shared_ptr<PlayerModel> data);
@@ -64,6 +75,7 @@ private:
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;
+	IClassesComponent* const _classesComponent;
 
 	shared_ptr<DialogManager> _dialogManager;
 	shared_ptr<pqxx::connection> _dbConnection;
@@ -71,6 +83,7 @@ private:
 
 	// Handlers
 	unique_ptr<AuthHandler> _authHandler;
+	unique_ptr<Modes::Freeroam::FreeroamHandler> _freeroam;
 
 	map<string, unique_ptr<Utils::CommandCallback>> _commandHandlers;
 };

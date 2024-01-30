@@ -126,8 +126,8 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 			player.sendClientMessage(Colour::White(), _("You have been logged in!", player));
 			auto data = this->coreManager.lock()->getPlayerData(player);
 			data->lastLoginAt = Utils::SQL::get_current_timestamp();
-			player.spawn();
 			playerData->deleteTempData(LOGIN_ATTEMPTS_KEY);
+			this->coreManager.lock()->onPlayerLoggedIn(player);
 			return;
 		}
 	}
@@ -188,7 +188,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 		return;
 	}
 	this->coreManager.lock()->refreshPlayerData(player);
-	player.spawn();
+	this->coreManager.lock()->onPlayerLoggedIn(player);
 }
 
 void AuthHandler::showLanguageDialog(IPlayer& player)

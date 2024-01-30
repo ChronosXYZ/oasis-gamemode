@@ -15,7 +15,7 @@ using namespace std;
 
 namespace Core
 {
-typedef std::variant<int, float, std::string> PrimitiveType;
+typedef std::variant<int, float, std::string, bool> PrimitiveType;
 struct PlayerModel
 {
 	unsigned long account_id;

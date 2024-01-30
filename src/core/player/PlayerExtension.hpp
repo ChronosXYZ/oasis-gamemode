@@ -41,6 +41,13 @@ public:
 			.detach();
 	}
 
+	void setFacingAngle(float angle)
+	{
+		auto rot = serverPlayer.getRotation().ToEuler();
+		rot.z = angle;
+		serverPlayer.setRotation(rot);
+	}
+
 	void freeExtension() override
 	{
 		_playerData.reset();

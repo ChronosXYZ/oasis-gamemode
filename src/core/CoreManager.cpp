@@ -1,4 +1,6 @@
 #include "CoreManager.hpp"
+#include "Server/Components/Classes/classes.hpp"
+#include <memory>
 
 namespace Core
 {
@@ -7,9 +9,14 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 	, _core(core)
 	, _playerPool(playerPool)
 	, _dialogManager(make_shared<DialogManager>(components))
+	, _classesComponent(components->queryComponent<IClassesComponent>())
 {
-	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
-	playerPool->getPlayerTextDispatcher().addEventHandler(this);
+	this->initSkinSelection();
+
+	_playerPool->getPlayerConnectDispatcher().addEventHandler(this);
+	_playerPool->getPlayerTextDispatcher().addEventHandler(this);
+
+	_classesComponent->getEventDispatcher().addEventHandler(this);
 
 	this->_dbConnection = make_shared<pqxx::connection>(getenv("DB_CONNECTION_STRING"));
 }
@@ -26,6 +33,8 @@ CoreManager::~CoreManager()
 	saveAllPlayers();
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
+
+	_classesComponent->getEventDispatcher().removeEventHandler(this);
 }
 
 shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
@@ -67,6 +76,8 @@ shared_ptr<DialogManager> CoreManager::getDialogManager()
 void CoreManager::initHandlers()
 {
 	_authHandler = make_unique<AuthHandler>(_playerPool, weak_from_this());
+
+	_freeroam = make_unique<Modes::Freeroam::FreeroamHandler>(weak_from_this(), _playerPool);
 
 	// FIXME move this definition outta here
 	this->addCommand("kill", [](reference_wrapper<IPlayer> player)
@@ -206,5 +217,50 @@ void CoreManager::onFree(IComponent* component)
 	{
 		this->_dialogManager.reset();
 	}
+}
+
+void CoreManager::initSkinSelection()
+{
+	IClassesComponent* classesComponent = this->components->queryComponent<IClassesComponent>();
+	for (int i = 0; i <= 311; i++)
+	{
+		if (i == 74) // skip invalid skin
+			continue;
+		classesComponent->create(i,
+			TEAM_NONE,
+			Vector3(0, 0, 0),
+			0.0,
+			WeaponSlots { WeaponSlotData { 0, 0 } });
+	}
+}
+
+bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
+{
+	auto pData = this->getPlayerData(player);
+	if (!pData->getTempData(CLASS_SELECTION))
+	{
+		// first player request class call
+		pData->setTempData(CLASS_SELECTION, true);
+		player.setSkin(pData->lastSkinId);
+		return true;
+	}
+	return true;
+}
+
+void CoreManager::onPlayerLoggedIn(IPlayer& player)
+{
+	Vector4 classSelectionPoint = consts::CLASS_SELECTION_POINTS[random() % consts::CLASS_SELECTION_POINTS.size()];
+	player.setPosition(Vector3(classSelectionPoint));
+
+	auto playerExt = this->getPlayerExt(player);
+	playerExt->setFacingAngle(classSelectionPoint.w);
+	player.setCameraLookAt(Vector3(classSelectionPoint), PlayerCameraCutType_Cut);
+	auto angleRad = Utils::deg2Rad(classSelectionPoint.w);
+	player.setCameraPosition(Vector3(
+		classSelectionPoint.x + 5.0 * std::sin(-angleRad),
+		classSelectionPoint.y + 5.0 * std::cos(-angleRad),
+		classSelectionPoint.z));
+
+	auto pData = this->getPlayerData(player);
 }
 }

@@ -56,6 +56,12 @@ const std::array<Vector3, 23>
 		Vector3(1705.2347, 1025.6808, 10.8203)
 	};
 
+const inline std::array<Vector4, 3> CLASS_SELECTION_POINTS {
+	Vector4(1565.4669, -1359.0862, 330.0576, 260.6601), // LS Maze Bank
+	Vector4(-1543.5278, 698.5956, 139.2734, 227.3011), // SF Bridge
+	Vector4(2183.6245, 1285.7245, 43.0771, 90.4277) // LV Sphinx
+};
+
 const inline std::array<std::string_view, 3> LANGUAGES {
 	"English",
 	"Portuguese",
