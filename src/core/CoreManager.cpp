@@ -1,6 +1,5 @@
 #include "CoreManager.hpp"
-#include "Server/Components/Classes/classes.hpp"
-#include <memory>
+#include "utils/Common.hpp"
 
 namespace Core
 {
@@ -282,19 +281,32 @@ bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 
 void CoreManager::showModeSelectionDialog(IPlayer& player)
 {
-	this->getDialogManager()->createDialog(player, DialogStyle::DialogStyle_LIST, _("Modes", player),
-		_("Freeroam\nDeathmatch\nProtect the President\nDerby\nCops and Robbers", player),
+	this->getDialogManager()->createDialog(player, DialogStyle::DialogStyle_TABLIST_HEADERS, _("Modes", player),
+		fmt::sprintf(_("Mode\tCommand\tPlayers\n"
+					   "Freeroam\t/fr\t%d\n"
+					   "Deathmatch\t/dm\t%d\n"
+					   "Protect the President\t/ptp\t%d\n"
+					   "Derby\t/derby\t%d\n"
+					   "Cops and Robbers\t/cnr\t%d",
+						 player),
+			_modePlayerCount[Modes::Mode::Freeroam],
+			_modePlayerCount[Modes::Mode::Deathmatch],
+			_modePlayerCount[Modes::Mode::PTP],
+			_modePlayerCount[Modes::Mode::Derby],
+			_modePlayerCount[Modes::Mode::CnR]),
 		_("Select", player),
 		"",
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
 			auto pData = this->getPlayerData(player);
-			switch (listItem)
+			auto selectedMode = static_cast<Modes::Mode>(listItem);
+			switch (selectedMode)
 			{
-			case 0:
+			case Modes::Mode::Freeroam:
 			{
 				pData->setTempData(CURRENT_MODE, Modes::Freeroam::MODE_NAME);
-				player.setVirtualWorld(0);
+				player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
+				this->_modePlayerCount[selectedMode]++;
 				player.spawn();
 				break;
 			}

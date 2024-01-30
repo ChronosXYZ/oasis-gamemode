@@ -15,6 +15,7 @@ class CoreManager;
 namespace Modes::Freeroam
 {
 const inline static std::string MODE_NAME = "freeroam";
+const inline static unsigned int VIRTUAL_WORLD_ID = 0;
 
 class FreeroamHandler : public PlayerSpawnEventHandler
 {

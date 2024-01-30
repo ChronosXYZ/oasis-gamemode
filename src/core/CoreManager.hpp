@@ -25,7 +25,9 @@
 #include "utils/Common.hpp"
 #include "utils/Strings.hpp"
 #include "utils/QueryNames.hpp"
+
 #include "../modes/freeroam/Freeroam.hpp"
+#include "../modes/Constants.hpp"
 
 using namespace std;
 
@@ -84,6 +86,13 @@ private:
 	shared_ptr<DialogManager> _dialogManager;
 	shared_ptr<pqxx::connection> _dbConnection;
 	std::map<unsigned int, shared_ptr<PlayerModel>> _playerData;
+	std::map<Modes::Mode, unsigned int> _modePlayerCount {
+		{ Modes::Mode::Freeroam, 0 },
+		{ Modes::Mode::Deathmatch, 0 },
+		{ Modes::Mode::Derby, 0 },
+		{ Modes::Mode::PTP, 0 },
+		{ Modes::Mode::CnR, 0 }
+	};
 
 	// Handlers
 	unique_ptr<AuthHandler> _authHandler;

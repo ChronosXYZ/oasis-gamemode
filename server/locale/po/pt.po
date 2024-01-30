@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 22:19+0000\n"
+"POT-Creation-Date: 2024-01-30 23:03+0000\n"
 "PO-Revision-Date: 2024-01-28 13:50+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Portuguese <translation-team-pt@lists.sourceforge.net>\n"
@@ -100,35 +100,37 @@ msgstr ""
 msgid "[ERROR] #WHITE#Invalid email!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:94
+#: src/core/CoreManager.cpp:93
 msgid "[ERROR] #WHITE#Invalid skin ID!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:171
+#: src/core/CoreManager.cpp:170
 msgid "[ERROR] #WHITE#Invalid command parameters!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:176
+#: src/core/CoreManager.cpp:175
 msgid "[Error] #WHITE#Failed to invoke command!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:285
+#: src/core/CoreManager.cpp:284
 msgid "Modes"
 msgstr ""
 
-#: src/core/CoreManager.cpp:286
+#: src/core/CoreManager.cpp:285
+#, c-format
 msgid ""
-"Freeroam\n"
-"Deathmatch\n"
-"Protect the President\n"
-"Derby\n"
-"Cops and Robbers"
+"Mode\tCommand\tPlayers\n"
+"Freeroam\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Protect the President\t/ptp\t%d\n"
+"Derby\t/derby\t%d\n"
+"Cops and Robbers\t/cnr\t%d"
 msgstr ""
 
-#: src/core/CoreManager.cpp:287
+#: src/core/CoreManager.cpp:297
 msgid "Select"
 msgstr ""
 
-#: src/core/CoreManager.cpp:303
+#: src/core/CoreManager.cpp:315
 msgid "[Error] #WHITE#Mode is not implemented yet!"
 msgstr ""
