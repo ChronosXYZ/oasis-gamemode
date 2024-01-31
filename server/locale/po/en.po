@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 23:03+0000\n"
-"PO-Revision-Date: 2024-01-30 23:03+0000\n"
+"POT-Creation-Date: 2024-01-31 15:21+0000\n"
+"PO-Revision-Date: 2024-01-31 15:21+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -17,7 +17,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/core/auth/AuthHandler.cpp:47
+#: src/core/auth/AuthHandler.cpp:33
+#, c-format
+msgid "Registration"
+msgstr "Registration"
+
+#: src/core/auth/AuthHandler.cpp:34
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -44,71 +49,81 @@ msgstr ""
 "contact any staff member:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 
-#: src/core/auth/AuthHandler.cpp:55 src/core/auth/AuthHandler.cpp:238
+#: src/core/auth/AuthHandler.cpp:42 src/core/auth/AuthHandler.cpp:228
 msgid "Enter"
 msgstr "Enter"
 
-#: src/core/auth/AuthHandler.cpp:56 src/core/auth/AuthHandler.cpp:99
+#: src/core/auth/AuthHandler.cpp:43 src/core/auth/AuthHandler.cpp:86
 msgid "Quit"
 msgstr "Quit"
 
-#: src/core/auth/AuthHandler.cpp:86
+#: src/core/auth/AuthHandler.cpp:72 src/core/auth/AuthHandler.cpp:85
 #, c-format
-msgid ""
-"#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
-"#LIGHT_GRAY#Please re-write the correct password in the field below to "
-"login.\n"
-"\n"
-"#LIGHT_GRAY#- If you have forgotten your password, request a password "
-"recovery at our discord server:\n"
-"#DEEP_SAFFRON#oasisfreeroam.xyz"
-msgstr ""
-"#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
-"#LIGHT_GRAY#Please re-write the correct password in the field below to "
-"login.\n"
-"\n"
-"#LIGHT_GRAY#- If you have forgotten your password, request a password "
-"recovery at our discord server:\n"
-"#DEEP_SAFFRON#oasisfreeroam.xyz"
-
-#: src/core/auth/AuthHandler.cpp:92
-#, c-format
-msgid ""
-"#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
-"\n"
-"#LIGHT_GRAY#- Your name is registered in our database\n"
-"#LIGHT_GRAY#- Login by entering your password\n"
-"\n"
-"#LIGHT_GRAY#- If you have forgotten your password, request a password "
-"recovery at our discord server:\n"
-"#DEEP_SAFFRON#oasisfreeroam.xyz"
-msgstr ""
-"#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
-"\n"
-"#LIGHT_GRAY#- Your name is registered in our database\n"
-"#LIGHT_GRAY#- Login by entering your password\n"
-"\n"
-"#LIGHT_GRAY#- If you have forgotten your password, request a password "
-"recovery at our discord server:\n"
-"#DEEP_SAFFRON#oasisfreeroam.xyz"
-
-#: src/core/auth/AuthHandler.cpp:98
 msgid "Login"
 msgstr "Login"
 
-#: src/core/auth/AuthHandler.cpp:126
+#: src/core/auth/AuthHandler.cpp:73
+#, c-format
+msgid ""
+"#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
+"#LIGHT_GRAY#Please re-write the correct password in the field below to "
+"login.\n"
+"\n"
+"#LIGHT_GRAY#- If you have forgotten your password, request a password "
+"recovery at our discord server:\n"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
+msgstr ""
+"#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
+"#LIGHT_GRAY#Please re-write the correct password in the field below to "
+"login.\n"
+"\n"
+"#LIGHT_GRAY#- If you have forgotten your password, request a password "
+"recovery at our discord server:\n"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
+
+#: src/core/auth/AuthHandler.cpp:79
+#, c-format
+msgid ""
+"#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
+"\n"
+"#LIGHT_GRAY#- Your name is registered in our database\n"
+"#LIGHT_GRAY#- Login by entering your password\n"
+"\n"
+"#LIGHT_GRAY#- If you have forgotten your password, request a password "
+"recovery at our discord server:\n"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
+msgstr ""
+"#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
+"\n"
+"#LIGHT_GRAY#- Your name is registered in our database\n"
+"#LIGHT_GRAY#- Login by entering your password\n"
+"\n"
+"#LIGHT_GRAY#- If you have forgotten your password, request a password "
+"recovery at our discord server:\n"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
+
+#: src/core/auth/AuthHandler.cpp:113
 msgid "You have been logged in!"
 msgstr "You have been logged in!"
 
-#: src/core/auth/AuthHandler.cpp:139
-msgid "[Error] #WHITE#Too much login attempts!"
-msgstr "[Error] #WHITE#Too much login attempts!"
+#: src/core/auth/AuthHandler.cpp:127
+msgid "Too much login attempts!"
+msgstr "Too much login attempts!"
 
-#: src/core/auth/AuthHandler.cpp:150
-msgid "[Error] #WHITE#Password length must be between 6-48"
-msgstr "[Error] #WHITE#Password length must be between 6-48"
+#: src/core/auth/AuthHandler.cpp:138
+msgid "Password length must be between 6-48"
+msgstr "Password length must be between 6-48"
 
-#: src/core/auth/AuthHandler.cpp:232
+#: src/core/auth/AuthHandler.cpp:175
+msgid "Something went wrong when trying to create user!"
+msgstr "Something went wrong when trying to create user!"
+
+#: src/core/auth/AuthHandler.cpp:221
+#, c-format
+msgid "Enter your email"
+msgstr "Enter your email"
+
+#: src/core/auth/AuthHandler.cpp:222
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -124,31 +139,77 @@ msgstr ""
 "You can skip entering email, but account features will be limited! Use "
 "#WHITE#/verify#LIGHT_GRAY# later"
 
-#: src/core/auth/AuthHandler.cpp:239
+#: src/core/auth/AuthHandler.cpp:229
 msgid "Skip"
 msgstr "Skip"
 
-#: src/core/auth/AuthHandler.cpp:264
-msgid "[ERROR] #WHITE#Invalid email!"
-msgstr "[ERROR] #WHITE#Invalid email!"
+#: src/core/auth/AuthHandler.cpp:254
+msgid "Invalid email!"
+msgstr "Invalid email!"
 
-#: src/core/CoreManager.cpp:93
-msgid "[ERROR] #WHITE#Invalid skin ID!"
-msgstr "[ERROR] #WHITE#Invalid skin ID!"
+#: src/core/auth/AuthHandler.cpp:301
+#, c-format
+msgid "Registration info"
+msgstr "Registration info"
+
+#: src/core/auth/AuthHandler.cpp:302
+#, c-format
+msgid ""
+"#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
+"logged in.\n"
+"\n"
+"#MILLION_GREY#Username: #WHITE#%s\n"
+"#MILLION_GREY#Account ID: #WHITE#%d\n"
+"#MILLION_GREY#Password: #WHITE#%s\n"
+"#MILLION_GREY#Registration date: #WHITE#%s\n"
+"\n"
+"#MILLION_GREY#Use '#RED#F8#MILLION_GREY#' to take screenshot and save the "
+"password."
+msgstr ""
+"#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
+"logged in.\n"
+"\n"
+"#MILLION_GREY#Username: #WHITE#%s\n"
+"#MILLION_GREY#Account ID: #WHITE#%d\n"
+"#MILLION_GREY#Password: #WHITE#%s\n"
+"#MILLION_GREY#Registration date: #WHITE#%s\n"
+"\n"
+"#MILLION_GREY#Use '#RED#F8#MILLION_GREY#' to take screenshot and save the "
+"password."
+
+#: src/core/auth/AuthHandler.cpp:313
+msgid "OK"
+msgstr "OK"
+
+#: src/core/auth/AuthHandler.cpp:316
+msgid "You have successfully registered!"
+msgstr "You have successfully registered!"
+
+#: src/core/CoreManager.cpp:83
+msgid "You have killed yourself!"
+msgstr "You have killed yourself!"
+
+#: src/core/CoreManager.cpp:89
+msgid "Invalid skin ID!"
+msgstr "Invalid skin ID!"
+
+#: src/core/CoreManager.cpp:160 src/core/CoreManager.cpp:165
+msgid "Invalid command parameters!"
+msgstr "Invalid command parameters!"
 
 #: src/core/CoreManager.cpp:170
-msgid "[ERROR] #WHITE#Invalid command parameters!"
-msgstr "[ERROR] #WHITE#Invalid command parameters!"
+msgid "Failed to invoke command!"
+msgstr "Failed to invoke command!"
 
-#: src/core/CoreManager.cpp:175
-msgid "[Error] #WHITE#Failed to invoke command!"
-msgstr "[Error] #WHITE#Failed to invoke command!"
+#: src/core/CoreManager.cpp:279
+msgid "You are not logged in yet!"
+msgstr "You are not logged in yet!"
 
-#: src/core/CoreManager.cpp:284
+#: src/core/CoreManager.cpp:295
 msgid "Modes"
 msgstr "Modes"
 
-#: src/core/CoreManager.cpp:285
+#: src/core/CoreManager.cpp:296
 #, c-format
 msgid ""
 "Mode\tCommand\tPlayers\n"
@@ -165,10 +226,18 @@ msgstr ""
 "Derby\t/derby\t%d\n"
 "Cops and Robbers\t/cnr\t%d"
 
-#: src/core/CoreManager.cpp:297
+#: src/core/CoreManager.cpp:308
 msgid "Select"
 msgstr "Select"
 
-#: src/core/CoreManager.cpp:315
-msgid "[Error] #WHITE#Mode is not implemented yet!"
-msgstr "[Error] #WHITE#Mode is not implemented yet!"
+#: src/core/CoreManager.cpp:333
+msgid "Mode is not implemented yet!"
+msgstr "Mode is not implemented yet!"
+
+#: src/core/player/PlayerExtension.cpp:46
+msgid "#RED#[ERROR]#WHITE#"
+msgstr "#RED#[ERROR]#WHITE#"
+
+#: src/core/player/PlayerExtension.cpp:52
+msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
+msgstr "#BRIGHT_BLUE#[INFO]#WHITE#"

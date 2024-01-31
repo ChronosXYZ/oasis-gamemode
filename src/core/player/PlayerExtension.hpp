@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PlayerModel.hpp"
+#include <fmt/core.h>
 #include <player.hpp>
 #include <component.hpp>
 #include <memory>
@@ -16,46 +17,21 @@ class OasisPlayerExt : public IExtension
 {
 private:
 	std::shared_ptr<PlayerModel> _playerData = nullptr;
-	IPlayer& serverPlayer;
+	IPlayer& _player;
 
 public:
 	PROVIDE_EXT_UID(0xBE727855C7D51E32)
-	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player)
-		: serverPlayer(player)
-	{
-		_playerData = data;
-	}
 
-	std::shared_ptr<PlayerModel> getPlayerData()
-	{
-		return this->_playerData;
-	}
+	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player);
 
-	void delayedKick()
-	{
-		std::thread([&]()
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(DELAYED_KICK_INTERVAL_MS));
-				serverPlayer.kick();
-			})
-			.detach();
-	}
+	std::shared_ptr<PlayerModel> getPlayerData();
 
-	void setFacingAngle(float angle)
-	{
-		auto rot = serverPlayer.getRotation().ToEuler();
-		rot.z = angle;
-		serverPlayer.setRotation(rot);
-	}
+	void delayedKick();
+	void setFacingAngle(float angle);
+	void sendErrorMessage(const std::string& message);
+	void sendInfoMessage(const std::string& message);
 
-	void freeExtension() override
-	{
-		_playerData.reset();
-	}
-
-	void reset() override
-	{
-		_playerData.reset();
-	}
+	void freeExtension() override;
+	void reset() override;
 };
 }

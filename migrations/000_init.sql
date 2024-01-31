@@ -13,6 +13,7 @@ CREATE TABLE public.users (
 	last_skin_id int2 NULL,
 	last_ip text NULL,
 	last_login_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	registration_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT users_pk PRIMARY KEY (id),
 	CONSTRAINT users_unique UNIQUE (name, email)
 );

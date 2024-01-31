@@ -32,8 +32,9 @@
 
 namespace Core
 {
-const inline static std::string CLASS_SELECTION = "classSelection";
+const inline static std::string SKIN_SELECTION = "skinSelection";
 const inline static std::string CURRENT_MODE = "currentMode";
+const inline static std::string IS_LOGGED_IN = "isLoggedIn";
 
 class CoreManager : public PlayerConnectEventHandler,
 					public PlayerTextEventHandler,
@@ -48,7 +49,6 @@ public:
 	~CoreManager();
 
 	shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
-	OasisPlayerExt* getPlayerExt(IPlayer& player);
 	shared_ptr<DialogManager> getDialogManager();
 	shared_ptr<pqxx::connection> getDBConnection();
 

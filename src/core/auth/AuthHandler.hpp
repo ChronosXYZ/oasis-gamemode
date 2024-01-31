@@ -11,7 +11,7 @@
 
 #include <sdk.hpp>
 #include <player.hpp>
-#include <Server/Components/Dialogs/dialogs.hpp>
+#include <Server/Components/Classes/classes.hpp>
 #include <spdlog/spdlog.h>
 #include <network.hpp>
 #include <fmt/printf.h>
@@ -26,22 +26,25 @@
 namespace Core
 {
 class CoreManager;
-class AuthHandler : public PlayerConnectEventHandler
+class AuthHandler : public PlayerConnectEventHandler, public ClassEventHandler
 {
 public:
 	AuthHandler(IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager);
 	~AuthHandler();
 
 	void onPlayerConnect(IPlayer& player) override;
+	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 
 private:
-	IPlayerPool* const playerPool;
-	std::weak_ptr<CoreManager> coreManager;
+	IPlayerPool* const _playerPool;
+	IClassesComponent* const _classesComponent;
+	std::weak_ptr<CoreManager> _coreManager;
 
 	void showLanguageDialog(IPlayer& player);
 	void showRegistrationDialog(IPlayer& player);
 	void showEmailDialog(IPlayer& player);
 	void showLoginDialog(IPlayer& player, bool wrongPass);
+	void showRegistrationInfoDialog(IPlayer& player);
 
 	// Callbacks
 	void onLoginSubmit(IPlayer& player, const std::string& password);

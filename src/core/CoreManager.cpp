@@ -1,8 +1,5 @@
 #include "CoreManager.hpp"
 #include "utils/Common.hpp"
-#include <iterator>
-#include <spdlog/spdlog.h>
-#include <stdexcept>
 
 namespace Core
 {
@@ -54,11 +51,6 @@ shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
 	return {};
 }
 
-OasisPlayerExt* CoreManager::getPlayerExt(IPlayer& player)
-{
-	return queryExtension<OasisPlayerExt>(player);
-}
-
 void CoreManager::onPlayerConnect(IPlayer& player)
 {
 	auto data = std::shared_ptr<PlayerModel>(new PlayerModel());
@@ -88,13 +80,13 @@ void CoreManager::initHandlers()
 	this->addCommand("kill", [](reference_wrapper<IPlayer> player)
 		{
 			player.get().setHealth(0.0);
-			player.get().sendClientMessage(Colour::Yellow(), "You have killed yourself!");
+			Utils::getPlayerExt(player.get())->sendInfoMessage(_("You have killed yourself!", player));
 		});
 	this->addCommand("skin", [&](reference_wrapper<IPlayer> player, int skinId)
 		{
 			if (skinId < 0 || skinId > 311)
 			{
-				player.get().sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid skin ID!", player));
+				Utils::getPlayerExt(player.get())->sendErrorMessage(_("Invalid skin ID!", player));
 				return;
 			}
 			player.get().setSkin(skinId);
@@ -165,17 +157,17 @@ bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
 	catch (const std::bad_variant_access& e)
 	{
 		spdlog::debug(e.what());
-		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid command parameters!", player));
+		Utils::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
 	}
 	catch (const std::invalid_argument& e)
 	{
 		spdlog::debug(e.what());
-		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid command parameters!", player));
+		Utils::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
 	}
 	catch (const exception& e)
 	{
 		spdlog::debug("Failed to invoke command: {}", e.what());
-		player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Failed to invoke command!", player));
+		Utils::getPlayerExt(player)->sendErrorMessage(_("Failed to invoke command!", player));
 	}
 	return true;
 }
@@ -187,6 +179,9 @@ void CoreManager::callCommandHandler(string cmdName, Utils::CallbackValuesType a
 
 void CoreManager::savePlayer(shared_ptr<PlayerModel> data)
 {
+	if (!data->getTempData(IS_LOGGED_IN))
+		return;
+
 	auto db = this->getDBConnection();
 	pqxx::work txn(*db);
 
@@ -196,7 +191,7 @@ void CoreManager::savePlayer(shared_ptr<PlayerModel> data)
 		data->lastSkinId,
 		data->lastIP,
 		data->lastLoginAt,
-		data->account_id);
+		data->userId);
 
 	txn.commit();
 	spdlog::info("Player {} has been successfully saved", data->name);
@@ -242,22 +237,36 @@ void CoreManager::initSkinSelection()
 bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 {
 	auto pData = this->getPlayerData(player);
-	if (!pData->getTempData(CLASS_SELECTION))
+	if (!pData->getTempData(IS_LOGGED_IN))
+		return true;
+	if (pData->getTempData(CURRENT_MODE))
+	{
+		player.spawn();
+		return true;
+	}
+	if (!pData->getTempData(SKIN_SELECTION))
 	{
 		// first player request class call
-		pData->setTempData(CLASS_SELECTION, true);
+		pData->setTempData(SKIN_SELECTION, true);
 		player.setSkin(pData->lastSkinId);
-		return true;
 	}
 	return true;
 }
 
 void CoreManager::onPlayerLoggedIn(IPlayer& player)
 {
+	auto pData = this->getPlayerData(player);
+	pData->setTempData(IS_LOGGED_IN, true);
+
+	// hack to get class selection buttons appear again
+	player.forceClassSelection();
+	player.setSpectating(true);
+	player.setSpectating(false);
+
 	Vector4 classSelectionPoint = consts::CLASS_SELECTION_POINTS[random() % consts::CLASS_SELECTION_POINTS.size()];
 	player.setPosition(Vector3(classSelectionPoint));
 
-	auto playerExt = this->getPlayerExt(player);
+	auto playerExt = Utils::getPlayerExt(player);
 	playerExt->setFacingAngle(classSelectionPoint.w);
 	player.setCameraLookAt(Vector3(classSelectionPoint), PlayerCameraCutType_Cut);
 	auto angleRad = Utils::deg2Rad(classSelectionPoint.w);
@@ -265,16 +274,19 @@ void CoreManager::onPlayerLoggedIn(IPlayer& player)
 		classSelectionPoint.x + 5.0 * std::sin(-angleRad),
 		classSelectionPoint.y + 5.0 * std::cos(-angleRad),
 		classSelectionPoint.z));
-
-	auto pData = this->getPlayerData(player);
 }
 
 bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 {
 	auto pData = this->getPlayerData(player);
-	if (pData->getTempData(Core::CLASS_SELECTION))
+	if (!pData->getTempData(Core::IS_LOGGED_IN))
 	{
-		pData->deleteTempData(Core::CLASS_SELECTION);
+		Utils::getPlayerExt(player)->sendErrorMessage(_("You are not logged in yet!", player));
+		return false;
+	}
+	if (pData->getTempData(Core::SKIN_SELECTION))
+	{
+		pData->deleteTempData(Core::SKIN_SELECTION);
 	}
 	pData->lastSkinId = player.getSkin();
 
@@ -323,7 +335,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	}
 	default:
 	{
-		player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Mode is not implemented yet!", player));
+		Utils::getPlayerExt(player)->sendErrorMessage(_("Mode is not implemented yet!", player));
 		this->showModeSelectionDialog(player);
 		break;
 	}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 23:03+0000\n"
+"POT-Creation-Date: 2024-01-31 15:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/core/auth/AuthHandler.cpp:47
+#: src/core/auth/AuthHandler.cpp:33
+#, c-format
+msgid "Registration"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:34
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -33,15 +38,20 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:55 src/core/auth/AuthHandler.cpp:238
+#: src/core/auth/AuthHandler.cpp:42 src/core/auth/AuthHandler.cpp:228
 msgid "Enter"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:56 src/core/auth/AuthHandler.cpp:99
+#: src/core/auth/AuthHandler.cpp:43 src/core/auth/AuthHandler.cpp:86
 msgid "Quit"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:86
+#: src/core/auth/AuthHandler.cpp:72 src/core/auth/AuthHandler.cpp:85
+#, c-format
+msgid "Login"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:73
 #, c-format
 msgid ""
 "#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
@@ -53,7 +63,7 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:92
+#: src/core/auth/AuthHandler.cpp:79
 #, c-format
 msgid ""
 "#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
@@ -66,23 +76,28 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:98
-msgid "Login"
-msgstr ""
-
-#: src/core/auth/AuthHandler.cpp:126
+#: src/core/auth/AuthHandler.cpp:113
 msgid "You have been logged in!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:139
-msgid "[Error] #WHITE#Too much login attempts!"
+#: src/core/auth/AuthHandler.cpp:127
+msgid "Too much login attempts!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:150
-msgid "[Error] #WHITE#Password length must be between 6-48"
+#: src/core/auth/AuthHandler.cpp:138
+msgid "Password length must be between 6-48"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:232
+#: src/core/auth/AuthHandler.cpp:175
+msgid "Something went wrong when trying to create user!"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:221
+#, c-format
+msgid "Enter your email"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:222
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -92,31 +107,67 @@ msgid ""
 "#WHITE#/verify#LIGHT_GRAY# later"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:239
+#: src/core/auth/AuthHandler.cpp:229
 msgid "Skip"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:264
-msgid "[ERROR] #WHITE#Invalid email!"
+#: src/core/auth/AuthHandler.cpp:254
+msgid "Invalid email!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:93
-msgid "[ERROR] #WHITE#Invalid skin ID!"
+#: src/core/auth/AuthHandler.cpp:301
+#, c-format
+msgid "Registration info"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:302
+#, c-format
+msgid ""
+"#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
+"logged in.\n"
+"\n"
+"#MILLION_GREY#Username: #WHITE#%s\n"
+"#MILLION_GREY#Account ID: #WHITE#%d\n"
+"#MILLION_GREY#Password: #WHITE#%s\n"
+"#MILLION_GREY#Registration date: #WHITE#%s\n"
+"\n"
+"#MILLION_GREY#Use '#RED#F8#MILLION_GREY#' to take screenshot and save the "
+"password."
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:313
+msgid "OK"
+msgstr ""
+
+#: src/core/auth/AuthHandler.cpp:316
+msgid "You have successfully registered!"
+msgstr ""
+
+#: src/core/CoreManager.cpp:83
+msgid "You have killed yourself!"
+msgstr ""
+
+#: src/core/CoreManager.cpp:89
+msgid "Invalid skin ID!"
+msgstr ""
+
+#: src/core/CoreManager.cpp:160 src/core/CoreManager.cpp:165
+msgid "Invalid command parameters!"
 msgstr ""
 
 #: src/core/CoreManager.cpp:170
-msgid "[ERROR] #WHITE#Invalid command parameters!"
+msgid "Failed to invoke command!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:175
-msgid "[Error] #WHITE#Failed to invoke command!"
+#: src/core/CoreManager.cpp:279
+msgid "You are not logged in yet!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:284
+#: src/core/CoreManager.cpp:295
 msgid "Modes"
 msgstr ""
 
-#: src/core/CoreManager.cpp:285
+#: src/core/CoreManager.cpp:296
 #, c-format
 msgid ""
 "Mode\tCommand\tPlayers\n"
@@ -127,10 +178,18 @@ msgid ""
 "Cops and Robbers\t/cnr\t%d"
 msgstr ""
 
-#: src/core/CoreManager.cpp:297
+#: src/core/CoreManager.cpp:308
 msgid "Select"
 msgstr ""
 
-#: src/core/CoreManager.cpp:315
-msgid "[Error] #WHITE#Mode is not implemented yet!"
+#: src/core/CoreManager.cpp:333
+msgid "Mode is not implemented yet!"
+msgstr ""
+
+#: src/core/player/PlayerExtension.cpp:46
+msgid "#RED#[ERROR]#WHITE#"
+msgstr ""
+
+#: src/core/player/PlayerExtension.cpp:52
+msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr ""

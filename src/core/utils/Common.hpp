@@ -1,5 +1,6 @@
 #pragma once
 
+#include "component.hpp"
 #include <bits/utility.h>
 #include <fmt/core.h>
 #include <functional>
@@ -10,6 +11,8 @@
 #include <vector>
 
 #include <player.hpp>
+
+#include "../player/PlayerExtension.hpp"
 
 namespace Utils
 {
@@ -109,6 +112,11 @@ private:
 const inline double deg2Rad(const double& degrees)
 {
 	return degrees * std::numbers::pi / 180;
+}
+
+static inline Core::OasisPlayerExt* getPlayerExt(IPlayer& player)
+{
+	return queryExtension<Core::OasisPlayerExt>(player);
 }
 
 template <typename E>

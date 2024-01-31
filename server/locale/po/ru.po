@@ -7,18 +7,23 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 23:03+0000\n"
+"POT-Creation-Date: 2024-01-31 15:21+0000\n"
 "PO-Revision-Date: 2024-01-28 13:50+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ASCII\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/core/auth/AuthHandler.cpp:47
+#: src/core/auth/AuthHandler.cpp:33
+#, c-format
+msgid "Registration"
+msgstr "Регистрация"
+
+#: src/core/auth/AuthHandler.cpp:34
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -34,15 +39,20 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:55 src/core/auth/AuthHandler.cpp:238
+#: src/core/auth/AuthHandler.cpp:42 src/core/auth/AuthHandler.cpp:228
 msgid "Enter"
-msgstr ""
+msgstr "Ввести"
 
-#: src/core/auth/AuthHandler.cpp:56 src/core/auth/AuthHandler.cpp:99
+#: src/core/auth/AuthHandler.cpp:43 src/core/auth/AuthHandler.cpp:86
 msgid "Quit"
-msgstr ""
+msgstr "Выйти"
 
-#: src/core/auth/AuthHandler.cpp:86
+#: src/core/auth/AuthHandler.cpp:72 src/core/auth/AuthHandler.cpp:85
+#, c-format
+msgid "Login"
+msgstr "Войти"
+
+#: src/core/auth/AuthHandler.cpp:73
 #, c-format
 msgid ""
 "#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
@@ -54,7 +64,7 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:92
+#: src/core/auth/AuthHandler.cpp:79
 #, c-format
 msgid ""
 "#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
@@ -66,24 +76,37 @@ msgid ""
 "recovery at our discord server:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
+"#LIGHT_GRAY#Добро пожаловать снова на #RED#Oasis#WHITE# Freeroam, #DEEP_SAFFRON#%s\n"
+"\n"
+"#LIGHT_GRAY#- Ваше имя зарегистрировано в нашей базе данных\n"
+"#LIGHT_GRAY#- Войдите с помощью своего пароля\n"
+"\n"
+"#LIGHT_GRAY#- Если вы забыли пароль, запросите "
+"смену пароля на нашем Discord-сервере:\n"
+"#DEEP_SAFFRON#oasisfreeroam.xyz"
 
-#: src/core/auth/AuthHandler.cpp:98
-msgid "Login"
-msgstr ""
-
-#: src/core/auth/AuthHandler.cpp:126
+#: src/core/auth/AuthHandler.cpp:113
 msgid "You have been logged in!"
-msgstr ""
+msgstr "Вы вошли в аккаунт!"
 
-#: src/core/auth/AuthHandler.cpp:139
-msgid "[Error] #WHITE#Too much login attempts!"
-msgstr ""
+#: src/core/auth/AuthHandler.cpp:127
+msgid "Too much login attempts!"
+msgstr "Слишком много попыток логина!"
 
-#: src/core/auth/AuthHandler.cpp:150
-msgid "[Error] #WHITE#Password length must be between 6-48"
-msgstr ""
+#: src/core/auth/AuthHandler.cpp:138
+msgid "Password length must be between 6-48"
+msgstr "Пароль должен быть длиной от 6 до 48 символов"
 
-#: src/core/auth/AuthHandler.cpp:232
+#: src/core/auth/AuthHandler.cpp:175
+msgid "Something went wrong when trying to create user!"
+msgstr "Что-то пошло не так, пока мы создавали аккаунт!"
+
+#: src/core/auth/AuthHandler.cpp:221
+#, c-format
+msgid "Enter your email"
+msgstr "Введите ваш email"
+
+#: src/core/auth/AuthHandler.cpp:222
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -93,31 +116,68 @@ msgid ""
 "#WHITE#/verify#LIGHT_GRAY# later"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:239
+#: src/core/auth/AuthHandler.cpp:229
 msgid "Skip"
+msgstr "Пропустить"
+
+#: src/core/auth/AuthHandler.cpp:254
+msgid "Invalid email!"
+msgstr "Неверный email!"
+
+#: src/core/auth/AuthHandler.cpp:301
+#, c-format
+msgid "Registration info"
+msgstr "Информация о регистрации"
+
+#: src/core/auth/AuthHandler.cpp:302
+#, c-format
+msgid ""
+"#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
+"logged in.\n"
+"\n"
+"#MILLION_GREY#Username: #WHITE#%s\n"
+"#MILLION_GREY#Account ID: #WHITE#%d\n"
+"#MILLION_GREY#Password: #WHITE#%s\n"
+"#MILLION_GREY#Registration date: #WHITE#%s\n"
+"\n"
+"#MILLION_GREY#Use '#RED#F8#MILLION_GREY#' to take screenshot and save the "
+"password."
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:264
-msgid "[ERROR] #WHITE#Invalid email!"
-msgstr ""
+#: src/core/auth/AuthHandler.cpp:313
+msgid "OK"
+msgstr "ОК"
 
-#: src/core/CoreManager.cpp:93
-msgid "[ERROR] #WHITE#Invalid skin ID!"
-msgstr ""
+#: src/core/auth/AuthHandler.cpp:316
+msgid "You have successfully registered!"
+msgstr "Вы успешно зарегистрировались"
+
+#: src/core/CoreManager.cpp:83
+msgid "You have killed yourself!"
+msgstr "Вы убили себя!"
+
+#: src/core/CoreManager.cpp:89
+#, fuzzy
+msgid "Invalid skin ID!"
+msgstr "Неверный email!"
+
+#: src/core/CoreManager.cpp:160 src/core/CoreManager.cpp:165
+msgid "Invalid command parameters!"
+msgstr "Неверные параметры команды!"
 
 #: src/core/CoreManager.cpp:170
-msgid "[ERROR] #WHITE#Invalid command parameters!"
-msgstr ""
+msgid "Failed to invoke command!"
+msgstr "Невозможно вызвать команду!"
 
-#: src/core/CoreManager.cpp:175
-msgid "[Error] #WHITE#Failed to invoke command!"
-msgstr ""
+#: src/core/CoreManager.cpp:279
+msgid "You are not logged in yet!"
+msgstr "Вы еще не вошли в аккаунт!"
 
-#: src/core/CoreManager.cpp:284
+#: src/core/CoreManager.cpp:295
 msgid "Modes"
-msgstr ""
+msgstr "Режимы"
 
-#: src/core/CoreManager.cpp:285
+#: src/core/CoreManager.cpp:296
 #, c-format
 msgid ""
 "Mode\tCommand\tPlayers\n"
@@ -127,11 +187,25 @@ msgid ""
 "Derby\t/derby\t%d\n"
 "Cops and Robbers\t/cnr\t%d"
 msgstr ""
+"Режим\tКоманда\tИгроки\n"
+"Свободный\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Защита президента\t/ptp\t%d\n"
+"Дерби\t/derby\t%d\n"
+"Полицейские и грабители\t/cnr\t%d"
 
-#: src/core/CoreManager.cpp:297
+#: src/core/CoreManager.cpp:308
 msgid "Select"
-msgstr ""
+msgstr "Выбрать"
 
-#: src/core/CoreManager.cpp:315
-msgid "[Error] #WHITE#Mode is not implemented yet!"
-msgstr ""
+#: src/core/CoreManager.cpp:333
+msgid "Mode is not implemented yet!"
+msgstr "Режим еще не реализован!"
+
+#: src/core/player/PlayerExtension.cpp:46
+msgid "#RED#[ERROR]#WHITE#"
+msgstr "#RED#[ОШИБКА]#WHITE#"
+
+#: src/core/player/PlayerExtension.cpp:52
+msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
+msgstr "#BRIGHT_BLUE#[ИНФО]#WHITE#"

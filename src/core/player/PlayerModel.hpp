@@ -10,6 +10,7 @@
 #include "AdminData.hpp"
 #include "BanData.hpp"
 #include "../utils/PgTimestamp.hpp"
+#include "../../constants.hpp"
 
 using namespace std;
 
@@ -18,14 +19,15 @@ namespace Core
 typedef std::variant<int, float, std::string, bool> PrimitiveType;
 struct PlayerModel
 {
-	unsigned long account_id;
+	unsigned long userId;
 	string name;
 	string passwordHash;
-	string language;
+	string language = consts::LANGUAGE_CODE_NAME.at(0);
 	string email;
 	string lastIP;
 	unsigned short lastSkinId;
 	Utils::SQL::timestamp lastLoginAt;
+	Utils::SQL::timestamp registrationDate;
 
 	unique_ptr<Ban> ban;
 	unique_ptr<AdminData> adminData;
@@ -35,7 +37,7 @@ struct PlayerModel
 
 	void updateFromRow(const pqxx::row& row)
 	{
-		account_id = row["id"].as<unsigned long>();
+		userId = row["id"].as<unsigned long>();
 		name = row["name"].c_str();
 		passwordHash = row["password_hash"].c_str();
 		language = row["language"].c_str();
@@ -43,6 +45,7 @@ struct PlayerModel
 		lastIP = row["last_ip"].c_str();
 		lastSkinId = row["last_skin_id"].as<unsigned short>();
 		lastLoginAt = row["last_login_at"].as<Utils::SQL::timestamp>();
+		registrationDate = row["registration_date"].as<Utils::SQL::timestamp>();
 
 		if (!row["ban_expires_at"].is_null())
 		{
