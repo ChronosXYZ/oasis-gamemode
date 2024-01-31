@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <variant>
 #include <string>
+#include <set>
 
 #include <component.hpp>
 #include <player.hpp>
@@ -28,8 +29,6 @@
 
 #include "../modes/freeroam/Freeroam.hpp"
 #include "../modes/Constants.hpp"
-
-using namespace std;
 
 namespace Core
 {
@@ -55,8 +54,12 @@ public:
 
 	template <typename F>
 		requires Utils::callback_function<F, reference_wrapper<IPlayer>, double, int, std::string>
-	void addCommand(std::string name, F handler);
+	void addCommand(std::string name, F handler)
+	{
+		this->_commandHandlers["/" + name] = std::unique_ptr<Utils::CommandCallback>(new Utils::CommandCallback(handler));
+	};
 	bool refreshPlayerData(IPlayer& player);
+	void selectMode(IPlayer& player, Modes::Mode mode);
 
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
@@ -78,6 +81,7 @@ private:
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
 	void showModeSelectionDialog(IPlayer& player);
+	void removePlayerFromModes(IPlayer& player);
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;
@@ -86,12 +90,12 @@ private:
 	shared_ptr<DialogManager> _dialogManager;
 	shared_ptr<pqxx::connection> _dbConnection;
 	std::map<unsigned int, shared_ptr<PlayerModel>> _playerData;
-	std::map<Modes::Mode, unsigned int> _modePlayerCount {
-		{ Modes::Mode::Freeroam, 0 },
-		{ Modes::Mode::Deathmatch, 0 },
-		{ Modes::Mode::Derby, 0 },
-		{ Modes::Mode::PTP, 0 },
-		{ Modes::Mode::CnR, 0 }
+	std::map<Modes::Mode, std::set<unsigned int>> _modePlayerCount {
+		{ Modes::Mode::Freeroam, {} },
+		{ Modes::Mode::Deathmatch, {} },
+		{ Modes::Mode::Derby, {} },
+		{ Modes::Mode::PTP, {} },
+		{ Modes::Mode::CnR, {} }
 	};
 
 	// Handlers

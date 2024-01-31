@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <functional>
 
 #include <player.hpp>
 #include <string>
@@ -19,12 +20,15 @@ const inline static unsigned int VIRTUAL_WORLD_ID = 0;
 
 class FreeroamHandler : public PlayerSpawnEventHandler
 {
+	FreeroamHandler(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
+	void initCommands();
 
 public:
-	FreeroamHandler(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
 	~FreeroamHandler();
+
+	static std::unique_ptr<FreeroamHandler> create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
 
 	void onPlayerSpawn(IPlayer& player) override;
 };

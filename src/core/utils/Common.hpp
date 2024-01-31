@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bits/utility.h>
+#include <fmt/core.h>
 #include <functional>
 #include <numbers>
 #include <stdexcept>
@@ -60,7 +61,10 @@ private:
 		{
 			if (!(vv.size() == sizeof...(Is)))
 			{
-				throw std::invalid_argument("argument vector length doesn't match callback signature argument count");
+				throw std::invalid_argument(
+					fmt::format("argument vector length doesn't match callback signature argument count: {}, expected {}",
+						vv.size(),
+						sizeof...(Is)));
 			}
 			/* if signature matches */ fn_(std::get<Args>(vv[Is])...);
 		};

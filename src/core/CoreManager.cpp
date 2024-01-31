@@ -1,5 +1,8 @@
 #include "CoreManager.hpp"
 #include "utils/Common.hpp"
+#include <iterator>
+#include <spdlog/spdlog.h>
+#include <stdexcept>
 
 namespace Core
 {
@@ -67,6 +70,7 @@ void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reaso
 {
 	this->savePlayer(player);
 	this->_playerData.erase(player.getID());
+	this->removePlayerFromModes(player);
 }
 
 shared_ptr<DialogManager> CoreManager::getDialogManager()
@@ -78,7 +82,7 @@ void CoreManager::initHandlers()
 {
 	_authHandler = make_unique<AuthHandler>(_playerPool, weak_from_this());
 
-	_freeroam = make_unique<Modes::Freeroam::FreeroamHandler>(weak_from_this(), _playerPool);
+	_freeroam = Modes::Freeroam::FreeroamHandler::create(weak_from_this(), _playerPool);
 
 	// FIXME move this definition outta here
 	this->addCommand("kill", [](reference_wrapper<IPlayer> player)
@@ -103,13 +107,6 @@ void CoreManager::initHandlers()
 shared_ptr<pqxx::connection> CoreManager::getDBConnection()
 {
 	return this->_dbConnection;
-}
-
-template <typename F>
-	requires Utils::callback_function<F, reference_wrapper<IPlayer>, double, int, string>
-void CoreManager::addCommand(string name, F handler)
-{
-	this->_commandHandlers["/" + name] = std::unique_ptr<Utils::CommandCallback>(new Utils::CommandCallback(handler));
 }
 
 bool CoreManager::refreshPlayerData(IPlayer& player)
@@ -165,8 +162,14 @@ bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
 	{
 		this->callCommandHandler(commandName, args);
 	}
-	catch (const std::bad_variant_access&)
+	catch (const std::bad_variant_access& e)
 	{
+		spdlog::debug(e.what());
+		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid command parameters!", player));
+	}
+	catch (const std::invalid_argument& e)
+	{
+		spdlog::debug(e.what());
 		player.sendClientMessage(consts::RED_COLOR, _("[ERROR] #WHITE#Invalid command parameters!", player));
 	}
 	catch (const exception& e)
@@ -196,6 +199,7 @@ void CoreManager::savePlayer(shared_ptr<PlayerModel> data)
 		data->account_id);
 
 	txn.commit();
+	spdlog::info("Player {} has been successfully saved", data->name);
 }
 
 void CoreManager::saveAllPlayers()
@@ -289,34 +293,58 @@ void CoreManager::showModeSelectionDialog(IPlayer& player)
 					   "Derby\t/derby\t%d\n"
 					   "Cops and Robbers\t/cnr\t%d",
 						 player),
-			_modePlayerCount[Modes::Mode::Freeroam],
-			_modePlayerCount[Modes::Mode::Deathmatch],
-			_modePlayerCount[Modes::Mode::PTP],
-			_modePlayerCount[Modes::Mode::Derby],
-			_modePlayerCount[Modes::Mode::CnR]),
+			_modePlayerCount[Modes::Mode::Freeroam].size(),
+			_modePlayerCount[Modes::Mode::Deathmatch].size(),
+			_modePlayerCount[Modes::Mode::PTP].size(),
+			_modePlayerCount[Modes::Mode::Derby].size(),
+			_modePlayerCount[Modes::Mode::CnR].size()),
 		_("Select", player),
 		"",
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
-			auto pData = this->getPlayerData(player);
-			auto selectedMode = static_cast<Modes::Mode>(listItem);
-			switch (selectedMode)
-			{
-			case Modes::Mode::Freeroam:
-			{
-				pData->setTempData(CURRENT_MODE, Modes::Freeroam::MODE_NAME);
-				player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
-				this->_modePlayerCount[selectedMode]++;
-				player.spawn();
-				break;
-			}
-			default:
-			{
-				player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Mode is not implemented yet!", player));
-				this->showModeSelectionDialog(player);
-				break;
-			}
-			}
+			selectMode(player, static_cast<Modes::Mode>(listItem));
 		});
+}
+
+void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
+{
+	this->removePlayerFromModes(player);
+	auto pData = this->getPlayerData(player);
+	switch (mode)
+	{
+	case Modes::Mode::Freeroam:
+	{
+		pData->setTempData(CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
+		player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
+		this->_modePlayerCount[mode].insert(player.getID());
+		player.spawn();
+		spdlog::info("Player {} has joined mode id {}", player.getName().to_string(), static_cast<int>(mode));
+		break;
+	}
+	default:
+	{
+		player.sendClientMessage(consts::RED_COLOR, _("[Error] #WHITE#Mode is not implemented yet!", player));
+		this->showModeSelectionDialog(player);
+		break;
+	}
+	}
+}
+
+void CoreManager::removePlayerFromModes(IPlayer& player)
+{
+	auto pData = this->getPlayerData(player);
+	if (auto modeOpt = pData->getTempData(CURRENT_MODE))
+	{
+		auto mode = static_cast<Modes::Mode>(std::get<int>(*modeOpt));
+		std::erase_if(_modePlayerCount[mode], [&](const auto& x)
+			{
+				if (player.getID() == x)
+				{
+					spdlog::info("Player {} has left mode id {}", player.getName().to_string(), std::get<int>(*modeOpt));
+					return true;
+				}
+				return false;
+			});
+	}
 }
 }
