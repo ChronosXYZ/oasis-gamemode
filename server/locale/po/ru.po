@@ -159,7 +159,7 @@ msgstr "Вы убили себя!"
 #: src/core/CoreManager.cpp:89
 #, fuzzy
 msgid "Invalid skin ID!"
-msgstr "Неверный email!"
+msgstr "Неверный ID скина!"
 
 #: src/core/CoreManager.cpp:160 src/core/CoreManager.cpp:165
 msgid "Invalid command parameters!"

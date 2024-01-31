@@ -30,6 +30,7 @@ public:
 	void setFacingAngle(float angle);
 	void sendErrorMessage(const std::string& message);
 	void sendInfoMessage(const std::string& message);
+	const std::string getIP();
 
 	void freeExtension() override;
 	void reset() override;

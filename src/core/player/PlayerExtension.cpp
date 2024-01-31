@@ -1,5 +1,6 @@
 #include "PlayerExtension.hpp"
 #include "../utils/LocaleUtils.hpp"
+#include <string_view>
 
 namespace Core
 {
@@ -50,5 +51,13 @@ void OasisPlayerExt::sendInfoMessage(const std::string& message)
 {
 	_player.sendClientMessage(Colour::White(),
 		fmt::format("{} {}", _("#BRIGHT_BLUE#[INFO]#WHITE#", _player), message));
+}
+
+const std::string OasisPlayerExt::getIP()
+{
+	PeerAddress::AddressString ipString;
+	PeerNetworkData peerData = _player.getNetworkData();
+	peerData.networkID.address.ToString(peerData.networkID.address, ipString);
+	return ipString.data();
 }
 }

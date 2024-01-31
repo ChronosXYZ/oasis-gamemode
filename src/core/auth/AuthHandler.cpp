@@ -111,8 +111,8 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 		if (Utils::argon2VerifyEncodedHash(playerData->passwordHash, password))
 		{
 			playerExt->sendInfoMessage(_("You have been logged in!", player));
-			auto data = this->_coreManager.lock()->getPlayerData(player);
-			data->lastLoginAt = Utils::SQL::get_current_timestamp();
+			playerData->lastLoginAt = Utils::SQL::get_current_timestamp();
+			playerData->lastIP = playerExt->getIP();
 			playerData->deleteTempData(LOGIN_ATTEMPTS_KEY);
 			this->_coreManager.lock()->onPlayerLoggedIn(player);
 			playerData->deleteTempData(IS_REQUEST_CLASS_ALREADY_CALLED);
@@ -153,10 +153,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 
 	pqxx::work txn(*db);
 
-	PeerAddress::AddressString ipString;
-	PeerNetworkData peerData = player.getNetworkData();
 	auto pData = this->_coreManager.lock()->getPlayerData(player);
-	peerData.networkID.address.ToString(peerData.networkID.address, ipString);
 	try
 	{
 		pqxx::result res = txn.exec_params(SQLQueryManager::Get()->getQueryByName(Utils::SQL::Queries::CREATE_PLAYER).value(),
@@ -165,7 +162,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 			pData->language,
 			pData->email,
 			1,
-			ipString.data());
+			playerExt->getIP());
 		txn.commit();
 	}
 	catch (const std::exception& e)
