@@ -13,11 +13,13 @@ FreeroamHandler::FreeroamHandler(std::weak_ptr<Core::CoreManager> coreManager, I
 {
 	using namespace std::placeholders;
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
+	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 }
 
 FreeroamHandler::~FreeroamHandler()
 {
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
+	_playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
 }
 
 void FreeroamHandler::onPlayerSpawn(IPlayer& player)
@@ -28,7 +30,6 @@ void FreeroamHandler::onPlayerSpawn(IPlayer& player)
 	{
 		return;
 	}
-	player.setPosition(consts::randomSpawnArray[random() % consts::randomSpawnArray.size()]);
 }
 
 std::unique_ptr<FreeroamHandler> FreeroamHandler::create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
@@ -43,5 +44,24 @@ void FreeroamHandler::initCommands()
 		{
 			this->_coreManager.lock()->selectMode(player, Mode::Freeroam);
 		});
+}
+
+void FreeroamHandler::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
+{
+	this->setRandomSpawnInfo(player);
+}
+
+void FreeroamHandler::onModeJoin(IPlayer& player)
+{
+	this->setRandomSpawnInfo(player);
+}
+
+void FreeroamHandler::setRandomSpawnInfo(IPlayer& player)
+{
+	queryExtension<IPlayerClassData>(player)->setSpawnInfo(PlayerClass(this->_coreManager.lock()->getPlayerData(player)->lastSkinId,
+		TEAM_NONE,
+		consts::randomSpawnArray[random() % consts::randomSpawnArray.size()],
+		0.0,
+		WeaponSlots {}));
 }
 }

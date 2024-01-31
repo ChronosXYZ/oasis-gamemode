@@ -1,5 +1,9 @@
 #include "CoreManager.hpp"
+#include "Server/Components/Classes/classes.hpp"
+#include "component.hpp"
+#include "player.hpp"
 #include "utils/Common.hpp"
+#include "values.hpp"
 
 namespace Core
 {
@@ -250,6 +254,7 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 		pData->setTempData(SKIN_SELECTION, true);
 		player.setSkin(pData->lastSkinId);
 	}
+
 	return true;
 }
 
@@ -329,6 +334,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 		pData->setTempData(CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
 		player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
 		this->_modePlayerCount[mode].insert(player.getID());
+		this->_freeroam->onModeJoin(player);
 		player.spawn();
 		spdlog::info("Player {} has joined mode id {}", player.getName().to_string(), static_cast<int>(mode));
 		break;
