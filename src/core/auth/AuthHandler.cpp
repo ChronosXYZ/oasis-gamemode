@@ -187,7 +187,7 @@ void AuthHandler::showLanguageDialog(IPlayer& player)
 	}
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_LIST,
-		"" DIALOG_HEADER "| Select language",
+		fmt::sprintf(DIALOG_HEADER_TITLE, "Select language"),
 		languagesList,
 		"Select",
 		"Quit",

@@ -8,6 +8,7 @@
 #include <argon2.h>
 #include <vector>
 #include <random>
+#include <chrono>
 
 #define HASHLEN 32
 #define SALTLEN 16
@@ -24,6 +25,7 @@ static std::string argon2HashPassword(const std::string& password)
 {
 	// unsigned char salt[SALTLEN] = { 0x00 };
 	random_bytes_engine rbe;
+	rbe.seed(std::chrono::system_clock::now().time_since_epoch().count());
 	std::vector<unsigned char> salt(SALTLEN);
 	std::generate(begin(salt), end(salt), std::ref(rbe));
 
