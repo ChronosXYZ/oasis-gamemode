@@ -1,19 +1,22 @@
-// Required for most of open.mp.
-#include <functional>
-#include <sdk.hpp>
-#include <ctime>
-#include <cstdlib>
-#include <memory>
-
-#include <Server/Components/Classes/classes.hpp>
-
 #include "constants.hpp"
 #include "core/CoreManager.hpp"
 #include "core/SQLQueryManager.hpp"
 #include "core/utils/dotenv.h"
-#include "core/utils/LocaleUtils.hpp"
-#include "player.hpp"
-#include "tinygettext/dictionary_manager.hpp"
+#include "core/utils/Localization.hpp"
+
+#include <player.hpp>
+#include <spdlog/spdlog.h>
+#include <tinygettext/dictionary_manager.hpp>
+#include <Server/Components/Classes/classes.hpp>
+#include <sdk.hpp>
+
+#include <functional>
+#include <ctime>
+#include <cstdlib>
+#include <memory>
+
+#define OASIS_GM_UID 0xF09FC558499EF9D7
+#define OASIS_GAMEMODE_NAME "Oasis Freeroam"
 
 class OasisGamemodeComponent final : public IComponent, public PlayerSpawnEventHandler, public PlayerConnectEventHandler, public PlayerTextEventHandler
 {
@@ -57,8 +60,8 @@ public:
 
 	void initTinygettext()
 	{
-		Locale::gDictionaryManager.reset(new tinygettext::DictionaryManager());
-		Locale::gDictionaryManager->add_directory("locale/po");
+		Localization::gDictionaryManager.reset(new tinygettext::DictionaryManager());
+		Localization::gDictionaryManager->add_directory("locale/po");
 	}
 
 	void onInit(IComponentList* components) override
@@ -86,7 +89,7 @@ public:
 	void onReady() override
 	{
 		// Fire events here at earliest.
-		_core->setData(SettableCoreDataType::ModeText, "Oasis Freeroam");
+		_core->setData(SettableCoreDataType::ModeText, OASIS_GAMEMODE_NAME);
 		*_core->getConfig().getBool("game.use_entry_exit_markers") = false;
 	}
 

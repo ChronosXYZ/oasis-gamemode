@@ -1,4 +1,13 @@
 #include "CoreManager.hpp"
+#include "SQLQueryManager.hpp"
+#include "PlayerVars.hpp"
+#include "commands/CommandManager.hpp"
+#include "player/PlayerExtension.hpp"
+#include "utils/Common.hpp"
+#include "utils/QueryNames.hpp"
+
+#include <spdlog/spdlog.h>
+#include <fmt/printf.h>
 
 namespace Core
 {
@@ -6,13 +15,13 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 	: components(components)
 	, _core(core)
 	, _playerPool(playerPool)
-	, _dialogManager(std::make_shared<DialogManager>(components))
+	, _dialogManager(std::shared_ptr<DialogManager>(new DialogManager(components)))
+	, _commandManager(std::shared_ptr<Commands::CommandManager>(new Commands::CommandManager(playerPool)))
 	, _classesComponent(components->queryComponent<IClassesComponent>())
 {
 	this->initSkinSelection();
 
 	_playerPool->getPlayerConnectDispatcher().addEventHandler(this);
-	_playerPool->getPlayerTextDispatcher().addEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 
 	_classesComponent->getEventDispatcher().addEventHandler(this);
@@ -31,7 +40,6 @@ CoreManager::~CoreManager()
 {
 	saveAllPlayers();
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
-	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 
 	_classesComponent->getEventDispatcher().removeEventHandler(this);
@@ -39,7 +47,7 @@ CoreManager::~CoreManager()
 
 std::shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
 {
-	auto ext = queryExtension<OasisPlayerExt>(player);
+	auto ext = queryExtension<Player::OasisPlayerExt>(player);
 	if (ext)
 	{
 		if (auto data = ext->getPlayerData())
@@ -54,7 +62,7 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 {
 	auto data = std::shared_ptr<PlayerModel>(new PlayerModel());
 	this->_playerData[player.getID()] = data;
-	player.addExtension(new OasisPlayerExt(data, player), true);
+	player.addExtension(new Player::OasisPlayerExt(data, player), true);
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
@@ -76,16 +84,16 @@ void CoreManager::initHandlers()
 	_freeroam = Modes::Freeroam::FreeroamHandler::create(weak_from_this(), _playerPool);
 
 	// FIXME move this definition outta here
-	this->addCommand("kill", [](std::reference_wrapper<IPlayer> player)
+	_commandManager->addCommand("kill", [](std::reference_wrapper<IPlayer> player)
 		{
 			player.get().setHealth(0.0);
-			Utils::getPlayerExt(player.get())->sendInfoMessage(_("You have killed yourself!", player));
+			Player::getPlayerExt(player.get())->sendInfoMessage(_("You have killed yourself!", player));
 		});
-	this->addCommand("skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
+	_commandManager->addCommand("skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
 		{
 			if (skinId < 0 || skinId > 311)
 			{
-				Utils::getPlayerExt(player.get())->sendErrorMessage(_("Invalid skin ID!", player));
+				Player::getPlayerExt(player.get())->sendErrorMessage(_("Invalid skin ID!", player));
 				return;
 			}
 			player.get().setSkin(skinId);
@@ -116,64 +124,6 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 	this->getPlayerData(player)->updateFromRow(row);
 	txn.commit();
 	return true;
-}
-
-bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
-{
-	auto cmdText = commandText.to_string();
-	auto cmdParts = Utils::Strings::split(cmdText, ' ');
-	assert(!cmdParts.empty());
-
-	// get command name and pop the first element from the vector
-	auto commandName = cmdParts.at(0);
-	cmdParts.erase(cmdParts.begin());
-
-	if (!this->_commandHandlers.contains(commandName))
-	{
-		return false;
-	}
-	Utils::CallbackValuesType args;
-	args.push_back(player);
-	for (auto& part : cmdParts)
-	{
-		if (Utils::Strings::isNumber<int>(part))
-		{
-			args.push_back(stoi(part));
-		}
-		else if (Utils::Strings::isNumber<double>(part))
-		{
-			args.push_back(stod(part));
-		}
-		else
-		{
-			args.push_back(part);
-		}
-	}
-	try
-	{
-		this->callCommandHandler(commandName, args);
-	}
-	catch (const std::bad_variant_access& e)
-	{
-		spdlog::debug(e.what());
-		Utils::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
-	}
-	catch (const std::invalid_argument& e)
-	{
-		spdlog::debug(e.what());
-		Utils::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
-	}
-	catch (const std::exception& e)
-	{
-		spdlog::debug("Failed to invoke command: {}", e.what());
-		Utils::getPlayerExt(player)->sendErrorMessage(_("Failed to invoke command!", player));
-	}
-	return true;
-}
-
-void CoreManager::callCommandHandler(const std::string& cmdName, Utils::CallbackValuesType args)
-{
-	(*this->_commandHandlers[cmdName])(args);
 }
 
 void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
@@ -240,6 +190,11 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 		return true;
 	if (pData->getTempData(PlayerVars::CURRENT_MODE))
 	{
+		queryExtension<IPlayerClassData>(player)->setSpawnInfo(PlayerClass(0,
+			TEAM_NONE,
+			Vector3(0, 0, 0),
+			0.0,
+			WeaponSlots {}));
 		player.spawn();
 		return true;
 	}
@@ -263,10 +218,10 @@ void CoreManager::onPlayerLoggedIn(IPlayer& player)
 	player.setSpectating(true);
 	player.setSpectating(false);
 
-	Vector4 classSelectionPoint = consts::CLASS_SELECTION_POINTS[random() % consts::CLASS_SELECTION_POINTS.size()];
+	Vector4 classSelectionPoint = CLASS_SELECTION_POINTS[random() % CLASS_SELECTION_POINTS.size()];
 	player.setPosition(Vector3(classSelectionPoint));
 
-	auto playerExt = Utils::getPlayerExt(player);
+	auto playerExt = Player::getPlayerExt(player);
 	playerExt->setFacingAngle(classSelectionPoint.w);
 	player.setCameraLookAt(Vector3(classSelectionPoint), PlayerCameraCutType_Cut);
 	auto angleRad = Utils::deg2Rad(classSelectionPoint.w);
@@ -281,7 +236,7 @@ bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 	auto pData = this->getPlayerData(player);
 	if (!pData->getTempData(PlayerVars::IS_LOGGED_IN))
 	{
-		Utils::getPlayerExt(player)->sendErrorMessage(_("You are not logged in yet!", player));
+		Player::getPlayerExt(player)->sendErrorMessage(_("You are not logged in yet!", player));
 		return false;
 	}
 	if (pData->getTempData(PlayerVars::SKIN_SELECTION_MODE))
@@ -336,7 +291,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	}
 	default:
 	{
-		Utils::getPlayerExt(player)->sendErrorMessage(_("Mode is not implemented yet!", player));
+		Player::getPlayerExt(player)->sendErrorMessage(_("Mode is not implemented yet!", player));
 		this->showModeSelectionDialog(player);
 		break;
 	}
@@ -359,5 +314,10 @@ void CoreManager::removePlayerFromModes(IPlayer& player)
 				return false;
 			});
 	}
+}
+
+std::shared_ptr<Commands::CommandManager> CoreManager::getCommandManager()
+{
+	return _commandManager;
 }
 }

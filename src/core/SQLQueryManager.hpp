@@ -1,16 +1,11 @@
 #pragma once
 
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <optional>
-#include <string>
-#include <unordered_map>
+#include "utils/Singleton.hpp"
 
 #include <cmrc/cmrc.hpp>
 
-#include "utils/Singleton.hpp"
+#include <optional>
+#include <unordered_map>
 
 CMRC_DECLARE(oasis);
 

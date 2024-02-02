@@ -1,7 +1,7 @@
 #include "PlayerExtension.hpp"
-#include "../utils/LocaleUtils.hpp"
+#include "../utils/Localization.hpp"
 
-namespace Core
+namespace Core::Player
 {
 OasisPlayerExt::OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player)
 	: _player(player)

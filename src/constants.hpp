@@ -1,14 +1,5 @@
 #pragma once
 
-#include <regex>
-#include <string>
-#include <types.hpp>
-#include <sdk.hpp>
-#include <array>
-#include <unordered_map>
-
-#define OASIS_GM_UID 0xF09FC558499EF9D7
-
 #define ACCENT_MAIN 0xFF0000FF // SERVER COLOR
 #define ACCENT_SECONDARY 0xFFFFFFFF // SERVER COLOR
 #define ACCENT_MAIN_E "{FF0000}" // SERVER COLOR Embedded
@@ -18,60 +9,3 @@
 #define DIALOG_TABLIST_TITLE_COLOR ACCENT_MAIN_E // Embedded
 #define DIALOG_HEADER DIALOG_HEADER_TITLE // embedded
 #define DIALOG_TABLIST DIALOG_TABLIST_TITLE_COLOR
-
-namespace consts
-{
-inline const auto RANDOM_SPAWN_POINTS
-	= std::to_array({ Vector3(1958.3783f, 1343.1572f, 15.3746f),
-		Vector3(2199.6531f, 1393.3678f, 10.8203f),
-		Vector3(2483.5977, 1222.0825, 10.8203),
-		Vector3(2637.2712, 1129.2743, 11.1797),
-		Vector3(2000.0106, 1521.1111, 17.0625),
-		Vector3(2024.8190, 1917.9425, 12.3386),
-		Vector3(2261.9048, 2035.9547, 10.8203),
-		Vector3(2262.0986, 2398.6572, 10.8203),
-		Vector3(2244.2566, 2523.7280, 10.8203),
-		Vector3(2335.3228, 2786.4478, 10.8203),
-		Vector3(2150.0186, 2734.2297, 11.1763),
-		Vector3(2158.0811, 2797.5488, 10.8203),
-		Vector3(1969.8301, 2722.8564, 10.8203),
-		Vector3(1652.0555, 2709.4072, 10.8265),
-		Vector3(1564.0052, 2756.9463, 10.8203),
-		Vector3(1271.5452, 2554.0227, 10.8203),
-		Vector3(1441.5894, 2567.9099, 10.8203),
-		Vector3(1480.6473, 2213.5718, 11.0234),
-		Vector3(1400.5906, 2225.6960, 11.0234),
-		Vector3(1598.8419, 2221.5676, 11.0625),
-		Vector3(1318.7759, 1251.3580, 10.8203),
-		Vector3(1558.0731, 1007.8292, 10.8125),
-		// Vector3(-857.0551, 1536.6832, 22.5870), // Out of Town Spawns
-		// Vector3(817.3494, 856.5039, 12.7891),
-		// Vector3(116.9315, 1110.1823, 13.6094),
-		// Vector3(-18.8529, 1176.0159, 19.5634),
-		// Vector3(-315.0575, 1774.0636, 43.6406),
-		Vector3(1705.2347, 1025.6808, 10.8203) });
-
-inline static const auto CLASS_SELECTION_POINTS = std::to_array({
-	Vector4(1565.4669, -1359.0862, 330.0576, 260.6601), // LS Maze Bank
-	Vector4(-1543.5278, 698.5956, 139.2734, 227.3011), // SF Bridge
-	Vector4(2183.6245, 1285.7245, 43.0771, 90.4277) // LV Sphinx
-});
-
-inline const auto LANGUAGES = std::to_array<std::string>({ "English",
-	"Portuguese",
-	"Russian" });
-
-inline const std::unordered_map<unsigned int, std::string> LANGUAGE_CODE_NAME = {
-	{ 0, "en" },
-	{ 1, "pt" },
-	{ 2, "ru" }
-};
-
-inline const std::unordered_map<std::string, std::string> LANGUAGE_CHARSETS = {
-	{ "en", "ASCII" },
-	{ "pt", "ASCII" },
-	{ "ru", "CP1251" }
-};
-
-inline const std::regex EMAIL_REGEX("(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?:(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
-}

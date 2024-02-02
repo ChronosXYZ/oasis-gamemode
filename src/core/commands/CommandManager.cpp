@@ -1,0 +1,79 @@
+#include "CommandManager.hpp"
+#include "../utils/Strings.hpp"
+#include "../player/PlayerExtension.hpp"
+
+#include <spdlog/spdlog.h>
+#include <player.hpp>
+
+namespace Core::Commands
+{
+
+CommandManager::CommandManager(IPlayerPool* playerPool)
+	: _playerPool(playerPool)
+{
+	_playerPool->getPlayerTextDispatcher().addEventHandler(this);
+}
+
+CommandManager::~CommandManager()
+{
+	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
+}
+
+bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText)
+{
+	auto cmdText = commandText.to_string();
+	auto cmdParts = Utils::Strings::split(cmdText, ' ');
+	assert(!cmdParts.empty());
+
+	// get command name and pop the first element from the vector
+	auto commandName = cmdParts.at(0);
+	cmdParts.erase(cmdParts.begin());
+
+	if (!this->_commandHandlers.contains(commandName))
+	{
+		return false;
+	}
+	CommandCallbackValues args;
+	args.push_back(player);
+	for (auto& part : cmdParts)
+	{
+		if (Utils::Strings::isNumber<int>(part))
+		{
+			args.push_back(stoi(part));
+		}
+		else if (Utils::Strings::isNumber<double>(part))
+		{
+			args.push_back(stod(part));
+		}
+		else
+		{
+			args.push_back(part);
+		}
+	}
+	try
+	{
+		this->callCommandHandler(commandName, args);
+	}
+	catch (const std::bad_variant_access& e)
+	{
+		spdlog::debug(e.what());
+		Player::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
+	}
+	catch (const std::invalid_argument& e)
+	{
+		spdlog::debug(e.what());
+		Player::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
+	}
+	catch (const std::exception& e)
+	{
+		spdlog::debug("Failed to invoke command: {}", e.what());
+		Player::getPlayerExt(player)->sendErrorMessage(_("Failed to invoke command!", player));
+	}
+	return true;
+}
+
+void CommandManager::callCommandHandler(const std::string& cmdName, CommandCallbackValues args)
+{
+	(*this->_commandHandlers[cmdName])(args);
+}
+}

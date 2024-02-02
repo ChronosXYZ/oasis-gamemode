@@ -1,5 +1,10 @@
 #pragma once
 
+#include "AdminData.hpp"
+#include "BanData.hpp"
+#include "../utils/PgTimestamp.hpp"
+#include "../utils/Localization.hpp"
+
 #include <date/date.h>
 #include <memory>
 #include <optional>
@@ -7,11 +12,6 @@
 #include <pqxx/pqxx>
 #include <string_view>
 #include <variant>
-
-#include "AdminData.hpp"
-#include "BanData.hpp"
-#include "../utils/PgTimestamp.hpp"
-#include "../../constants.hpp"
 
 namespace Core
 {
@@ -21,7 +21,7 @@ struct PlayerModel
 	unsigned long userId;
 	std::string name;
 	std::string passwordHash;
-	std::string language = consts::LANGUAGE_CODE_NAME.at(0);
+	std::string language = Localization::LANGUAGE_CODE_NAMES.at(0);
 	std::string email;
 	std::string lastIP;
 	unsigned short lastSkinId;
@@ -85,5 +85,4 @@ struct PlayerModel
 		return {};
 	}
 };
-
 }

@@ -1,40 +1,26 @@
 #pragma once
 
-#include <concepts>
-#include <functional>
-#include <memory>
-#include <map>
-#include <exception>
-#include <stdexcept>
-#include <variant>
-#include <string>
-#include <set>
+#include "DialogManager.hpp"
+#include "auth/AuthHandler.hpp"
+#include "commands/CommandManager.hpp"
+#include "player/PlayerModel.hpp"
+#include "../modes/Modes.hpp"
+#include "../modes/freeroam/Freeroam.hpp"
 
-#include <component.hpp>
-#include <player.hpp>
-#include <spdlog/spdlog.h>
-#include <pqxx/pqxx>
-#include <sdk.hpp>
 #include <Server/Components/Classes/classes.hpp>
 
-#include "PlayerVars.hpp"
-#include "player/PlayerExtension.hpp"
-#include "player/PlayerExtension.hpp"
-#include "player/PlayerModel.hpp"
-#include "DialogManager.hpp"
-#include "SQLQueryManager.hpp"
-#include "auth/AuthHandler.hpp"
-#include "utils/Common.hpp"
-#include "utils/Strings.hpp"
-#include "utils/QueryNames.hpp"
-
-#include "../modes/freeroam/Freeroam.hpp"
-#include "../modes/Constants.hpp"
+#include <memory>
+#include <player.hpp>
 
 namespace Core
 {
+inline const auto CLASS_SELECTION_POINTS = std::to_array({
+	Vector4(1565.4669, -1359.0862, 330.0576, 260.6601), // LS Maze Bank
+	Vector4(-1543.5278, 698.5956, 139.2734, 227.3011), // SF Bridge
+	Vector4(2183.6245, 1285.7245, 43.0771, 90.4277) // LV Sphinx
+});
+
 class CoreManager : public PlayerConnectEventHandler,
-					public PlayerTextEventHandler,
 					public std::enable_shared_from_this<CoreManager>,
 					public ClassEventHandler,
 					public PlayerSpawnEventHandler
@@ -47,20 +33,14 @@ public:
 
 	std::shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
 	std::shared_ptr<DialogManager> getDialogManager();
+	std::shared_ptr<Commands::CommandManager> getCommandManager();
 	std::shared_ptr<pqxx::connection> getDBConnection();
 
-	template <typename F>
-		requires Utils::callback_function<F, std::reference_wrapper<IPlayer>, double, int, std::string>
-	void addCommand(std::string name, F handler)
-	{
-		this->_commandHandlers["/" + name] = std::unique_ptr<Utils::CommandCallback>(new Utils::CommandCallback(handler));
-	};
 	bool refreshPlayerData(IPlayer& player);
 	void selectMode(IPlayer& player, Modes::Mode mode);
 
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
-	bool onPlayerCommandText(IPlayer& player, StringView commandText) override;
 	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 	bool onPlayerRequestSpawn(IPlayer& player) override;
 
@@ -73,7 +53,6 @@ private:
 
 	void initHandlers();
 	void initSkinSelection();
-	void callCommandHandler(const std::string& cmdName, Utils::CallbackValuesType args);
 	void savePlayer(IPlayer& player);
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
@@ -84,6 +63,7 @@ private:
 	ICore* const _core = nullptr;
 	IClassesComponent* const _classesComponent;
 
+	std::shared_ptr<Commands::CommandManager> _commandManager;
 	std::shared_ptr<DialogManager> _dialogManager;
 	std::shared_ptr<pqxx::connection> _dbConnection;
 	std::map<unsigned int, std::shared_ptr<PlayerModel>> _playerData;
@@ -98,7 +78,5 @@ private:
 	// Handlers
 	std::unique_ptr<Auth::AuthHandler> _authHandler;
 	std::unique_ptr<Modes::Freeroam::FreeroamHandler> _freeroam;
-
-	std::unordered_map<std::string, std::unique_ptr<Utils::CommandCallback>> _commandHandlers;
 };
 }

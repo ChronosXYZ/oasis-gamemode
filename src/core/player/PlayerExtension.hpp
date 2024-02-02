@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PlayerModel.hpp"
+
 #include <fmt/core.h>
 #include <player.hpp>
 #include <component.hpp>
@@ -10,8 +11,9 @@
 #include <chrono>
 
 #define DELAYED_KICK_INTERVAL_MS 500
+#define OASIS_PLAYER_EXT_UID 0xBE727855C7D51E32
 
-namespace Core
+namespace Core::Player
 {
 class OasisPlayerExt : public IExtension
 {
@@ -20,7 +22,7 @@ private:
 	IPlayer& _player;
 
 public:
-	PROVIDE_EXT_UID(0xBE727855C7D51E32)
+	PROVIDE_EXT_UID(OASIS_PLAYER_EXT_UID)
 
 	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player);
 
@@ -34,5 +36,10 @@ public:
 
 	void freeExtension() override;
 	void reset() override;
+};
+
+inline static OasisPlayerExt* getPlayerExt(IPlayer& player)
+{
+	return queryExtension<OasisPlayerExt>(player);
 };
 }

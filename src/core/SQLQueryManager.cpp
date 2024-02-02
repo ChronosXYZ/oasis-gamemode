@@ -1,5 +1,7 @@
 #include "SQLQueryManager.hpp"
 
+#include <cmrc/cmrc.hpp>
+
 namespace Core
 {
 SQLQueryManager::SQLQueryManager()

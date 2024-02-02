@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-31 15:21+0000\n"
+"POT-Creation-Date: 2024-02-02 21:57+0000\n"
 "PO-Revision-Date: 2024-01-28 13:50+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -18,12 +18,12 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/core/auth/AuthHandler.cpp:33
+#: src/core/auth/AuthHandler.cpp:41
 #, c-format
 msgid "Registration"
 msgstr "Регистрация"
 
-#: src/core/auth/AuthHandler.cpp:34
+#: src/core/auth/AuthHandler.cpp:42
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -39,20 +39,20 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:42 src/core/auth/AuthHandler.cpp:228
+#: src/core/auth/AuthHandler.cpp:50 src/core/auth/AuthHandler.cpp:233
 msgid "Enter"
 msgstr "Ввести"
 
-#: src/core/auth/AuthHandler.cpp:43 src/core/auth/AuthHandler.cpp:86
+#: src/core/auth/AuthHandler.cpp:51 src/core/auth/AuthHandler.cpp:94
 msgid "Quit"
 msgstr "Выйти"
 
-#: src/core/auth/AuthHandler.cpp:72 src/core/auth/AuthHandler.cpp:85
+#: src/core/auth/AuthHandler.cpp:80 src/core/auth/AuthHandler.cpp:93
 #, c-format
 msgid "Login"
 msgstr "Войти"
 
-#: src/core/auth/AuthHandler.cpp:73
+#: src/core/auth/AuthHandler.cpp:81
 #, c-format
 msgid ""
 "#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
@@ -64,7 +64,7 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:79
+#: src/core/auth/AuthHandler.cpp:87
 #, c-format
 msgid ""
 "#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
@@ -76,37 +76,38 @@ msgid ""
 "recovery at our discord server:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
-"#LIGHT_GRAY#Добро пожаловать снова на #RED#Oasis#WHITE# Freeroam, #DEEP_SAFFRON#%s\n"
+"#LIGHT_GRAY#Добро пожаловать снова на #RED#Oasis#WHITE# Freeroam, "
+"#DEEP_SAFFRON#%s\n"
 "\n"
 "#LIGHT_GRAY#- Ваше имя зарегистрировано в нашей базе данных\n"
 "#LIGHT_GRAY#- Войдите с помощью своего пароля\n"
 "\n"
-"#LIGHT_GRAY#- Если вы забыли пароль, запросите "
-"смену пароля на нашем Discord-сервере:\n"
+"#LIGHT_GRAY#- Если вы забыли пароль, запросите смену пароля на нашем Discord-"
+"сервере:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 
-#: src/core/auth/AuthHandler.cpp:113
+#: src/core/auth/AuthHandler.cpp:121
 msgid "You have been logged in!"
 msgstr "Вы вошли в аккаунт!"
 
-#: src/core/auth/AuthHandler.cpp:127
+#: src/core/auth/AuthHandler.cpp:135
 msgid "Too much login attempts!"
 msgstr "Слишком много попыток логина!"
 
-#: src/core/auth/AuthHandler.cpp:138
+#: src/core/auth/AuthHandler.cpp:146
 msgid "Password length must be between 6-48"
 msgstr "Пароль должен быть длиной от 6 до 48 символов"
 
-#: src/core/auth/AuthHandler.cpp:175
+#: src/core/auth/AuthHandler.cpp:180
 msgid "Something went wrong when trying to create user!"
 msgstr "Что-то пошло не так, пока мы создавали аккаунт!"
 
-#: src/core/auth/AuthHandler.cpp:221
+#: src/core/auth/AuthHandler.cpp:226
 #, c-format
 msgid "Enter your email"
 msgstr "Введите ваш email"
 
-#: src/core/auth/AuthHandler.cpp:222
+#: src/core/auth/AuthHandler.cpp:227
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -116,20 +117,20 @@ msgid ""
 "#WHITE#/verify#LIGHT_GRAY# later"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:229
+#: src/core/auth/AuthHandler.cpp:234
 msgid "Skip"
 msgstr "Пропустить"
 
-#: src/core/auth/AuthHandler.cpp:254
+#: src/core/auth/AuthHandler.cpp:259
 msgid "Invalid email!"
 msgstr "Неверный email!"
 
-#: src/core/auth/AuthHandler.cpp:301
+#: src/core/auth/AuthHandler.cpp:306
 #, c-format
 msgid "Registration info"
 msgstr "Информация о регистрации"
 
-#: src/core/auth/AuthHandler.cpp:302
+#: src/core/auth/AuthHandler.cpp:307
 #, c-format
 msgid ""
 "#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
@@ -144,40 +145,32 @@ msgid ""
 "password."
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:313
+#: src/core/auth/AuthHandler.cpp:318
 msgid "OK"
 msgstr "ОК"
 
-#: src/core/auth/AuthHandler.cpp:316
+#: src/core/auth/AuthHandler.cpp:321
 msgid "You have successfully registered!"
 msgstr "Вы успешно зарегистрировались"
 
-#: src/core/CoreManager.cpp:83
+#: src/core/CoreManager.cpp:90
 msgid "You have killed yourself!"
 msgstr "Вы убили себя!"
 
-#: src/core/CoreManager.cpp:89
+#: src/core/CoreManager.cpp:96
 #, fuzzy
 msgid "Invalid skin ID!"
 msgstr "Неверный ID скина!"
 
-#: src/core/CoreManager.cpp:160 src/core/CoreManager.cpp:165
-msgid "Invalid command parameters!"
-msgstr "Неверные параметры команды!"
-
-#: src/core/CoreManager.cpp:170
-msgid "Failed to invoke command!"
-msgstr "Невозможно вызвать команду!"
-
-#: src/core/CoreManager.cpp:279
+#: src/core/CoreManager.cpp:234
 msgid "You are not logged in yet!"
 msgstr "Вы еще не вошли в аккаунт!"
 
-#: src/core/CoreManager.cpp:295
+#: src/core/CoreManager.cpp:250
 msgid "Modes"
 msgstr "Режимы"
 
-#: src/core/CoreManager.cpp:296
+#: src/core/CoreManager.cpp:251
 #, c-format
 msgid ""
 "Mode\tCommand\tPlayers\n"
@@ -194,13 +187,22 @@ msgstr ""
 "Дерби\t/derby\t%d\n"
 "Полицейские и грабители\t/cnr\t%d"
 
-#: src/core/CoreManager.cpp:308
+#: src/core/CoreManager.cpp:263
 msgid "Select"
 msgstr "Выбрать"
 
-#: src/core/CoreManager.cpp:333
+#: src/core/CoreManager.cpp:289
 msgid "Mode is not implemented yet!"
 msgstr "Режим еще не реализован!"
+
+#: src/core/commands/CommandManager.cpp:60
+#: src/core/commands/CommandManager.cpp:65
+msgid "Invalid command parameters!"
+msgstr "Неверные параметры команды!"
+
+#: src/core/commands/CommandManager.cpp:70
+msgid "Failed to invoke command!"
+msgstr "Невозможно вызвать команду!"
 
 #: src/core/player/PlayerExtension.cpp:46
 msgid "#RED#[ERROR]#WHITE#"
@@ -209,3 +211,18 @@ msgstr "#RED#[ОШИБКА]#WHITE#"
 #: src/core/player/PlayerExtension.cpp:52
 msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr "#BRIGHT_BLUE#[ИНФО]#WHITE#"
+
+#: src/modes/freeroam/Freeroam.cpp:60
+#, fuzzy
+msgid "Invalid car model ID!"
+msgstr "Неверный ID скина!"
+
+#: src/modes/freeroam/Freeroam.cpp:65
+#, fuzzy
+msgid "Invalid color ID!"
+msgstr "Неверный ID скина!"
+
+#: src/modes/freeroam/Freeroam.cpp:72
+#, fuzzy
+msgid "You have sucessfully spawned the vehicle!"
+msgstr "Вы успешно зарегистрировались"

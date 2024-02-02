@@ -1,28 +1,8 @@
 #pragma once
 
-#include <memory>
-#include <iostream>
-#include <string>
-#include <format>
-#include <exception>
-#include <string>
-#include <regex>
-#include <chrono>
-
-#include <sdk.hpp>
-#include <player.hpp>
 #include <Server/Components/Classes/classes.hpp>
-#include <spdlog/spdlog.h>
-#include <network.hpp>
-#include <fmt/printf.h>
-#include <spdlog/spdlog.h>
-
-#include "../../constants.hpp"
-#include "../utils/LocaleUtils.hpp"
-#include "../utils/Hash.hpp"
-#include "../SQLQueryManager.hpp"
-#include "../utils/QueryNames.hpp"
-#include "PlayerVars.hpp"
+#include <player.hpp>
+#include <regex>
 
 namespace Core
 {
@@ -31,6 +11,8 @@ class CoreManager;
 
 namespace Core::Auth
 {
+inline const std::regex EMAIL_REGEX("(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?:(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
+
 class AuthHandler : public PlayerConnectEventHandler, public ClassEventHandler
 {
 public:

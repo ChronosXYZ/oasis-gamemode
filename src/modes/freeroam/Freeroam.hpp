@@ -1,12 +1,12 @@
 #pragma once
 
-#include <memory>
-#include <functional>
-
+#include <types.hpp>
+#include <Server/Components/Vehicles/vehicle_components.hpp>
 #include <player.hpp>
-#include <string>
 
-#include "../../constants.hpp"
+#include <memory>
+#include <string>
+#include <functional>
 
 namespace Core
 {
@@ -15,14 +15,21 @@ class CoreManager;
 
 namespace Modes::Freeroam
 {
-const inline static std::string MODE_NAME = "freeroam";
-const inline static unsigned int VIRTUAL_WORLD_ID = 0;
+inline const std::string MODE_NAME = "freeroam";
+inline const unsigned int VIRTUAL_WORLD_ID = 0;
 
-class FreeroamHandler : public PlayerSpawnEventHandler, public PlayerDamageEventHandler
+inline const auto SPAWN_LOCATION = Vector3(2037.4828, -1193.1844, 22.7924);
+inline const auto SPAWN_ANGLE = 99.7903;
+
+class FreeroamHandler : public PlayerSpawnEventHandler,
+						public PlayerDamageEventHandler
 {
 	FreeroamHandler(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
+
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
+	IVehiclesComponent* _vehiclesComponent;
+
 	void initCommands();
 	void setRandomSpawnInfo(IPlayer& player);
 

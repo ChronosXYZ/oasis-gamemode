@@ -1,5 +1,17 @@
+
 #include "AuthHandler.hpp"
+#include "PlayerVars.hpp"
 #include "../CoreManager.hpp"
+#include "../PlayerVars.hpp"
+#include "../utils/Localization.hpp"
+#include "../SQLQueryManager.hpp"
+#include "../utils/QueryNames.hpp"
+#include "../utils/Argon2idHash.hpp"
+#include "../player/PlayerExtension.hpp"
+#include "../../constants.hpp"
+
+#include <fmt/printf.h>
+#include <spdlog/spdlog.h>
 
 namespace Core::Auth
 {
@@ -102,7 +114,7 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 {
 	auto playerData = this->_coreManager.lock()->getPlayerData(player);
-	auto playerExt = Utils::getPlayerExt(player);
+	auto playerExt = Player::getPlayerExt(player);
 	if (password.length() > 5)
 	{
 		if (Utils::argon2VerifyEncodedHash(playerData->passwordHash, password))
@@ -132,7 +144,7 @@ void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
 {
 	if (password.length() <= 5 || password.length() > 48)
 	{
-		Utils::getPlayerExt(player)->sendErrorMessage(_("Password length must be between 6-48", player));
+		Player::getPlayerExt(player)->sendErrorMessage(_("Password length must be between 6-48", player));
 		this->showRegistrationDialog(player);
 		return;
 	}
@@ -145,7 +157,7 @@ void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
 
 void AuthHandler::onRegistrationSubmit(IPlayer& player)
 {
-	auto playerExt = Utils::getPlayerExt(player);
+	auto playerExt = Player::getPlayerExt(player);
 	auto db = this->_coreManager.lock()->getDBConnection();
 
 	pqxx::work txn(*db);
@@ -178,7 +190,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 void AuthHandler::showLanguageDialog(IPlayer& player)
 {
 	std::string languagesList;
-	for (auto lang : consts::LANGUAGES)
+	for (auto lang : Localization::LANGUAGES)
 	{
 		languagesList.append(fmt::sprintf("%s\n", lang));
 	}
@@ -195,7 +207,7 @@ void AuthHandler::showLanguageDialog(IPlayer& player)
 			case DialogResponse_Left:
 			{
 				auto pData = this->_coreManager.lock()->getPlayerData(player);
-				pData->language = consts::LANGUAGE_CODE_NAME.at(listItem);
+				pData->language = Localization::LANGUAGE_CODE_NAMES.at(listItem);
 				showRegistrationDialog(player);
 				break;
 			}
@@ -242,10 +254,10 @@ void AuthHandler::showEmailDialog(IPlayer& player)
 void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
 {
 	std::smatch m;
-	if (!std::regex_match(email, m, consts::EMAIL_REGEX))
+	if (!std::regex_match(email, m, EMAIL_REGEX))
 	{
 		this->showEmailDialog(player);
-		Utils::getPlayerExt(player)->sendErrorMessage(_("Invalid email!", player));
+		Player::getPlayerExt(player)->sendErrorMessage(_("Invalid email!", player));
 		return;
 	}
 
@@ -276,12 +288,12 @@ bool AuthHandler::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 	}
 
 	player.setSpectating(true);
-	player.interpolateCameraPosition(Vector3(1081.2651, -1958.5565, 68.9221),
+	player.interpolateCameraPosition(Vector3(1093.0, -2036.0, 90.0),
 		Vector3(21.1088, -1806.9847, 79.4125),
 		15000,
-		PlayerCameraCutType::PlayerCameraCutType_Move);
-	player.interpolateCameraLookAt(Vector3(1080.3202, -1958.2172, 68.7421),
-		Vector3(22.0785, -1807.2444, 79.1674),
+		PlayerCameraCutType_Move);
+	player.interpolateCameraLookAt(Vector3(384.0, -1557.0, 20.0),
+		Vector3(455.1533, -1868.1967, 31.9840),
 		15000,
 		PlayerCameraCutType_Move);
 	return true;
@@ -307,7 +319,7 @@ void AuthHandler::showRegistrationInfoDialog(IPlayer& player)
 		_("OK", player), "",
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
-			Utils::getPlayerExt(player)->sendInfoMessage(_("You have successfully registered!", player));
+			Player::getPlayerExt(player)->sendInfoMessage(_("You have successfully registered!", player));
 			this->_coreManager.lock()->onPlayerLoggedIn(player);
 		});
 }

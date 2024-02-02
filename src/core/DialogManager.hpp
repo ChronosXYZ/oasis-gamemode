@@ -1,9 +1,9 @@
 #pragma once
 
+#include <Server/Components/Dialogs/dialogs.hpp>
+
 #include <functional>
 #include <map>
-#include <sdk.hpp>
-#include <Server/Components/Dialogs/dialogs.hpp>
 
 #define MAGIC_DIALOG_ID 1337
 
