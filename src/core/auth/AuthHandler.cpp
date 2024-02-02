@@ -1,11 +1,8 @@
 #include "AuthHandler.hpp"
 #include "../CoreManager.hpp"
 
-namespace Core
+namespace Core::Auth
 {
-const std::string LOGIN_ATTEMPTS_KEY = "login_attempts";
-const inline static std::string IS_REQUEST_CLASS_ALREADY_CALLED = "isRequestClassAlreadyCalled";
-const inline static std::string PLAIN_TEXT_PASSWORD = "plainTextPassword";
 
 AuthHandler::AuthHandler(IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager)
 	: _coreManager(coreManager)
@@ -65,7 +62,7 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 	if (wrongPass)
 	{
 		auto data = this->_coreManager.lock()->getPlayerData(player);
-		loginAttempts = std::get<int>(data->getTempData(LOGIN_ATTEMPTS_KEY).value());
+		loginAttempts = std::get<int>(data->getTempData(PlayerVars::LOGIN_ATTEMPTS_KEY).value());
 	}
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
@@ -113,15 +110,15 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 			playerExt->sendInfoMessage(_("You have been logged in!", player));
 			playerData->lastLoginAt = Utils::SQL::get_current_timestamp();
 			playerData->lastIP = playerExt->getIP();
-			playerData->deleteTempData(LOGIN_ATTEMPTS_KEY);
+			playerData->deleteTempData(PlayerVars::LOGIN_ATTEMPTS_KEY);
 			this->_coreManager.lock()->onPlayerLoggedIn(player);
-			playerData->deleteTempData(IS_REQUEST_CLASS_ALREADY_CALLED);
+			playerData->deleteTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED);
 			return;
 		}
 	}
 
-	auto loginAttempts = std::get<int>(playerData->getTempData(LOGIN_ATTEMPTS_KEY).value());
-	playerData->setTempData(LOGIN_ATTEMPTS_KEY, ++loginAttempts);
+	auto loginAttempts = std::get<int>(playerData->getTempData(PlayerVars::LOGIN_ATTEMPTS_KEY).value());
+	playerData->setTempData(PlayerVars::LOGIN_ATTEMPTS_KEY, ++loginAttempts);
 	if (loginAttempts > 3)
 	{
 		playerExt->sendErrorMessage(_("Too much login attempts!", player));
@@ -143,7 +140,7 @@ void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
 	auto pData = this->_coreManager.lock()->getPlayerData(player);
 	pData->passwordHash = hashedPassword;
 	this->showEmailDialog(player);
-	pData->setTempData(PLAIN_TEXT_PASSWORD, password);
+	pData->setTempData(PlayerVars::PLAIN_TEXT_PASSWORD, password);
 }
 
 void AuthHandler::onRegistrationSubmit(IPlayer& player)
@@ -174,7 +171,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 		return;
 	}
 	this->_coreManager.lock()->refreshPlayerData(player);
-	pData->deleteTempData(IS_REQUEST_CLASS_ALREADY_CALLED);
+	pData->deleteTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED);
 	this->showRegistrationInfoDialog(player);
 }
 
@@ -260,10 +257,10 @@ void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
 bool AuthHandler::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 {
 	auto pData = this->_coreManager.lock()->getPlayerData(player);
-	if (pData->getTempData(Core::IS_LOGGED_IN) || pData->getTempData(Core::CURRENT_MODE))
+	if (pData->getTempData(Core::PlayerVars::IS_LOGGED_IN) || pData->getTempData(Core::PlayerVars::CURRENT_MODE))
 		return true;
 
-	if (!pData->getTempData(IS_REQUEST_CLASS_ALREADY_CALLED))
+	if (!pData->getTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED))
 	{
 		if (!this->_coreManager.lock()->refreshPlayerData(player))
 		{
@@ -272,10 +269,10 @@ bool AuthHandler::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 		else
 		{
 			auto data = this->_coreManager.lock()->getPlayerData(player);
-			data->setTempData(LOGIN_ATTEMPTS_KEY, 0);
+			data->setTempData(PlayerVars::LOGIN_ATTEMPTS_KEY, 0);
 			showLoginDialog(player, false);
 		}
-		pData->setTempData(IS_REQUEST_CLASS_ALREADY_CALLED, true);
+		pData->setTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED, true);
 	}
 
 	player.setSpectating(true);
@@ -305,7 +302,7 @@ void AuthHandler::showRegistrationInfoDialog(IPlayer& player)
 						 player),
 			pData->name,
 			pData->userId,
-			std::get<string>(*pData->getTempData(PLAIN_TEXT_PASSWORD)),
+			std::get<std::string>(*pData->getTempData(PlayerVars::PLAIN_TEXT_PASSWORD)),
 			std::format("{:%Y-%m-%d}", pData->registrationDate)),
 		_("OK", player), "",
 		[&](DialogResponse resp, int listItem, StringView inputText)

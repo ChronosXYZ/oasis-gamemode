@@ -22,7 +22,7 @@ private:
 	IPlayerPool* playerPool = nullptr;
 	bool _savedPlayerData = false;
 
-	shared_ptr<Core::CoreManager> coreManager;
+	std::shared_ptr<Core::CoreManager> coreManager;
 
 public:
 	PROVIDE_UID(OASIS_GM_UID);

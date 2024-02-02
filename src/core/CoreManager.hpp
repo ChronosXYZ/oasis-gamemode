@@ -17,6 +17,7 @@
 #include <sdk.hpp>
 #include <Server/Components/Classes/classes.hpp>
 
+#include "PlayerVars.hpp"
 #include "player/PlayerExtension.hpp"
 #include "player/PlayerExtension.hpp"
 #include "player/PlayerModel.hpp"
@@ -32,10 +33,6 @@
 
 namespace Core
 {
-const inline static std::string SKIN_SELECTION = "skinSelection";
-const inline static std::string CURRENT_MODE = "currentMode";
-const inline static std::string IS_LOGGED_IN = "isLoggedIn";
-
 class CoreManager : public PlayerConnectEventHandler,
 					public PlayerTextEventHandler,
 					public std::enable_shared_from_this<CoreManager>,
@@ -45,15 +42,15 @@ class CoreManager : public PlayerConnectEventHandler,
 public:
 	IComponentList* const components;
 
-	static shared_ptr<CoreManager> create(IComponentList* components, ICore* core, IPlayerPool* playerPool);
+	static std::shared_ptr<CoreManager> create(IComponentList* components, ICore* core, IPlayerPool* playerPool);
 	~CoreManager();
 
-	shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
-	shared_ptr<DialogManager> getDialogManager();
-	shared_ptr<pqxx::connection> getDBConnection();
+	std::shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
+	std::shared_ptr<DialogManager> getDialogManager();
+	std::shared_ptr<pqxx::connection> getDBConnection();
 
 	template <typename F>
-		requires Utils::callback_function<F, reference_wrapper<IPlayer>, double, int, std::string>
+		requires Utils::callback_function<F, std::reference_wrapper<IPlayer>, double, int, std::string>
 	void addCommand(std::string name, F handler)
 	{
 		this->_commandHandlers["/" + name] = std::unique_ptr<Utils::CommandCallback>(new Utils::CommandCallback(handler));
@@ -76,7 +73,7 @@ private:
 
 	void initHandlers();
 	void initSkinSelection();
-	void callCommandHandler(string cmdName, Utils::CallbackValuesType args);
+	void callCommandHandler(const std::string& cmdName, Utils::CallbackValuesType args);
 	void savePlayer(IPlayer& player);
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
@@ -87,9 +84,9 @@ private:
 	ICore* const _core = nullptr;
 	IClassesComponent* const _classesComponent;
 
-	shared_ptr<DialogManager> _dialogManager;
-	shared_ptr<pqxx::connection> _dbConnection;
-	std::map<unsigned int, shared_ptr<PlayerModel>> _playerData;
+	std::shared_ptr<DialogManager> _dialogManager;
+	std::shared_ptr<pqxx::connection> _dbConnection;
+	std::map<unsigned int, std::shared_ptr<PlayerModel>> _playerData;
 	std::map<Modes::Mode, std::set<unsigned int>> _modePlayerCount {
 		{ Modes::Mode::Freeroam, {} },
 		{ Modes::Mode::Deathmatch, {} },
@@ -99,9 +96,9 @@ private:
 	};
 
 	// Handlers
-	unique_ptr<AuthHandler> _authHandler;
-	unique_ptr<Modes::Freeroam::FreeroamHandler> _freeroam;
+	std::unique_ptr<Auth::AuthHandler> _authHandler;
+	std::unique_ptr<Modes::Freeroam::FreeroamHandler> _freeroam;
 
-	map<string, unique_ptr<Utils::CommandCallback>> _commandHandlers;
+	std::unordered_map<std::string, std::unique_ptr<Utils::CommandCallback>> _commandHandlers;
 };
 }

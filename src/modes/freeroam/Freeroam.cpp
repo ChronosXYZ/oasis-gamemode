@@ -25,7 +25,7 @@ FreeroamHandler::~FreeroamHandler()
 void FreeroamHandler::onPlayerSpawn(IPlayer& player)
 {
 	auto pData = _coreManager.lock()->getPlayerData(player);
-	auto mode = static_cast<Mode>(std::get<int>(*pData->getTempData(Core::CURRENT_MODE)));
+	auto mode = static_cast<Mode>(std::get<int>(*pData->getTempData(Core::PlayerVars::CURRENT_MODE)));
 	if (mode != Mode::Freeroam)
 	{
 		return;
@@ -60,7 +60,7 @@ void FreeroamHandler::setRandomSpawnInfo(IPlayer& player)
 {
 	queryExtension<IPlayerClassData>(player)->setSpawnInfo(PlayerClass(this->_coreManager.lock()->getPlayerData(player)->lastSkinId,
 		TEAM_NONE,
-		consts::randomSpawnArray[random() % consts::randomSpawnArray.size()],
+		consts::RANDOM_SPAWN_POINTS[random() % consts::RANDOM_SPAWN_POINTS.size()],
 		0.0,
 		WeaponSlots {}));
 }

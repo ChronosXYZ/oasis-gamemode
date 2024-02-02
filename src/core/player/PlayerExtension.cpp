@@ -1,6 +1,5 @@
 #include "PlayerExtension.hpp"
 #include "../utils/LocaleUtils.hpp"
-#include <string_view>
 
 namespace Core
 {

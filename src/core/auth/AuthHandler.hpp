@@ -22,14 +22,19 @@
 #include "../utils/Hash.hpp"
 #include "../SQLQueryManager.hpp"
 #include "../utils/QueryNames.hpp"
+#include "PlayerVars.hpp"
 
 namespace Core
 {
 class CoreManager;
+}
+
+namespace Core::Auth
+{
 class AuthHandler : public PlayerConnectEventHandler, public ClassEventHandler
 {
 public:
-	AuthHandler(IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager);
+	AuthHandler(IPlayerPool* playerPool, std::weak_ptr<Core::CoreManager> coreManager);
 	~AuthHandler();
 
 	void onPlayerConnect(IPlayer& player) override;
@@ -38,7 +43,7 @@ public:
 private:
 	IPlayerPool* const _playerPool;
 	IClassesComponent* const _classesComponent;
-	std::weak_ptr<CoreManager> _coreManager;
+	std::weak_ptr<Core::CoreManager> _coreManager;
 
 	void showLanguageDialog(IPlayer& player);
 	void showRegistrationDialog(IPlayer& player);

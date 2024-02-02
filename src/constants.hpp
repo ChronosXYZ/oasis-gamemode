@@ -1,10 +1,7 @@
 #pragma once
 
-#include <fmt/core.h>
-#include <map>
 #include <regex>
 #include <string>
-#include <string_view>
 #include <types.hpp>
 #include <sdk.hpp>
 #include <array>
@@ -24,10 +21,8 @@
 
 namespace consts
 {
-const inline Colour RED_COLOR = Colour::FromRGBA(0xFF0000FF);
-const std::array<Vector3, 23>
-	randomSpawnArray {
-		Vector3(1958.3783f, 1343.1572f, 15.3746f),
+inline const auto RANDOM_SPAWN_POINTS
+	= std::to_array({ Vector3(1958.3783f, 1343.1572f, 15.3746f),
 		Vector3(2199.6531f, 1393.3678f, 10.8203f),
 		Vector3(2483.5977, 1222.0825, 10.8203),
 		Vector3(2637.2712, 1129.2743, 11.1797),
@@ -54,33 +49,29 @@ const std::array<Vector3, 23>
 		// Vector3(116.9315, 1110.1823, 13.6094),
 		// Vector3(-18.8529, 1176.0159, 19.5634),
 		// Vector3(-315.0575, 1774.0636, 43.6406),
-		Vector3(1705.2347, 1025.6808, 10.8203)
-	};
+		Vector3(1705.2347, 1025.6808, 10.8203) });
 
-const inline std::array<Vector4, 3> CLASS_SELECTION_POINTS {
+inline static const auto CLASS_SELECTION_POINTS = std::to_array({
 	Vector4(1565.4669, -1359.0862, 330.0576, 260.6601), // LS Maze Bank
 	Vector4(-1543.5278, 698.5956, 139.2734, 227.3011), // SF Bridge
 	Vector4(2183.6245, 1285.7245, 43.0771, 90.4277) // LV Sphinx
-};
+});
 
-const inline std::array<std::string_view, 3> LANGUAGES {
-	"English",
+inline const auto LANGUAGES = std::to_array<std::string>({ "English",
 	"Portuguese",
-	"Russian"
-};
+	"Russian" });
 
-static const std::map<unsigned int, std::string> LANGUAGE_CODE_NAME = {
+inline const std::unordered_map<unsigned int, std::string> LANGUAGE_CODE_NAME = {
 	{ 0, "en" },
 	{ 1, "pt" },
 	{ 2, "ru" }
 };
 
-static const std::map<std::string, std::string> LANGUAGE_CHARSETS = {
+inline const std::unordered_map<std::string, std::string> LANGUAGE_CHARSETS = {
 	{ "en", "ASCII" },
 	{ "pt", "ASCII" },
 	{ "ru", "CP1251" }
 };
 
-static const std::regex EMAIL_REGEX("(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?:(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
-
+inline const std::regex EMAIL_REGEX("(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?:(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
 }

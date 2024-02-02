@@ -1,9 +1,4 @@
 #include "CoreManager.hpp"
-#include "Server/Components/Classes/classes.hpp"
-#include "component.hpp"
-#include "player.hpp"
-#include "utils/Common.hpp"
-#include "values.hpp"
 
 namespace Core
 {
@@ -11,7 +6,7 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 	: components(components)
 	, _core(core)
 	, _playerPool(playerPool)
-	, _dialogManager(make_shared<DialogManager>(components))
+	, _dialogManager(std::make_shared<DialogManager>(components))
 	, _classesComponent(components->queryComponent<IClassesComponent>())
 {
 	this->initSkinSelection();
@@ -22,12 +17,12 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 
 	_classesComponent->getEventDispatcher().addEventHandler(this);
 
-	this->_dbConnection = make_shared<pqxx::connection>(getenv("DB_CONNECTION_STRING"));
+	this->_dbConnection = std::make_shared<pqxx::connection>(getenv("DB_CONNECTION_STRING"));
 }
 
-shared_ptr<CoreManager> CoreManager::create(IComponentList* components, ICore* core, IPlayerPool* playerPool)
+std::shared_ptr<CoreManager> CoreManager::create(IComponentList* components, ICore* core, IPlayerPool* playerPool)
 {
-	shared_ptr<CoreManager> pManager(new CoreManager(components, core, playerPool));
+	std::shared_ptr<CoreManager> pManager(new CoreManager(components, core, playerPool));
 	pManager->initHandlers();
 	return pManager;
 }
@@ -42,7 +37,7 @@ CoreManager::~CoreManager()
 	_classesComponent->getEventDispatcher().removeEventHandler(this);
 }
 
-shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
+std::shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
 {
 	auto ext = queryExtension<OasisPlayerExt>(player);
 	if (ext)
@@ -69,24 +64,24 @@ void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reaso
 	this->removePlayerFromModes(player);
 }
 
-shared_ptr<DialogManager> CoreManager::getDialogManager()
+std::shared_ptr<DialogManager> CoreManager::getDialogManager()
 {
 	return this->_dialogManager;
 }
 
 void CoreManager::initHandlers()
 {
-	_authHandler = make_unique<AuthHandler>(_playerPool, weak_from_this());
+	_authHandler = std::make_unique<Auth::AuthHandler>(_playerPool, weak_from_this());
 
 	_freeroam = Modes::Freeroam::FreeroamHandler::create(weak_from_this(), _playerPool);
 
 	// FIXME move this definition outta here
-	this->addCommand("kill", [](reference_wrapper<IPlayer> player)
+	this->addCommand("kill", [](std::reference_wrapper<IPlayer> player)
 		{
 			player.get().setHealth(0.0);
 			Utils::getPlayerExt(player.get())->sendInfoMessage(_("You have killed yourself!", player));
 		});
-	this->addCommand("skin", [&](reference_wrapper<IPlayer> player, int skinId)
+	this->addCommand("skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
 		{
 			if (skinId < 0 || skinId > 311)
 			{
@@ -100,7 +95,7 @@ void CoreManager::initHandlers()
 		});
 }
 
-shared_ptr<pqxx::connection> CoreManager::getDBConnection()
+std::shared_ptr<pqxx::connection> CoreManager::getDBConnection()
 {
 	return this->_dbConnection;
 }
@@ -168,7 +163,7 @@ bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
 		spdlog::debug(e.what());
 		Utils::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
 	}
-	catch (const exception& e)
+	catch (const std::exception& e)
 	{
 		spdlog::debug("Failed to invoke command: {}", e.what());
 		Utils::getPlayerExt(player)->sendErrorMessage(_("Failed to invoke command!", player));
@@ -176,14 +171,14 @@ bool CoreManager::onPlayerCommandText(IPlayer& player, StringView commandText)
 	return true;
 }
 
-void CoreManager::callCommandHandler(string cmdName, Utils::CallbackValuesType args)
+void CoreManager::callCommandHandler(const std::string& cmdName, Utils::CallbackValuesType args)
 {
 	(*this->_commandHandlers[cmdName])(args);
 }
 
-void CoreManager::savePlayer(shared_ptr<PlayerModel> data)
+void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 {
-	if (!data->getTempData(IS_LOGGED_IN))
+	if (!data->getTempData(PlayerVars::IS_LOGGED_IN))
 		return;
 
 	auto db = this->getDBConnection();
@@ -241,17 +236,17 @@ void CoreManager::initSkinSelection()
 bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 {
 	auto pData = this->getPlayerData(player);
-	if (!pData->getTempData(IS_LOGGED_IN))
+	if (!pData->getTempData(PlayerVars::IS_LOGGED_IN))
 		return true;
-	if (pData->getTempData(CURRENT_MODE))
+	if (pData->getTempData(PlayerVars::CURRENT_MODE))
 	{
 		player.spawn();
 		return true;
 	}
-	if (!pData->getTempData(SKIN_SELECTION))
+	if (!pData->getTempData(PlayerVars::SKIN_SELECTION_MODE))
 	{
 		// first player request class call
-		pData->setTempData(SKIN_SELECTION, true);
+		pData->setTempData(PlayerVars::SKIN_SELECTION_MODE, true);
 		player.setSkin(pData->lastSkinId);
 	}
 
@@ -261,7 +256,7 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 void CoreManager::onPlayerLoggedIn(IPlayer& player)
 {
 	auto pData = this->getPlayerData(player);
-	pData->setTempData(IS_LOGGED_IN, true);
+	pData->setTempData(PlayerVars::IS_LOGGED_IN, true);
 
 	// hack to get class selection buttons appear again
 	player.forceClassSelection();
@@ -284,14 +279,14 @@ void CoreManager::onPlayerLoggedIn(IPlayer& player)
 bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 {
 	auto pData = this->getPlayerData(player);
-	if (!pData->getTempData(Core::IS_LOGGED_IN))
+	if (!pData->getTempData(PlayerVars::IS_LOGGED_IN))
 	{
 		Utils::getPlayerExt(player)->sendErrorMessage(_("You are not logged in yet!", player));
 		return false;
 	}
-	if (pData->getTempData(Core::SKIN_SELECTION))
+	if (pData->getTempData(PlayerVars::SKIN_SELECTION_MODE))
 	{
-		pData->deleteTempData(Core::SKIN_SELECTION);
+		pData->deleteTempData(PlayerVars::SKIN_SELECTION_MODE);
 	}
 	pData->lastSkinId = player.getSkin();
 
@@ -331,7 +326,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	{
 	case Modes::Mode::Freeroam:
 	{
-		pData->setTempData(CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
+		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
 		player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
 		this->_modePlayerCount[mode].insert(player.getID());
 		this->_freeroam->onModeJoin(player);
@@ -351,7 +346,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 void CoreManager::removePlayerFromModes(IPlayer& player)
 {
 	auto pData = this->getPlayerData(player);
-	if (auto modeOpt = pData->getTempData(CURRENT_MODE))
+	if (auto modeOpt = pData->getTempData(PlayerVars::CURRENT_MODE))
 	{
 		auto mode = static_cast<Modes::Mode>(std::get<int>(*modeOpt));
 		std::erase_if(_modePlayerCount[mode], [&](const auto& x)

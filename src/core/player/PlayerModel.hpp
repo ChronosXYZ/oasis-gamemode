@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <pqxx/pqxx>
+#include <string_view>
 #include <variant>
 
 #include "AdminData.hpp"
@@ -12,25 +13,23 @@
 #include "../utils/PgTimestamp.hpp"
 #include "../../constants.hpp"
 
-using namespace std;
-
 namespace Core
 {
 typedef std::variant<int, float, std::string, bool> PrimitiveType;
 struct PlayerModel
 {
 	unsigned long userId;
-	string name;
-	string passwordHash;
-	string language = consts::LANGUAGE_CODE_NAME.at(0);
-	string email;
-	string lastIP;
+	std::string name;
+	std::string passwordHash;
+	std::string language = consts::LANGUAGE_CODE_NAME.at(0);
+	std::string email;
+	std::string lastIP;
 	unsigned short lastSkinId;
 	Utils::SQL::timestamp lastLoginAt;
 	Utils::SQL::timestamp registrationDate;
 
-	unique_ptr<Ban> ban;
-	unique_ptr<AdminData> adminData;
+	std::unique_ptr<Ban> ban;
+	std::unique_ptr<AdminData> adminData;
 	std::unordered_map<std::string, PrimitiveType> tempData;
 
 	PlayerModel() = default;
@@ -49,19 +48,19 @@ struct PlayerModel
 
 		if (!row["ban_expires_at"].is_null())
 		{
-			ban = make_unique<Ban>();
+			ban = std::make_unique<Ban>();
 			ban->expiresAt = row["ban_expires_at"].as<std::time_t>();
-			ban->by = row["banned_by"].as<string>();
-			ban->reason = row["ban_reason"].as<string>();
+			ban->by = row["banned_by"].as<std::string>();
+			ban->reason = row["ban_reason"].as<std::string>();
 		}
 
-		adminData = make_unique<AdminData>();
+		adminData = std::make_unique<AdminData>();
 		if (!row["admin_level"].is_null())
 			adminData->level = row["admin_level"].as<unsigned short>();
 		else
 			adminData->level = 0;
 		if (!row["admin_pass_hash"].is_null())
-			adminData->passwordHash = row["admin_pass_hash"].as<string>();
+			adminData->passwordHash = row["admin_pass_hash"].as<std::string>();
 	}
 
 	void setTempData(const std::string& key, const PrimitiveType& value)
