@@ -1,6 +1,7 @@
 #include "CommandManager.hpp"
 #include "../utils/Strings.hpp"
 #include "../player/PlayerExtension.hpp"
+#include "CommandInfo.hpp"
 
 #include <spdlog/spdlog.h>
 #include <player.hpp>
@@ -28,6 +29,7 @@ bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText
 	// get command name and pop the first element from the vector
 	auto commandName = cmdParts.at(0);
 	cmdParts.erase(cmdParts.begin());
+	commandName.erase(0, 1); // remove '/' from command name
 
 	if (!this->_commandHandlers.contains(commandName))
 	{
@@ -57,12 +59,12 @@ bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText
 	catch (const std::bad_variant_access& e)
 	{
 		spdlog::debug(e.what());
-		Player::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
+		this->sendCommandUsage(player, commandName, this->_commandInfo[commandName]);
 	}
 	catch (const std::invalid_argument& e)
 	{
 		spdlog::debug(e.what());
-		Player::getPlayerExt(player)->sendErrorMessage(_("Invalid command parameters!", player));
+		this->sendCommandUsage(player, commandName, this->_commandInfo[commandName]);
 	}
 	catch (const std::exception& e)
 	{
@@ -75,5 +77,15 @@ bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText
 void CommandManager::callCommandHandler(const std::string& cmdName, CommandCallbackValues args)
 {
 	(*this->_commandHandlers[cmdName])(args);
+}
+
+void CommandManager::sendCommandUsage(IPlayer& player, const std::string& name, std::shared_ptr<CommandInfo> info)
+{
+	std::string usageText = "/" + name;
+	for (const auto& arg : info->args)
+	{
+		usageText += fmt::format(" [{}]", arg);
+	}
+	player.sendClientMessage(Colour::White(), fmt::format("{} {}", _("#GOLD_FUSION#[USAGE]#WHITE#", player), usageText));
 }
 }

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-02 21:57+0000\n"
+"POT-Creation-Date: 2024-02-03 00:16+0000\n"
 "PO-Revision-Date: 2024-01-28 13:50+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Portuguese <translation-team-pt@lists.sourceforge.net>\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/core/auth/AuthHandler.cpp:41
+#: src/core/auth/AuthHandler.cpp:42
 #, c-format
 msgid "Registration"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:42
+#: src/core/auth/AuthHandler.cpp:43
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -38,20 +38,20 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:50 src/core/auth/AuthHandler.cpp:233
+#: src/core/auth/AuthHandler.cpp:51 src/core/auth/AuthHandler.cpp:234
 msgid "Enter"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:51 src/core/auth/AuthHandler.cpp:94
+#: src/core/auth/AuthHandler.cpp:52 src/core/auth/AuthHandler.cpp:95
 msgid "Quit"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:80 src/core/auth/AuthHandler.cpp:93
+#: src/core/auth/AuthHandler.cpp:81 src/core/auth/AuthHandler.cpp:94
 #, c-format
 msgid "Login"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:81
+#: src/core/auth/AuthHandler.cpp:82
 #, c-format
 msgid ""
 "#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
@@ -63,7 +63,7 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:87
+#: src/core/auth/AuthHandler.cpp:88
 #, c-format
 msgid ""
 "#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
@@ -76,28 +76,28 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:121
+#: src/core/auth/AuthHandler.cpp:122
 msgid "You have been logged in!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:135
+#: src/core/auth/AuthHandler.cpp:136
 msgid "Too much login attempts!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:146
+#: src/core/auth/AuthHandler.cpp:147
 msgid "Password length must be between 6-48"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:180
+#: src/core/auth/AuthHandler.cpp:181
 msgid "Something went wrong when trying to create user!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:226
+#: src/core/auth/AuthHandler.cpp:227
 #, c-format
 msgid "Enter your email"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:227
+#: src/core/auth/AuthHandler.cpp:228
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -107,20 +107,20 @@ msgid ""
 "#WHITE#/verify#LIGHT_GRAY# later"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:234
+#: src/core/auth/AuthHandler.cpp:235
 msgid "Skip"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:259
+#: src/core/auth/AuthHandler.cpp:260
 msgid "Invalid email!"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:306
+#: src/core/auth/AuthHandler.cpp:307
 #, c-format
 msgid "Registration info"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:307
+#: src/core/auth/AuthHandler.cpp:308
 #, c-format
 msgid ""
 "#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
@@ -135,31 +135,31 @@ msgid ""
 "password."
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:318
+#: src/core/auth/AuthHandler.cpp:319
 msgid "OK"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:321
+#: src/core/auth/AuthHandler.cpp:322
 msgid "You have successfully registered!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:90
+#: src/core/CoreManager.cpp:92
 msgid "You have killed yourself!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:96
+#: src/core/CoreManager.cpp:104
 msgid "Invalid skin ID!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:234
+#: src/core/CoreManager.cpp:252
 msgid "You are not logged in yet!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:250
+#: src/core/CoreManager.cpp:268
 msgid "Modes"
 msgstr ""
 
-#: src/core/CoreManager.cpp:251
+#: src/core/CoreManager.cpp:269
 #, c-format
 msgid ""
 "Mode\tCommand\tPlayers\n"
@@ -170,21 +170,20 @@ msgid ""
 "Cops and Robbers\t/cnr\t%d"
 msgstr ""
 
-#: src/core/CoreManager.cpp:263
+#: src/core/CoreManager.cpp:281
 msgid "Select"
 msgstr ""
 
-#: src/core/CoreManager.cpp:289
+#: src/core/CoreManager.cpp:307
 msgid "Mode is not implemented yet!"
 msgstr ""
 
-#: src/core/commands/CommandManager.cpp:60
-#: src/core/commands/CommandManager.cpp:65
-msgid "Invalid command parameters!"
+#: src/core/commands/CommandManager.cpp:72
+msgid "Failed to invoke command!"
 msgstr ""
 
-#: src/core/commands/CommandManager.cpp:70
-msgid "Failed to invoke command!"
+#: src/core/commands/CommandManager.cpp:89
+msgid "#GOLD_FUSION#[USAGE]#WHITE#"
 msgstr ""
 
 #: src/core/player/PlayerExtension.cpp:46
@@ -195,14 +194,14 @@ msgstr ""
 msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr ""
 
-#: src/modes/freeroam/Freeroam.cpp:60
+#: src/modes/freeroam/Freeroam.cpp:67
 msgid "Invalid car model ID!"
 msgstr ""
 
-#: src/modes/freeroam/Freeroam.cpp:65
+#: src/modes/freeroam/Freeroam.cpp:72
 msgid "Invalid color ID!"
 msgstr ""
 
-#: src/modes/freeroam/Freeroam.cpp:72
+#: src/modes/freeroam/Freeroam.cpp:79
 msgid "You have sucessfully spawned the vehicle!"
 msgstr ""

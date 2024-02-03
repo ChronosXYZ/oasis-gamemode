@@ -11,6 +11,7 @@ inline const static std::unordered_map<std::string, const std::string> COLORS {
 	{ "RED", "FF0000" },
 	{ "BRIGHT_BLUE", "0096FF" },
 	{ "DRY_HIGHLIGHTER_GREEN", "33AA22" },
-	{ "MILLION_GREY", "999999" }
+	{ "MILLION_GREY", "999999" },
+	{ "GOLD_FUSION", "FFAF00" }
 };
 }

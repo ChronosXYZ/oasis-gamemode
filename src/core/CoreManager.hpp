@@ -20,6 +20,8 @@ inline const auto CLASS_SELECTION_POINTS = std::to_array({
 	Vector4(2183.6245, 1285.7245, 43.0771, 90.4277) // LV Sphinx
 });
 
+inline const auto GENERAL_COMMAND_CATEGORY = "general";
+
 class CoreManager : public PlayerConnectEventHandler,
 					public std::enable_shared_from_this<CoreManager>,
 					public ClassEventHandler,

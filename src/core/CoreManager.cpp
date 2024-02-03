@@ -1,6 +1,7 @@
 #include "CoreManager.hpp"
 #include "SQLQueryManager.hpp"
 #include "PlayerVars.hpp"
+#include "commands/CommandInfo.hpp"
 #include "commands/CommandManager.hpp"
 #include "player/PlayerExtension.hpp"
 #include "utils/Common.hpp"
@@ -84,12 +85,19 @@ void CoreManager::initHandlers()
 	_freeroam = Modes::Freeroam::FreeroamHandler::create(weak_from_this(), _playerPool);
 
 	// FIXME move this definition outta here
-	_commandManager->addCommand("kill", [](std::reference_wrapper<IPlayer> player)
+	_commandManager->addCommand(
+		"kill", [](std::reference_wrapper<IPlayer> player)
 		{
 			player.get().setHealth(0.0);
 			Player::getPlayerExt(player.get())->sendInfoMessage(_("You have killed yourself!", player));
+		},
+		Commands::CommandInfo {
+			.args = {},
+			.description = "Kill yourself",
+			.category = GENERAL_COMMAND_CATEGORY,
 		});
-	_commandManager->addCommand("skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
+	_commandManager->addCommand(
+		"skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
 		{
 			if (skinId < 0 || skinId > 311)
 			{
@@ -100,6 +108,11 @@ void CoreManager::initHandlers()
 			auto data = this->getPlayerData(player.get());
 			data->lastSkinId = skinId;
 			player.get().sendClientMessage(Colour::Yellow(), fmt::sprintf("You have changed your skin to ID: %d!", skinId));
+		},
+		Commands::CommandInfo {
+			.args = { "skin ID" },
+			.description = "Set player skin",
+			.category = GENERAL_COMMAND_CATEGORY,
 		});
 }
 

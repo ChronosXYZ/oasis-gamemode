@@ -51,12 +51,15 @@ std::unique_ptr<FreeroamHandler> FreeroamHandler::create(std::weak_ptr<Core::Cor
 }
 void FreeroamHandler::initCommands()
 {
-	this->_coreManager.lock()->getCommandManager()->addCommand("fr", [&](std::reference_wrapper<IPlayer> player)
+	this->_coreManager.lock()->getCommandManager()->addCommand(
+		"fr", [&](std::reference_wrapper<IPlayer> player)
 		{
 			this->_coreManager.lock()->selectMode(player, Mode::Freeroam);
-		});
+		},
+		Core::Commands::CommandInfo { .args = {}, .description = "Teleports player to the Freeroam mode", .category = MODE_NAME });
 
-	this->_coreManager.lock()->getCommandManager()->addCommand("v", [&](std::reference_wrapper<IPlayer> player, int modelId, int color1, int color2)
+	this->_coreManager.lock()->getCommandManager()->addCommand(
+		"v", [&](std::reference_wrapper<IPlayer> player, int modelId, int color1, int color2)
 		{
 			auto playerExt = Core::Player::getPlayerExt(player);
 			if (modelId < 400 || modelId > 611)
@@ -74,7 +77,8 @@ void FreeroamHandler::initCommands()
 			auto vehicle = _vehiclesComponent->create(false, modelId, playerPosition, 0.0, color1, color2, Seconds(60000));
 			vehicle->putPlayer(player, 0);
 			playerExt->sendInfoMessage(_("You have sucessfully spawned the vehicle!", player));
-		});
+		},
+		Core::Commands::CommandInfo { .args = { "vehicle model id", "color 1", "color 2" }, .description = "Spawns a vehicle", .category = MODE_NAME });
 }
 
 void FreeroamHandler::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
