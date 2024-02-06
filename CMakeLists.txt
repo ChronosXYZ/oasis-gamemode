@@ -57,6 +57,7 @@ conan_cmake_configure(REQUIRES
                             argon2/20190702
                             date/3.0.1
                             fmt/10.2.1
+                        OPTIONS "date:use_system_tz_db=True"
                         GENERATORS CMakeDeps)
 
 conan_cmake_autodetect(settings ARCH x86)
