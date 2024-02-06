@@ -19,6 +19,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
       - name: Build Docker image
         run: docker build . --build-arg BUILD_TYPE=Debug --file docker/image/Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
       - name: Log in to registry
@@ -30,4 +33,4 @@ jobs:
           VERSION=${{ github.sha }}
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:dev
-          docker push $IMAGE_ID:$VERSION --all-tags
+          docker push $IMAGE_ID --all-tags
