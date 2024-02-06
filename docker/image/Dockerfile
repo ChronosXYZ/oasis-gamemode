@@ -58,4 +58,4 @@ RUN wget -q https://github.com/golang-migrate/migrate/releases/download/v4.17.0/
     dpkg -i tmp.deb && \
     rm tmp.deb
 
-ENTRYPOINT [ "./omp-server" ]
+CMD [ "./omp-server" ]
