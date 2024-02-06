@@ -1,8 +1,3 @@
--- public.users definition
-
--- Drop table
-
--- DROP TABLE public.users;
 
 CREATE TABLE public.users (
 	id serial4 NOT NULL,
@@ -18,26 +13,12 @@ CREATE TABLE public.users (
 	CONSTRAINT users_unique UNIQUE (name, email)
 );
 
-
--- public.admins definition
-
--- Drop table
-
--- DROP TABLE public.admins;
-
 CREATE TABLE public.admins (
 	user_id serial4 NOT NULL,
 	"level" int2 NOT NULL DEFAULT 0,
 	password_hash text NULL,
 	CONSTRAINT admins_users_fk FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-
--- public.bans definition
-
--- Drop table
-
--- DROP TABLE public.bans;
 
 CREATE TABLE public.bans (
 	user_id serial4 NOT NULL,
