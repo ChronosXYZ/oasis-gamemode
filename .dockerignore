@@ -1,0 +1,21 @@
+docker
+build
+.cache
+.vscode
+.git
+*.md
+
+# server files
+server/.env
+server/announce
+server/samp03svr
+server/samp-npc
+server/server.cfg
+server/log.txt
+server/bans.json
+
+# folders
+server/gamemodes
+server/components
+server/dependencies
+server/plugins
