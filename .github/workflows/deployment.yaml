@@ -51,3 +51,4 @@ jobs:
           file: ./docker/image/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
