@@ -36,6 +36,7 @@ FROM ubuntu:23.10
 ENV DEBIAN_FRONTEND=noninteractive
 ARG OPEN_MP_VERSION=1.2.0.2670
 COPY --from=builder /app/server /app
+COPY --from=builder /app/migrations /app/migrations
 WORKDIR /app
 RUN dpkg --add-architecture i386 && \
     apt update && \
