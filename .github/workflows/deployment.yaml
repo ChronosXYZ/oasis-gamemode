@@ -7,6 +7,7 @@ on:
 
 env:
   IMAGE_NAME: oasis-server
+  BUILD_TYPE: Debug
 
 jobs:
   build-and-push:
@@ -16,7 +17,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Docker meta
@@ -45,5 +46,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_TYPE=${{ env.BUILD_TYPE }}
+          file: ./docker/image/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
