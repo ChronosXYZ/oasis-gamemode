@@ -201,20 +201,22 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 	auto pData = this->getPlayerData(player);
 	if (!pData->getTempData(PlayerVars::IS_LOGGED_IN))
 		return true;
-	if (pData->getTempData(PlayerVars::CURRENT_MODE))
-	{
-		queryExtension<IPlayerClassData>(player)->setSpawnInfo(PlayerClass(0,
-			TEAM_NONE,
-			Vector3(0, 0, 0),
-			0.0,
-			WeaponSlots {}));
-		player.spawn();
-		return true;
-	}
 	if (!pData->getTempData(PlayerVars::SKIN_SELECTION_MODE))
 	{
 		// first player request class call
 		pData->setTempData(PlayerVars::SKIN_SELECTION_MODE, true);
+
+		Vector4 classSelectionPoint = CLASS_SELECTION_POINTS[random() % CLASS_SELECTION_POINTS.size()];
+		player.setPosition(Vector3(classSelectionPoint));
+
+		auto playerExt = Player::getPlayerExt(player);
+		playerExt->setFacingAngle(classSelectionPoint.w);
+		player.setCameraLookAt(Vector3(classSelectionPoint), PlayerCameraCutType_Cut);
+		auto angleRad = Utils::deg2Rad(classSelectionPoint.w);
+		player.setCameraPosition(Vector3(
+			classSelectionPoint.x + 5.0 * std::sin(-angleRad),
+			classSelectionPoint.y + 5.0 * std::cos(-angleRad),
+			classSelectionPoint.z));
 		player.setSkin(pData->lastSkinId);
 	}
 
@@ -227,21 +229,7 @@ void CoreManager::onPlayerLoggedIn(IPlayer& player)
 	pData->setTempData(PlayerVars::IS_LOGGED_IN, true);
 
 	// hack to get class selection buttons appear again
-	player.forceClassSelection();
-	player.setSpectating(true);
 	player.setSpectating(false);
-
-	Vector4 classSelectionPoint = CLASS_SELECTION_POINTS[random() % CLASS_SELECTION_POINTS.size()];
-	player.setPosition(Vector3(classSelectionPoint));
-
-	auto playerExt = Player::getPlayerExt(player);
-	playerExt->setFacingAngle(classSelectionPoint.w);
-	player.setCameraLookAt(Vector3(classSelectionPoint), PlayerCameraCutType_Cut);
-	auto angleRad = Utils::deg2Rad(classSelectionPoint.w);
-	player.setCameraPosition(Vector3(
-		classSelectionPoint.x + 5.0 * std::sin(-angleRad),
-		classSelectionPoint.y + 5.0 * std::cos(-angleRad),
-		classSelectionPoint.z));
 }
 
 bool CoreManager::onPlayerRequestSpawn(IPlayer& player)

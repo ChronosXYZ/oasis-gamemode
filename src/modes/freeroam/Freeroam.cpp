@@ -36,11 +36,12 @@ void FreeroamHandler::onPlayerSpawn(IPlayer& player)
 	{
 		return;
 	}
+	setupSpawn(player);
 
-	player.setPosition(SPAWN_LOCATION);
-	playerExt->setFacingAngle(SPAWN_ANGLE);
-	player.setCameraBehind();
-	player.setSkin(playerExt->getPlayerData()->lastSkinId);
+	// player.setPosition(SPAWN_LOCATION);
+	// playerExt->setFacingAngle(SPAWN_ANGLE);
+	// player.setCameraBehind();
+	// player.setSkin(playerExt->getPlayerData()->lastSkinId);
 }
 
 std::unique_ptr<FreeroamHandler> FreeroamHandler::create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
@@ -87,9 +88,10 @@ void FreeroamHandler::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason
 
 void FreeroamHandler::onModeJoin(IPlayer& player)
 {
+	setupSpawn(player);
 }
 
-void FreeroamHandler::setRandomSpawnInfo(IPlayer& player)
+void FreeroamHandler::setupSpawn(IPlayer& player)
 {
 	queryExtension<IPlayerClassData>(player)->setSpawnInfo(PlayerClass(this->_coreManager.lock()->getPlayerData(player)->lastSkinId,
 		TEAM_NONE,

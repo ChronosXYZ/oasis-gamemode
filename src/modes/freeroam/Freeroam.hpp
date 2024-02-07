@@ -31,7 +31,7 @@ class FreeroamHandler : public PlayerSpawnEventHandler,
 	IVehiclesComponent* _vehiclesComponent;
 
 	void initCommands();
-	void setRandomSpawnInfo(IPlayer& player);
+	void setupSpawn(IPlayer& player);
 
 public:
 	~FreeroamHandler();

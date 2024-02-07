@@ -11,6 +11,9 @@
 #include "../../constants.hpp"
 
 #include <fmt/printf.h>
+#include <Server/Components/Timers/timers.hpp>
+#include <Server/Components/Timers/Impl/timers_impl.hpp>
+#include <functional>
 #include <spdlog/spdlog.h>
 
 namespace Core::Auth
@@ -20,19 +23,35 @@ AuthHandler::AuthHandler(IPlayerPool* playerPool, std::weak_ptr<CoreManager> cor
 	: _coreManager(coreManager)
 	, _playerPool(playerPool)
 	, _classesComponent(coreManager.lock()->components->queryComponent<IClassesComponent>())
+	, _timersComponent(coreManager.lock()->components->queryComponent<ITimersComponent>())
 {
 	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
-	_classesComponent->getEventDispatcher().addEventHandler(this);
 }
 
 AuthHandler::~AuthHandler()
 {
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
-	_classesComponent->getEventDispatcher().removeEventHandler(this);
 }
 
 void AuthHandler::onPlayerConnect(IPlayer& player)
 {
+	player.setSpectating(true);
+
+	if (!this->_coreManager.lock()->refreshPlayerData(player))
+	{
+		this->showLanguageDialog(player);
+	}
+	else
+	{
+		auto data = this->_coreManager.lock()->getPlayerData(player);
+		data->setTempData(PlayerVars::LOGIN_ATTEMPTS_KEY, 0);
+		showLoginDialog(player, false);
+	}
+	_timersComponent->create(new Impl::SimpleTimerHandler(
+								 std::bind(&AuthHandler::interpolatePlayerCamera,
+									 this,
+									 std::reference_wrapper<IPlayer>(player))),
+		Milliseconds(100), false);
 }
 
 void AuthHandler::showRegistrationDialog(IPlayer& player)
@@ -266,39 +285,6 @@ void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
 	onRegistrationSubmit(player);
 }
 
-bool AuthHandler::onPlayerRequestClass(IPlayer& player, unsigned int classId)
-{
-	auto pData = this->_coreManager.lock()->getPlayerData(player);
-	if (pData->getTempData(Core::PlayerVars::IS_LOGGED_IN) || pData->getTempData(Core::PlayerVars::CURRENT_MODE))
-		return true;
-
-	if (!pData->getTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED))
-	{
-		if (!this->_coreManager.lock()->refreshPlayerData(player))
-		{
-			this->showLanguageDialog(player);
-		}
-		else
-		{
-			auto data = this->_coreManager.lock()->getPlayerData(player);
-			data->setTempData(PlayerVars::LOGIN_ATTEMPTS_KEY, 0);
-			showLoginDialog(player, false);
-		}
-		pData->setTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED, true);
-	}
-
-	player.setSpectating(true);
-	player.interpolateCameraPosition(Vector3(1093.0, -2036.0, 90.0),
-		Vector3(21.1088, -1806.9847, 79.4125),
-		15000,
-		PlayerCameraCutType_Move);
-	player.interpolateCameraLookAt(Vector3(384.0, -1557.0, 20.0),
-		Vector3(455.1533, -1868.1967, 31.9840),
-		15000,
-		PlayerCameraCutType_Move);
-	return true;
-}
-
 void AuthHandler::showRegistrationInfoDialog(IPlayer& player)
 {
 	auto pData = this->_coreManager.lock()->getPlayerData(player);
@@ -322,5 +308,17 @@ void AuthHandler::showRegistrationInfoDialog(IPlayer& player)
 			Player::getPlayerExt(player)->sendInfoMessage(_("You have successfully registered!", player));
 			this->_coreManager.lock()->onPlayerLoggedIn(player);
 		});
+}
+
+void AuthHandler::interpolatePlayerCamera(IPlayer& player)
+{
+	player.interpolateCameraPosition(Vector3(1093.0, -2036.0, 90.0),
+		Vector3(21.1088, -1806.9847, 79.4125),
+		15000,
+		PlayerCameraCutType_Move);
+	player.interpolateCameraLookAt(Vector3(384.0, -1557.0, 20.0),
+		Vector3(455.1533, -1868.1967, 31.9840),
+		15000,
+		PlayerCameraCutType_Move);
 }
 }

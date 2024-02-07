@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Server/Components/Timers/timers.hpp"
 #include <Server/Components/Classes/classes.hpp>
 #include <player.hpp>
 #include <regex>
@@ -20,11 +21,11 @@ public:
 	~AuthHandler();
 
 	void onPlayerConnect(IPlayer& player) override;
-	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 
 private:
 	IPlayerPool* const _playerPool;
 	IClassesComponent* const _classesComponent;
+	ITimersComponent* const _timersComponent;
 	std::weak_ptr<Core::CoreManager> _coreManager;
 
 	void showLanguageDialog(IPlayer& player);
@@ -32,6 +33,7 @@ private:
 	void showEmailDialog(IPlayer& player);
 	void showLoginDialog(IPlayer& player, bool wrongPass);
 	void showRegistrationInfoDialog(IPlayer& player);
+	void interpolatePlayerCamera(IPlayer& player);
 
 	// Callbacks
 	void onLoginSubmit(IPlayer& player, const std::string& password);

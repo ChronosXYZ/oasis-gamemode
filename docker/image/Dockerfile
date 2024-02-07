@@ -56,6 +56,7 @@ RUN wget -q https://github.com/openmultiplayer/open.mp/releases/download/v$OPEN_
 # install migration tool
 RUN wget -q https://github.com/golang-migrate/migrate/releases/download/v4.17.0/migrate.linux-amd64.deb -O tmp.deb && \
     dpkg -i tmp.deb && \
-    rm tmp.deb
+    rm tmp.deb && \
+    rm server.cfg
 
 CMD [ "./omp-server" ]
