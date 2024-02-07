@@ -330,5 +330,6 @@ std::shared_ptr<Commands::CommandManager> CoreManager::getCommandManager()
 bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 {
 	player.setChatBubble(message, Colour::White(), 100.0, Milliseconds(CHAT_BUBBLE_EXPIRATION));
+	return true;
 }
 }

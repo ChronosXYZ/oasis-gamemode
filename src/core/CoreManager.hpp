@@ -17,9 +17,7 @@ namespace Core
 using namespace std::string_literals;
 
 inline const auto CLASS_SELECTION_POINTS = std::to_array({
-	Vector4(1565.4669, -1359.0862, 330.0576, 260.6601), // LS Maze Bank
-	Vector4(-1543.5278, 698.5956, 139.2734, 227.3011), // SF Bridge
-	Vector4(2183.6245, 1285.7245, 43.0771, 90.4277) // LV Sphinx
+	Vector4(1094.55, -2037.11, 82.75, 235.84) // LS beach
 });
 
 inline const auto GENERAL_COMMAND_CATEGORY = "general"s;
