@@ -70,6 +70,10 @@ void FreeroamHandler::initCommands()
 			}
 
 			auto playerPosition = player.get().getPosition();
+			if (player.get().getState() == PlayerState_Driver)
+			{
+				player.get().removeFromVehicle(true);
+			}
 			auto vehicle = _vehiclesComponent->create(false, modelId, playerPosition, 0.0, color1, color2, Seconds(60000));
 			vehicle->putPlayer(player, 0);
 			playerExt->sendInfoMessage(_("You have sucessfully spawned the vehicle!", player));
