@@ -223,6 +223,7 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 			classSelectionPoint.y + 5.0 * std::cos(-angleRad),
 			classSelectionPoint.z));
 		player.setSkin(pData->lastSkinId);
+		this->removePlayerFromModes(player);
 	}
 
 	return true;
@@ -314,6 +315,17 @@ void CoreManager::removePlayerFromModes(IPlayer& player)
 			{
 				if (player.getID() == x)
 				{
+					switch (mode)
+					{
+					case Modes::Mode::Freeroam:
+					{
+						_freeroam->onModeLeave(player);
+					}
+					default:
+					{
+						break;
+					}
+					}
 					spdlog::info("Player {} has left mode id {}", player.getName().to_string(), std::get<int>(*modeOpt));
 					return true;
 				}

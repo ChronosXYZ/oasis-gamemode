@@ -74,12 +74,7 @@ void FreeroamHandler::initCommands()
 			{
 				player.get().removeFromVehicle(true);
 			}
-			if (auto lastVehicleId = playerExt->getPlayerData()->getTempData(PlayerVars::LAST_VEHICLE_ID))
-			{
-				auto vid = std::get<int>(*lastVehicleId);
-				auto vehicle = _vehiclesComponent->get(vid);
-				_vehiclesComponent->release(vid);
-			}
+			this->deleteLastSpawnedCar(player);
 
 			auto playerPosition
 				= player.get().getPosition();
@@ -115,5 +110,21 @@ void FreeroamHandler::setupSpawn(IPlayer& player)
 		SPAWN_LOCATION,
 		SPAWN_ANGLE,
 		WeaponSlots {}));
+}
+
+void FreeroamHandler::onModeLeave(IPlayer& player)
+{
+	this->deleteLastSpawnedCar(player);
+}
+
+void FreeroamHandler::deleteLastSpawnedCar(IPlayer& player)
+{
+	auto playerExt = Core::Player::getPlayerExt(player);
+	if (auto lastVehicleId = playerExt->getPlayerData()->getTempData(PlayerVars::LAST_VEHICLE_ID))
+	{
+		auto vid = std::get<int>(*lastVehicleId);
+		auto vehicle = _vehiclesComponent->get(vid);
+		_vehiclesComponent->release(vid);
+	}
 }
 }

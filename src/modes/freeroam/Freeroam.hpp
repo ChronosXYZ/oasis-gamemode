@@ -32,6 +32,7 @@ class FreeroamHandler : public PlayerSpawnEventHandler,
 
 	void initCommands();
 	void setupSpawn(IPlayer& player);
+	void deleteLastSpawnedCar(IPlayer& player);
 
 public:
 	~FreeroamHandler();
@@ -39,6 +40,7 @@ public:
 	static std::unique_ptr<FreeroamHandler> create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
 
 	void onModeJoin(IPlayer& player);
+	void onModeLeave(IPlayer& player);
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
