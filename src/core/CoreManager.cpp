@@ -100,15 +100,16 @@ void CoreManager::initHandlers()
 	_commandManager->addCommand(
 		"skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
 		{
+			auto playerExt = Player::getPlayerExt(player);
 			if (skinId < 0 || skinId > 311)
 			{
-				Player::getPlayerExt(player.get())->sendErrorMessage(_("Invalid skin ID!", player));
+				playerExt->sendErrorMessage(_("Invalid skin ID!", player));
 				return;
 			}
 			player.get().setSkin(skinId);
-			auto data = this->getPlayerData(player.get());
+			auto data = Player::getPlayerData(player.get());
 			data->lastSkinId = skinId;
-			player.get().sendClientMessage(Colour::Yellow(), fmt::sprintf("You have changed your skin to ID: %d!", skinId));
+			playerExt->sendInfoMessage(fmt::sprintf(_("You have changed your skin to ID: %d!", player), skinId));
 		},
 		Commands::CommandInfo {
 			.args = { "skin ID" },

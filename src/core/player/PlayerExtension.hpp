@@ -44,4 +44,9 @@ inline static OasisPlayerExt* getPlayerExt(IPlayer& player)
 {
 	return queryExtension<OasisPlayerExt>(player);
 };
+
+inline static std::shared_ptr<PlayerModel> getPlayerData(IPlayer& player)
+{
+	return getPlayerExt(player)->getPlayerData();
+};
 }

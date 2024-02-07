@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <memory>
+#include <spdlog/spdlog.h>
 
 namespace Modes::Freeroam
 {
@@ -36,12 +37,6 @@ void FreeroamHandler::onPlayerSpawn(IPlayer& player)
 	{
 		return;
 	}
-	setupSpawn(player);
-
-	// player.setPosition(SPAWN_LOCATION);
-	// playerExt->setFacingAngle(SPAWN_ANGLE);
-	// player.setCameraBehind();
-	// player.setSkin(playerExt->getPlayerData()->lastSkinId);
 }
 
 std::unique_ptr<FreeroamHandler> FreeroamHandler::create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
@@ -84,6 +79,13 @@ void FreeroamHandler::initCommands()
 
 void FreeroamHandler::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
+	auto data = Core::Player::getPlayerData(player);
+	auto mode = static_cast<Mode>(std::get<int>(*data->getTempData(Core::PlayerVars::CURRENT_MODE)));
+	if (mode != Mode::Freeroam)
+	{
+		return;
+	}
+	setupSpawn(player);
 }
 
 void FreeroamHandler::onModeJoin(IPlayer& player)
@@ -93,7 +95,8 @@ void FreeroamHandler::onModeJoin(IPlayer& player)
 
 void FreeroamHandler::setupSpawn(IPlayer& player)
 {
-	queryExtension<IPlayerClassData>(player)->setSpawnInfo(PlayerClass(this->_coreManager.lock()->getPlayerData(player)->lastSkinId,
+	auto classData = queryExtension<IPlayerClassData>(player);
+	classData->setSpawnInfo(PlayerClass(Core::Player::getPlayerData(player)->lastSkinId,
 		TEAM_NONE,
 		SPAWN_LOCATION,
 		SPAWN_ANGLE,
