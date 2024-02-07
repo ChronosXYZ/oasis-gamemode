@@ -9,6 +9,7 @@
 
 #include <spdlog/spdlog.h>
 #include <fmt/printf.h>
+#include <Server/Components/Timers/timers.hpp>
 
 namespace Core
 {
@@ -63,7 +64,7 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 {
 	auto data = std::shared_ptr<PlayerModel>(new PlayerModel());
 	this->_playerData[player.getID()] = data;
-	player.addExtension(new Player::OasisPlayerExt(data, player), true);
+	player.addExtension(new Player::OasisPlayerExt(data, player, components->queryComponent<ITimersComponent>()), true);
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PlayerModel.hpp"
+#include "Server/Components/Timers/timers.hpp"
 
 #include <fmt/core.h>
 #include <player.hpp>
@@ -20,11 +21,12 @@ class OasisPlayerExt : public IExtension
 private:
 	std::shared_ptr<PlayerModel> _playerData = nullptr;
 	IPlayer& _player;
+	ITimersComponent* _timerManager;
 
 public:
 	PROVIDE_EXT_UID(OASIS_PLAYER_EXT_UID)
 
-	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player);
+	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player, ITimersComponent* timerManager);
 
 	std::shared_ptr<PlayerModel> getPlayerData();
 

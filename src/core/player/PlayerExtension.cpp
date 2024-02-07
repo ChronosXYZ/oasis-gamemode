@@ -1,11 +1,16 @@
 #include "PlayerExtension.hpp"
 #include "../utils/Localization.hpp"
+#include "player.hpp"
+#include <Server/Components/Timers/timers.hpp>
+#include <Server/Components/Timers/Impl/timers_impl.hpp>
+#include <functional>
 
 namespace Core::Player
 {
-OasisPlayerExt::OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player)
+OasisPlayerExt::OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player, ITimersComponent* timerManager)
 	: _player(player)
 	, _playerData(data)
+	, _timerManager(timerManager)
 {
 }
 
@@ -16,12 +21,11 @@ std::shared_ptr<PlayerModel> OasisPlayerExt::getPlayerData()
 
 void OasisPlayerExt::delayedKick()
 {
-	std::thread([&]()
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(DELAYED_KICK_INTERVAL_MS));
-			_player.kick();
-		})
-		.detach();
+	_timerManager->create(new Impl::SimpleTimerHandler(
+							  std::bind(
+								  &IPlayer::kick,
+								  std::reference_wrapper<IPlayer>(_player))),
+		Milliseconds(DELAYED_KICK_INTERVAL_MS), false);
 }
 
 void OasisPlayerExt::setFacingAngle(float angle)

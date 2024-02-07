@@ -80,7 +80,7 @@ void AuthHandler::showRegistrationDialog(IPlayer& player)
 			}
 			case DialogResponse_Right:
 			{
-				player.kick();
+				Player::getPlayerExt(player)->delayedKick();
 				break;
 			}
 			}
@@ -123,7 +123,7 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 			}
 			case DialogResponse_Right:
 			{
-				player.kick();
+				Player::getPlayerExt(player)->delayedKick();
 				break;
 			}
 			}
@@ -232,7 +232,7 @@ void AuthHandler::showLanguageDialog(IPlayer& player)
 			}
 			case DialogResponse_Right:
 			{
-				player.kick();
+				Player::getPlayerExt(player)->delayedKick();
 				break;
 			}
 			}
