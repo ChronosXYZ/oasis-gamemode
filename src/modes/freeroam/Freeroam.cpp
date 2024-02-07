@@ -2,6 +2,7 @@
 #include "../../core/CoreManager.hpp"
 #include "../../core/PlayerVars.hpp"
 #include "../../core/player/PlayerExtension.hpp"
+#include "PlayerVars.hpp"
 
 #include <player.hpp>
 #include <Server/Components/Vehicles/vehicles.hpp>
@@ -69,14 +70,23 @@ void FreeroamHandler::initCommands()
 				return;
 			}
 
-			auto playerPosition = player.get().getPosition();
 			if (player.get().getState() == PlayerState_Driver)
 			{
 				player.get().removeFromVehicle(true);
 			}
+			if (auto lastVehicleId = playerExt->getPlayerData()->getTempData(PlayerVars::LAST_VEHICLE_ID))
+			{
+				auto vid = std::get<int>(*lastVehicleId);
+				auto vehicle = _vehiclesComponent->get(vid);
+				_vehiclesComponent->release(vid);
+			}
+
+			auto playerPosition
+				= player.get().getPosition();
 			auto vehicle = _vehiclesComponent->create(false, modelId, playerPosition, 0.0, color1, color2, Seconds(60000));
 			vehicle->putPlayer(player, 0);
 			playerExt->sendInfoMessage(_("You have sucessfully spawned the vehicle!", player));
+			playerExt->getPlayerData()->setTempData(PlayerVars::LAST_VEHICLE_ID, vehicle->getID());
 		},
 		Core::Commands::CommandInfo { .args = { "vehicle model id", "color 1", "color 2" }, .description = "Spawns a vehicle", .category = MODE_NAME });
 }
