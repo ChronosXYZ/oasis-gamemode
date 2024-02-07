@@ -4,6 +4,7 @@
 #include "commands/CommandInfo.hpp"
 #include "commands/CommandManager.hpp"
 #include "player/PlayerExtension.hpp"
+#include "types.hpp"
 #include "utils/Common.hpp"
 #include "utils/QueryNames.hpp"
 
@@ -25,6 +26,7 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 
 	_playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
+	_playerPool->getPlayerTextDispatcher().addEventHandler(this);
 
 	_classesComponent->getEventDispatcher().addEventHandler(this);
 
@@ -43,6 +45,7 @@ CoreManager::~CoreManager()
 	saveAllPlayers();
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
+	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
 
 	_classesComponent->getEventDispatcher().removeEventHandler(this);
 }
@@ -322,5 +325,10 @@ void CoreManager::removePlayerFromModes(IPlayer& player)
 std::shared_ptr<Commands::CommandManager> CoreManager::getCommandManager()
 {
 	return _commandManager;
+}
+
+bool CoreManager::onPlayerText(IPlayer& player, StringView message)
+{
+	player.setChatBubble(message, Colour::White(), 100.0, Milliseconds(CHAT_BUBBLE_EXPIRATION));
 }
 }

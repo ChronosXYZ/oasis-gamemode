@@ -14,18 +14,23 @@
 
 namespace Core
 {
+using namespace std::string_literals;
+
 inline const auto CLASS_SELECTION_POINTS = std::to_array({
 	Vector4(1565.4669, -1359.0862, 330.0576, 260.6601), // LS Maze Bank
 	Vector4(-1543.5278, 698.5956, 139.2734, 227.3011), // SF Bridge
 	Vector4(2183.6245, 1285.7245, 43.0771, 90.4277) // LV Sphinx
 });
 
-inline const auto GENERAL_COMMAND_CATEGORY = "general";
+inline const auto GENERAL_COMMAND_CATEGORY = "general"s;
+
+inline const auto CHAT_BUBBLE_EXPIRATION = 10000;
 
 class CoreManager : public PlayerConnectEventHandler,
 					public std::enable_shared_from_this<CoreManager>,
 					public ClassEventHandler,
-					public PlayerSpawnEventHandler
+					public PlayerSpawnEventHandler,
+					public PlayerTextEventHandler
 {
 public:
 	IComponentList* const components;
@@ -45,6 +50,7 @@ public:
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
 	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 	bool onPlayerRequestSpawn(IPlayer& player) override;
+	bool onPlayerText(IPlayer& player, StringView message) override;
 
 	void onPlayerLoggedIn(IPlayer& player);
 
