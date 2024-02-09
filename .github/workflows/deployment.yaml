@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'src/**'
+      - 'server/**'
+      - 'migrations/**'
+      - 'resources/**'
+      - 'vendor/**'
+      - 'docker/image/**'
+      - CMakeLists.txt
 
 env:
   IMAGE_NAME: oasis-server
@@ -52,3 +60,21 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into server and deploy
+        uses: appleboy/ssh-action@master
+        env:
+          CR_PAT: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo $CR_PAT | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
+            docker-compose pull server
+            docker-compose up -d
