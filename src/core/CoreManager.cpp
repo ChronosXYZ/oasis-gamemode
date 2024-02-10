@@ -4,10 +4,13 @@
 #include "commands/CommandInfo.hpp"
 #include "commands/CommandManager.hpp"
 #include "player/PlayerExtension.hpp"
+#include "textdraws/ITextDrawWrapper.hpp"
+#include "textdraws/ServerLogo.hpp"
 #include "types.hpp"
 #include "utils/Common.hpp"
 #include "utils/QueryNames.hpp"
 
+#include <memory>
 #include <spdlog/spdlog.h>
 #include <fmt/printf.h>
 #include <Server/Components/Timers/timers.hpp>
@@ -66,8 +69,20 @@ std::shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
 void CoreManager::onPlayerConnect(IPlayer& player)
 {
 	auto data = std::shared_ptr<PlayerModel>(new PlayerModel());
+	auto playerExt = new Player::OasisPlayerExt(data,
+		player,
+		components->queryComponent<ITimersComponent>());
 	this->_playerData[player.getID()] = data;
-	player.addExtension(new Player::OasisPlayerExt(data, player, components->queryComponent<ITimersComponent>()), true);
+	player.addExtension(playerExt, true);
+
+	auto txdManager = playerExt->getTextDrawManager();
+	auto logo = std::shared_ptr<TextDraws::ServerLogo>(new TextDraws::ServerLogo(
+		player,
+		"OASIS",
+		"freeroam",
+		"oasisfreeroam.xyz"));
+	txdManager->add(logo->name(), logo);
+	logo->show();
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
