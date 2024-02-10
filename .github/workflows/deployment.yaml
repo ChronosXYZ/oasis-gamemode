@@ -78,5 +78,5 @@ jobs:
           envs: CR_PAT,GITHUB_USERNAME
           script: |
             echo $CR_PAT | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
-            docker-compose pull server
-            docker-compose up -d
+            docker compose pull server
+            docker compose up -d
