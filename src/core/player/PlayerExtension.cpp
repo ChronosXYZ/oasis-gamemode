@@ -1,13 +1,18 @@
 #include "PlayerExtension.hpp"
 #include "../utils/Localization.hpp"
+#include "Server/Components/Vehicles/vehicles.hpp"
 #include "TextDrawManager.hpp"
+#include "types.hpp"
 
+#include <math.h>
 #include <player.hpp>
 #include <component.hpp>
 #include <Server/Components/Timers/timers.hpp>
 #include <Server/Components/Timers/Impl/timers_impl.hpp>
 
 #include <functional>
+#include <memory>
+#include <cmath>
 
 namespace Core::Player
 {
@@ -74,5 +79,17 @@ const std::string OasisPlayerExt::getIP()
 std::shared_ptr<TextDrawManager> OasisPlayerExt::getTextDrawManager()
 {
 	return _textDrawManager;
+}
+
+float OasisPlayerExt::getVehicleSpeed()
+{
+	auto vehicleData = queryExtension<IPlayerVehicleData>(_player);
+	auto vehicle = vehicleData->getVehicle();
+	if (vehicle)
+	{
+		auto velocity = vehicle->getVelocity();
+		return sqrtf(powf(velocity.x, 2) + powf(velocity.y, 2)) * 100.0 * 1.6;
+	}
+	return 0.0;
 }
 }

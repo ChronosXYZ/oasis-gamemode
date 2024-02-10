@@ -6,6 +6,7 @@
 #include "player/PlayerModel.hpp"
 #include "../modes/Modes.hpp"
 #include "../modes/freeroam/Freeroam.hpp"
+#include "utils/ServiceLocator.hpp"
 
 #include <Server/Components/Classes/classes.hpp>
 
@@ -84,5 +85,6 @@ private:
 	// Handlers
 	std::unique_ptr<Auth::AuthHandler> _authHandler;
 	std::unique_ptr<Modes::Freeroam::FreeroamHandler> _freeroam;
+	std::unique_ptr<ServiceLocator> _playerControllers;
 };
 }

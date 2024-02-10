@@ -2,6 +2,7 @@
 
 #include "PlayerModel.hpp"
 #include "TextDrawManager.hpp"
+#include "types.hpp"
 
 #include <Server/Components/Timers/timers.hpp>
 
@@ -40,6 +41,7 @@ public:
 	void sendErrorMessage(const std::string& message);
 	void sendInfoMessage(const std::string& message);
 	const std::string getIP();
+	float getVehicleSpeed();
 
 	void freeExtension() override;
 	void reset() override;

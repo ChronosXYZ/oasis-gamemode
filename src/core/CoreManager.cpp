@@ -1,14 +1,17 @@
 #include "CoreManager.hpp"
 #include "SQLQueryManager.hpp"
 #include "PlayerVars.hpp"
+#include "Server/Components/Vehicles/vehicles.hpp"
 #include "commands/CommandInfo.hpp"
 #include "commands/CommandManager.hpp"
+#include "controllers/SpeedometerController.hpp"
 #include "player/PlayerExtension.hpp"
 #include "textdraws/ITextDrawWrapper.hpp"
 #include "textdraws/ServerLogo.hpp"
 #include "types.hpp"
 #include "utils/Common.hpp"
 #include "utils/QueryNames.hpp"
+#include "utils/ServiceLocator.hpp"
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -24,6 +27,7 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 	, _dialogManager(std::shared_ptr<DialogManager>(new DialogManager(components)))
 	, _commandManager(std::shared_ptr<Commands::CommandManager>(new Commands::CommandManager(playerPool)))
 	, _classesComponent(components->queryComponent<IClassesComponent>())
+	, _playerControllers(std::make_unique<ServiceLocator>())
 {
 	this->initSkinSelection();
 
@@ -81,7 +85,7 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 		"OASIS",
 		"freeroam",
 		"oasisfreeroam.xyz"));
-	txdManager->add(logo->name(), logo);
+	txdManager->add(TextDraws::ServerLogo::NAME, logo);
 	logo->show();
 }
 
@@ -134,6 +138,10 @@ void CoreManager::initHandlers()
 			.description = "Set player skin",
 			.category = GENERAL_COMMAND_CATEGORY,
 		});
+	_playerControllers->registerInstance(new Controllers::SpeedometerController(
+		_playerPool,
+		components->queryComponent<IVehiclesComponent>(),
+		components->queryComponent<ITimersComponent>()));
 }
 
 std::shared_ptr<pqxx::connection> CoreManager::getDBConnection()

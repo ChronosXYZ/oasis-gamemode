@@ -83,9 +83,4 @@ void ServerLogo::hide()
 	_website->hide();
 }
 
-const std::string& ServerLogo::name()
-{
-	return NAME;
-}
-
 }

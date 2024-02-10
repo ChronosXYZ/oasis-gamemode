@@ -14,7 +14,6 @@ using namespace std::string_literals;
 
 class ServerLogo : public ITextDrawWrapper
 {
-	inline static const auto NAME = "SERVER_LOGO"s;
 
 	IPlayerTextDrawData* _playerTextDrawData;
 
@@ -29,6 +28,7 @@ public:
 	void show() override;
 	void hide() override;
 	void destroy() override;
-	const std::string& name() override;
+
+	inline static const auto NAME = "SERVER_LOGO"s;
 };
 }
