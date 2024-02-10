@@ -1,8 +1,12 @@
 #include "PlayerExtension.hpp"
 #include "../utils/Localization.hpp"
-#include "player.hpp"
+#include "TextDrawManager.hpp"
+
+#include <player.hpp>
+#include <component.hpp>
 #include <Server/Components/Timers/timers.hpp>
 #include <Server/Components/Timers/Impl/timers_impl.hpp>
+
 #include <functional>
 
 namespace Core::Player
@@ -11,6 +15,7 @@ OasisPlayerExt::OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& playe
 	: _player(player)
 	, _playerData(data)
 	, _timerManager(timerManager)
+	, _textDrawManager(new TextDrawManager())
 {
 }
 
@@ -38,10 +43,12 @@ void OasisPlayerExt::setFacingAngle(float angle)
 void OasisPlayerExt::freeExtension()
 {
 	_playerData.reset();
+	_textDrawManager.reset();
 }
 void OasisPlayerExt::reset()
 {
 	_playerData.reset();
+	_textDrawManager.reset();
 }
 
 void OasisPlayerExt::sendErrorMessage(const std::string& message)
@@ -62,5 +69,10 @@ const std::string OasisPlayerExt::getIP()
 	PeerNetworkData peerData = _player.getNetworkData();
 	peerData.networkID.address.ToString(peerData.networkID.address, ipString);
 	return ipString.data();
+}
+
+std::shared_ptr<TextDrawManager> OasisPlayerExt::getTextDrawManager()
+{
+	return _textDrawManager;
 }
 }

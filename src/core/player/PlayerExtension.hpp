@@ -1,13 +1,16 @@
 #pragma once
 
 #include "PlayerModel.hpp"
-#include "Server/Components/Timers/timers.hpp"
+#include "TextDrawManager.hpp"
+
+#include <Server/Components/Timers/timers.hpp>
 
 #include <fmt/core.h>
 #include <player.hpp>
 #include <component.hpp>
-#include <memory>
 #include <sdk.hpp>
+
+#include <memory>
 #include <thread>
 #include <chrono>
 
@@ -20,6 +23,7 @@ class OasisPlayerExt : public IExtension
 {
 private:
 	std::shared_ptr<PlayerModel> _playerData = nullptr;
+	std::shared_ptr<TextDrawManager> _textDrawManager = nullptr;
 	IPlayer& _player;
 	ITimersComponent* _timerManager;
 
@@ -29,6 +33,7 @@ public:
 	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player, ITimersComponent* timerManager);
 
 	std::shared_ptr<PlayerModel> getPlayerData();
+	std::shared_ptr<TextDrawManager> getTextDrawManager();
 
 	void delayedKick();
 	void setFacingAngle(float angle);
