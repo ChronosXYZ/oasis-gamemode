@@ -3,6 +3,7 @@ build
 .cache
 .vscode
 .git
+.github
 *.md
 
 # server files
