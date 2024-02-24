@@ -1,4 +1,3 @@
-#include "constants.hpp"
 #include "core/CoreManager.hpp"
 #include "core/SQLQueryManager.hpp"
 #include "core/utils/dotenv.h"
@@ -7,10 +6,8 @@
 #include <player.hpp>
 #include <spdlog/spdlog.h>
 #include <tinygettext/dictionary_manager.hpp>
-#include <Server/Components/Classes/classes.hpp>
 #include <sdk.hpp>
 
-#include <functional>
 #include <ctime>
 #include <cstdlib>
 #include <memory>

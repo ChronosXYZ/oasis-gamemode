@@ -2,9 +2,7 @@
 #include "../utils/Localization.hpp"
 #include "Server/Components/Vehicles/vehicles.hpp"
 #include "TextDrawManager.hpp"
-#include "types.hpp"
 
-#include <math.h>
 #include <player.hpp>
 #include <component.hpp>
 #include <Server/Components/Timers/timers.hpp>
@@ -88,7 +86,7 @@ float OasisPlayerExt::getVehicleSpeed()
 	if (vehicle)
 	{
 		auto velocity = vehicle->getVelocity();
-		return sqrtf(powf(velocity.x, 2) + powf(velocity.y, 2)) * 100.0 * 1.6;
+		return std::sqrt(std::pow(velocity.x, 2) + std::pow(velocity.y, 2)) * 100.0 * 1.6;
 	}
 	return 0.0;
 }
