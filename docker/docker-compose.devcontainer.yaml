@@ -15,4 +15,9 @@ services:
       - SYS_PTRACE
     security_opt:
       - seccomp:unconfined
+    volumes:
+      - ./..:/code
+      - ./build:/code/build
+      - ./conan:/home/ubuntu/.conan
+      - ~/.ssh:/home/ubuntu/.ssh
     # network_mode: service:db
