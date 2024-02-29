@@ -17,6 +17,7 @@
 #include <spdlog/spdlog.h>
 #include <fmt/printf.h>
 #include <Server/Components/Timers/timers.hpp>
+#include <stdexcept>
 
 namespace Core
 {
@@ -37,7 +38,12 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 
 	_classesComponent->getEventDispatcher().addEventHandler(this);
 
-	this->_dbConnection = std::make_shared<pqxx::connection>(getenv("DB_CONNECTION_STRING"));
+	auto dbConnectionString = getenv("DB_CONNECTION_STRING");
+	if (dbConnectionString == NULL)
+	{
+		throw std::runtime_error("DB_CONNECTION_STRING environment variable is not set!");
+	}
+	this->_dbConnection = std::make_shared<pqxx::connection>(dbConnectionString);
 }
 
 std::shared_ptr<CoreManager> CoreManager::create(IComponentList* components, ICore* core, IPlayerPool* playerPool)
