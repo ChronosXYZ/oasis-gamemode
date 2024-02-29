@@ -54,11 +54,17 @@ sampctl ensure
 sampctl build
 ```
 
-Run the server!
+### 3. Configuring env vars
+
+Copy `.env.example` in `server` folder and set specified env vars to your settings.
+
+### 4. Run the server!
+
+Go to `server` folder and type:
 
 ```bash
-sampctl run
+./samp03svr
 ```
 
-If you are in VSCode Dev Container environment, use `make run` in the workspace root folder to run the server.
+If you are in VSCode Dev Container environment, you can use `make run` in the workspace root folder to run the server.
 
