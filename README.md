@@ -40,8 +40,6 @@ The output is in `docker/build/`
 
 This repository supports Dev Container feature. Use the `Dev Containers: Reopen in Container` command from the Command Palette (`F1`, `Ctrl+Shift+P`).
 
-**IMPORTANT**! At the very first, you should build base Docker container. Go to `docker` folder and type `docker compose build`!
-
 To build gamemode inside Dev Container environment, use `make` in the workspace root folder. Further use `SKIP_CMAKE` environment variable to prevent repeated CMake configuration process.
 
 ### 2. Building the server
