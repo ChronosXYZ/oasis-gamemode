@@ -12,6 +12,7 @@
 #include "utils/Common.hpp"
 #include "utils/QueryNames.hpp"
 #include "utils/ServiceLocator.hpp"
+#include "../modes/freeroam/FreeroamController.hpp"
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -29,6 +30,7 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 	, _commandManager(std::shared_ptr<Commands::CommandManager>(new Commands::CommandManager(playerPool)))
 	, _classesComponent(components->queryComponent<IClassesComponent>())
 	, _playerControllers(std::make_unique<ServiceLocator>())
+	, _modes(std::make_unique<ServiceLocator>())
 {
 	this->initSkinSelection();
 
@@ -109,41 +111,12 @@ std::shared_ptr<DialogManager> CoreManager::getDialogManager()
 
 void CoreManager::initHandlers()
 {
-	_authHandler = std::make_unique<Auth::AuthHandler>(_playerPool, weak_from_this());
+	_authController = std::make_unique<Auth::AuthController>(_playerPool, weak_from_this());
 
-	_freeroam = Modes::Freeroam::FreeroamHandler::create(weak_from_this(), _playerPool);
+	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
+		weak_from_this(),
+		_playerPool));
 
-	// FIXME move this definition outta here
-	_commandManager->addCommand(
-		"kill", [](std::reference_wrapper<IPlayer> player)
-		{
-			player.get().setHealth(0.0);
-			Player::getPlayerExt(player.get())->sendInfoMessage(_("You have killed yourself!", player));
-		},
-		Commands::CommandInfo {
-			.args = {},
-			.description = "Kill yourself",
-			.category = GENERAL_COMMAND_CATEGORY,
-		});
-	_commandManager->addCommand(
-		"skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
-		{
-			auto playerExt = Player::getPlayerExt(player);
-			if (skinId < 0 || skinId > 311)
-			{
-				playerExt->sendErrorMessage(_("Invalid skin ID!", player));
-				return;
-			}
-			player.get().setSkin(skinId);
-			auto data = Player::getPlayerData(player.get());
-			data->lastSkinId = skinId;
-			playerExt->sendInfoMessage(fmt::sprintf(_("You have changed your skin to ID: %d!", player), skinId));
-		},
-		Commands::CommandInfo {
-			.args = { "skin ID" },
-			.description = "Set player skin",
-			.category = GENERAL_COMMAND_CATEGORY,
-		});
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool,
 		components->queryComponent<IVehiclesComponent>(),
@@ -320,7 +293,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
 		player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
 		this->_modePlayerCount[mode].insert(player.getID());
-		this->_freeroam->onModeJoin(player);
+		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player);
 		player.spawn();
 		spdlog::info("Player {} has joined mode id {}", player.getName().to_string(), static_cast<int>(mode));
 		break;
@@ -348,7 +321,7 @@ void CoreManager::removePlayerFromModes(IPlayer& player)
 					{
 					case Modes::Mode::Freeroam:
 					{
-						_freeroam->onModeLeave(player);
+						_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeLeave(player);
 					}
 					default:
 					{

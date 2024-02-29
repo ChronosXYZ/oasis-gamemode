@@ -1,9 +1,10 @@
-#include "Freeroam.hpp"
+#include "FreeroamController.hpp"
 #include "../../core/CoreManager.hpp"
 #include "../../core/PlayerVars.hpp"
 #include "../../core/player/PlayerExtension.hpp"
 #include "PlayerVars.hpp"
 
+#include <fmt/printf.h>
 #include <player.hpp>
 #include <Server/Components/Vehicles/vehicles.hpp>
 
@@ -14,7 +15,7 @@
 namespace Modes::Freeroam
 {
 
-FreeroamHandler::FreeroamHandler(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
+FreeroamController::FreeroamController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
 	: _coreManager(coreManager)
 	, _vehiclesComponent(coreManager.lock()->components->queryComponent<IVehiclesComponent>())
 	, _playerPool(playerPool)
@@ -24,13 +25,13 @@ FreeroamHandler::FreeroamHandler(std::weak_ptr<Core::CoreManager> coreManager, I
 	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 }
 
-FreeroamHandler::~FreeroamHandler()
+FreeroamController::~FreeroamController()
 {
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
 }
 
-void FreeroamHandler::onPlayerSpawn(IPlayer& player)
+void FreeroamController::onPlayerSpawn(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
 	auto mode = static_cast<Mode>(std::get<int>(*playerExt->getPlayerData()->getTempData(Core::PlayerVars::CURRENT_MODE)));
@@ -40,13 +41,14 @@ void FreeroamHandler::onPlayerSpawn(IPlayer& player)
 	}
 }
 
-std::unique_ptr<FreeroamHandler> FreeroamHandler::create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
+FreeroamController* FreeroamController::create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
 {
-	auto handler = new FreeroamHandler(coreManager, playerPool);
+	auto handler = new FreeroamController(coreManager, playerPool);
 	handler->initCommands();
-	return std::unique_ptr<FreeroamHandler>(handler);
+	return handler;
 }
-void FreeroamHandler::initCommands()
+
+void FreeroamController::initCommands()
 {
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"fr", [&](std::reference_wrapper<IPlayer> player)
@@ -84,9 +86,40 @@ void FreeroamHandler::initCommands()
 			playerExt->getPlayerData()->setTempData(PlayerVars::LAST_VEHICLE_ID, vehicle->getID());
 		},
 		Core::Commands::CommandInfo { .args = { "vehicle model id", "color 1", "color 2" }, .description = "Spawns a vehicle", .category = MODE_NAME });
+
+	this->_coreManager.lock()->getCommandManager()->addCommand(
+		"kill", [](std::reference_wrapper<IPlayer> player)
+		{
+			player.get().setHealth(0.0);
+			Core::Player::getPlayerExt(player.get())->sendInfoMessage(_("You have killed yourself!", player));
+		},
+		Core::Commands::CommandInfo {
+			.args = {},
+			.description = "Kill yourself",
+			.category = MODE_NAME,
+		});
+	this->_coreManager.lock()->getCommandManager()->addCommand(
+		"skin", [&](std::reference_wrapper<IPlayer> player, int skinId)
+		{
+			auto playerExt = Core::Player::getPlayerExt(player);
+			if (skinId < 0 || skinId > 311)
+			{
+				playerExt->sendErrorMessage(_("Invalid skin ID!", player));
+				return;
+			}
+			player.get().setSkin(skinId);
+			auto data = Core::Player::getPlayerData(player.get());
+			data->lastSkinId = skinId;
+			playerExt->sendInfoMessage(fmt::sprintf(_("You have changed your skin to ID: %d!", player), skinId));
+		},
+		Core::Commands::CommandInfo {
+			.args = { "skin ID" },
+			.description = "Set player skin",
+			.category = MODE_NAME,
+		});
 }
 
-void FreeroamHandler::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
+void FreeroamController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
 	auto data = Core::Player::getPlayerData(player);
 	auto mode = static_cast<Mode>(std::get<int>(*data->getTempData(Core::PlayerVars::CURRENT_MODE)));
@@ -97,12 +130,12 @@ void FreeroamHandler::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason
 	setupSpawn(player);
 }
 
-void FreeroamHandler::onModeJoin(IPlayer& player)
+void FreeroamController::onModeJoin(IPlayer& player)
 {
 	setupSpawn(player);
 }
 
-void FreeroamHandler::setupSpawn(IPlayer& player)
+void FreeroamController::setupSpawn(IPlayer& player)
 {
 	auto classData = queryExtension<IPlayerClassData>(player);
 	classData->setSpawnInfo(PlayerClass(Core::Player::getPlayerData(player)->lastSkinId,
@@ -112,12 +145,12 @@ void FreeroamHandler::setupSpawn(IPlayer& player)
 		WeaponSlots {}));
 }
 
-void FreeroamHandler::onModeLeave(IPlayer& player)
+void FreeroamController::onModeLeave(IPlayer& player)
 {
 	this->deleteLastSpawnedCar(player);
 }
 
-void FreeroamHandler::deleteLastSpawnedCar(IPlayer& player)
+void FreeroamController::deleteLastSpawnedCar(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
 	if (auto lastVehicleId = playerExt->getPlayerData()->getTempData(PlayerVars::LAST_VEHICLE_ID))

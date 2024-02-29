@@ -18,12 +18,12 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/core/auth/AuthHandler.cpp:61
+#: src/core/auth/AuthController.cpp:61
 #, c-format
 msgid "Registration"
 msgstr "Регистрация"
 
-#: src/core/auth/AuthHandler.cpp:62
+#: src/core/auth/AuthController.cpp:62
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -39,20 +39,20 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:70 src/core/auth/AuthHandler.cpp:253
+#: src/core/auth/AuthController.cpp:70 src/core/auth/AuthController.cpp:253
 msgid "Enter"
 msgstr "Ввести"
 
-#: src/core/auth/AuthHandler.cpp:71 src/core/auth/AuthHandler.cpp:114
+#: src/core/auth/AuthController.cpp:71 src/core/auth/AuthController.cpp:114
 msgid "Quit"
 msgstr "Выйти"
 
-#: src/core/auth/AuthHandler.cpp:100 src/core/auth/AuthHandler.cpp:113
+#: src/core/auth/AuthController.cpp:100 src/core/auth/AuthController.cpp:113
 #, c-format
 msgid "Login"
 msgstr "Войти"
 
-#: src/core/auth/AuthHandler.cpp:101
+#: src/core/auth/AuthController.cpp:101
 #, c-format
 msgid ""
 "#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
@@ -64,7 +64,7 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:107
+#: src/core/auth/AuthController.cpp:107
 #, c-format
 msgid ""
 "#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
@@ -86,28 +86,28 @@ msgstr ""
 "сервере:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 
-#: src/core/auth/AuthHandler.cpp:141
+#: src/core/auth/AuthController.cpp:141
 msgid "You have been logged in!"
 msgstr "Вы вошли в аккаунт!"
 
-#: src/core/auth/AuthHandler.cpp:155
+#: src/core/auth/AuthController.cpp:155
 msgid "Too much login attempts!"
 msgstr "Слишком много попыток логина!"
 
-#: src/core/auth/AuthHandler.cpp:166
+#: src/core/auth/AuthController.cpp:166
 msgid "Password length must be between 6-48"
 msgstr "Пароль должен быть длиной от 6 до 48 символов"
 
-#: src/core/auth/AuthHandler.cpp:200
+#: src/core/auth/AuthController.cpp:200
 msgid "Something went wrong when trying to create user!"
 msgstr "Что-то пошло не так, пока мы создавали аккаунт!"
 
-#: src/core/auth/AuthHandler.cpp:246
+#: src/core/auth/AuthController.cpp:246
 #, c-format
 msgid "Enter your email"
 msgstr "Введите ваш email"
 
-#: src/core/auth/AuthHandler.cpp:247
+#: src/core/auth/AuthController.cpp:247
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -117,20 +117,20 @@ msgid ""
 "#WHITE#/verify#LIGHT_GRAY# later"
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:254
+#: src/core/auth/AuthController.cpp:254
 msgid "Skip"
 msgstr "Пропустить"
 
-#: src/core/auth/AuthHandler.cpp:279
+#: src/core/auth/AuthController.cpp:279
 msgid "Invalid email!"
 msgstr "Неверный email!"
 
-#: src/core/auth/AuthHandler.cpp:293
+#: src/core/auth/AuthController.cpp:293
 #, c-format
 msgid "Registration info"
 msgstr "Информация о регистрации"
 
-#: src/core/auth/AuthHandler.cpp:294
+#: src/core/auth/AuthController.cpp:294
 #, c-format
 msgid ""
 "#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
@@ -145,11 +145,11 @@ msgid ""
 "password."
 msgstr ""
 
-#: src/core/auth/AuthHandler.cpp:305
+#: src/core/auth/AuthController.cpp:305
 msgid "OK"
 msgstr "ОК"
 
-#: src/core/auth/AuthHandler.cpp:308
+#: src/core/auth/AuthController.cpp:308
 msgid "You have successfully registered!"
 msgstr "Вы успешно зарегистрировались"
 

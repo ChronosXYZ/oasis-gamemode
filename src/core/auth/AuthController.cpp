@@ -1,5 +1,5 @@
 
-#include "AuthHandler.hpp"
+#include "AuthController.hpp"
 #include "PlayerVars.hpp"
 #include "../CoreManager.hpp"
 #include "../PlayerVars.hpp"
@@ -19,7 +19,7 @@
 namespace Core::Auth
 {
 
-AuthHandler::AuthHandler(IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager)
+AuthController::AuthController(IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager)
 	: _coreManager(coreManager)
 	, _playerPool(playerPool)
 	, _classesComponent(coreManager.lock()->components->queryComponent<IClassesComponent>())
@@ -28,12 +28,12 @@ AuthHandler::AuthHandler(IPlayerPool* playerPool, std::weak_ptr<CoreManager> cor
 	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 }
 
-AuthHandler::~AuthHandler()
+AuthController::~AuthController()
 {
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 }
 
-void AuthHandler::onPlayerConnect(IPlayer& player)
+void AuthController::onPlayerConnect(IPlayer& player)
 {
 	player.setSpectating(true);
 
@@ -48,13 +48,13 @@ void AuthHandler::onPlayerConnect(IPlayer& player)
 		showLoginDialog(player, false);
 	}
 	_timersComponent->create(new Impl::SimpleTimerHandler(
-								 std::bind(&AuthHandler::interpolatePlayerCamera,
+								 std::bind(&AuthController::interpolatePlayerCamera,
 									 this,
 									 std::reference_wrapper<IPlayer>(player))),
 		Milliseconds(100), false);
 }
 
-void AuthHandler::showRegistrationDialog(IPlayer& player)
+void AuthController::showRegistrationDialog(IPlayer& player)
 {
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
@@ -87,7 +87,7 @@ void AuthHandler::showRegistrationDialog(IPlayer& player)
 		});
 }
 
-void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
+void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 {
 	int loginAttempts = 0;
 	if (wrongPass)
@@ -130,7 +130,7 @@ void AuthHandler::showLoginDialog(IPlayer& player, bool wrongPass)
 		});
 }
 
-void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
+void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 {
 	auto playerData = this->_coreManager.lock()->getPlayerData(player);
 	auto playerExt = Player::getPlayerExt(player);
@@ -159,7 +159,7 @@ void AuthHandler::onLoginSubmit(IPlayer& player, const std::string& password)
 	this->showLoginDialog(player, true);
 }
 
-void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
+void AuthController::onPasswordSubmit(IPlayer& player, const std::string& password)
 {
 	if (password.length() <= 5 || password.length() > 48)
 	{
@@ -174,7 +174,7 @@ void AuthHandler::onPasswordSubmit(IPlayer& player, const std::string& password)
 	pData->setTempData(PlayerVars::PLAIN_TEXT_PASSWORD, password);
 }
 
-void AuthHandler::onRegistrationSubmit(IPlayer& player)
+void AuthController::onRegistrationSubmit(IPlayer& player)
 {
 	auto playerExt = Player::getPlayerExt(player);
 	auto db = this->_coreManager.lock()->getDBConnection();
@@ -206,7 +206,7 @@ void AuthHandler::onRegistrationSubmit(IPlayer& player)
 	this->showRegistrationInfoDialog(player);
 }
 
-void AuthHandler::showLanguageDialog(IPlayer& player)
+void AuthController::showLanguageDialog(IPlayer& player)
 {
 	std::string languagesList;
 	for (auto lang : Localization::LANGUAGES)
@@ -239,7 +239,7 @@ void AuthHandler::showLanguageDialog(IPlayer& player)
 		});
 }
 
-void AuthHandler::showEmailDialog(IPlayer& player)
+void AuthController::showEmailDialog(IPlayer& player)
 {
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_INPUT,
@@ -270,7 +270,7 @@ void AuthHandler::showEmailDialog(IPlayer& player)
 		});
 }
 
-void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
+void AuthController::onEmailSubmit(IPlayer& player, const std::string& email)
 {
 	std::smatch m;
 	if (!std::regex_match(email, m, EMAIL_REGEX))
@@ -285,7 +285,7 @@ void AuthHandler::onEmailSubmit(IPlayer& player, const std::string& email)
 	onRegistrationSubmit(player);
 }
 
-void AuthHandler::showRegistrationInfoDialog(IPlayer& player)
+void AuthController::showRegistrationInfoDialog(IPlayer& player)
 {
 	auto pData = this->_coreManager.lock()->getPlayerData(player);
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
@@ -310,7 +310,7 @@ void AuthHandler::showRegistrationInfoDialog(IPlayer& player)
 		});
 }
 
-void AuthHandler::interpolatePlayerCamera(IPlayer& player)
+void AuthController::interpolatePlayerCamera(IPlayer& player)
 {
 	player.interpolateCameraPosition(Vector3(1093.0, -2036.0, 90.0),
 		Vector3(21.1088, -1806.9847, 79.4125),

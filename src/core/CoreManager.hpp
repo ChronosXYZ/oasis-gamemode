@@ -1,11 +1,10 @@
 #pragma once
 
 #include "DialogManager.hpp"
-#include "auth/AuthHandler.hpp"
+#include "auth/AuthController.hpp"
 #include "commands/CommandManager.hpp"
 #include "player/PlayerModel.hpp"
 #include "../modes/Modes.hpp"
-#include "../modes/freeroam/Freeroam.hpp"
 #include "utils/ServiceLocator.hpp"
 
 #include <Server/Components/Classes/classes.hpp>
@@ -82,9 +81,9 @@ private:
 		{ Modes::Mode::CnR, {} }
 	};
 
-	// Handlers
-	std::unique_ptr<Auth::AuthHandler> _authHandler;
-	std::unique_ptr<Modes::Freeroam::FreeroamHandler> _freeroam;
+	// Controllers
+	std::unique_ptr<Auth::AuthController> _authController;
+	std::unique_ptr<ServiceLocator> _modes;
 	std::unique_ptr<ServiceLocator> _playerControllers;
 };
 }

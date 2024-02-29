@@ -14,11 +14,11 @@ namespace Core::Auth
 {
 inline const std::regex EMAIL_REGEX("(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?:(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
 
-class AuthHandler : public PlayerConnectEventHandler, public ClassEventHandler
+class AuthController : public PlayerConnectEventHandler, public ClassEventHandler
 {
 public:
-	AuthHandler(IPlayerPool* playerPool, std::weak_ptr<Core::CoreManager> coreManager);
-	~AuthHandler();
+	AuthController(IPlayerPool* playerPool, std::weak_ptr<Core::CoreManager> coreManager);
+	~AuthController();
 
 	void onPlayerConnect(IPlayer& player) override;
 
