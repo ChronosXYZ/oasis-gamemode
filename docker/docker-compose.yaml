@@ -2,8 +2,10 @@ version: "3"
 
 services:
   builder:
-    image: open.mp/builder
-    build: ./ubuntu-23.10
+    image: oasis/builder
+    build:
+      context: ./ubuntu-23.10
+      target: base_builder
     working_dir: /code
     environment:
       - SKIP_CMAKE

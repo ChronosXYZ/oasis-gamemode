@@ -1,12 +1,14 @@
-version: '3'
+version: "3"
 
 services:
   builder_devenv:
     extends:
       file: docker-compose.yaml
       service: builder
-    image: open.mp/builder_devenv
-    build: ./devenv
+    image: oasis/devenv
+    build:
+      context: ./ubuntu-23.10
+      target: devenv
     command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
       - 8192:8192/udp
