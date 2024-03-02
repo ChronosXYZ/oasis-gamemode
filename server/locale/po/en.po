@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-07 01:01+0000\n"
-"PO-Revision-Date: 2024-02-07 01:01+0000\n"
+"POT-Creation-Date: 2024-03-02 12:57+0000\n"
+"PO-Revision-Date: 2024-03-02 12:57+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -17,12 +17,46 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/core/auth/AuthController.cpp:61
+#: src/core/CoreManager.cpp:251
+msgid "You are not logged in yet!"
+msgstr "You are not logged in yet!"
+
+#: src/core/CoreManager.cpp:267
+msgid "Modes"
+msgstr "Modes"
+
+#: src/core/CoreManager.cpp:268
+#, c-format
+msgid ""
+"Mode\tCommand\tPlayers\n"
+"Freeroam\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Protect the President\t/ptp\t%d\n"
+"Derby\t/derby\t%d\n"
+"Cops and Robbers\t/cnr\t%d"
+msgstr ""
+"Mode\tCommand\tPlayers\n"
+"Freeroam\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Protect the President\t/ptp\t%d\n"
+"Derby\t/derby\t%d\n"
+"Cops and Robbers\t/cnr\t%d"
+
+#: src/core/CoreManager.cpp:280
+#: src/modes/deathmatch/DeathmatchController.cpp:111
+msgid "Select"
+msgstr "Select"
+
+#: src/core/CoreManager.cpp:313
+msgid "Mode is not implemented yet!"
+msgstr "Mode is not implemented yet!"
+
+#: src/core/auth/AuthController.cpp:60
 #, c-format
 msgid "Registration"
 msgstr "Registration"
 
-#: src/core/auth/AuthController.cpp:62
+#: src/core/auth/AuthController.cpp:61
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -49,20 +83,20 @@ msgstr ""
 "contact any staff member:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 
-#: src/core/auth/AuthController.cpp:70 src/core/auth/AuthController.cpp:253
+#: src/core/auth/AuthController.cpp:69 src/core/auth/AuthController.cpp:252
 msgid "Enter"
 msgstr "Enter"
 
-#: src/core/auth/AuthController.cpp:71 src/core/auth/AuthController.cpp:114
+#: src/core/auth/AuthController.cpp:70 src/core/auth/AuthController.cpp:113
 msgid "Quit"
 msgstr "Quit"
 
-#: src/core/auth/AuthController.cpp:100 src/core/auth/AuthController.cpp:113
+#: src/core/auth/AuthController.cpp:99 src/core/auth/AuthController.cpp:112
 #, c-format
 msgid "Login"
 msgstr "Login"
 
-#: src/core/auth/AuthController.cpp:101
+#: src/core/auth/AuthController.cpp:100
 #, c-format
 msgid ""
 "#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
@@ -81,7 +115,7 @@ msgstr ""
 "recovery at our discord server:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 
-#: src/core/auth/AuthController.cpp:107
+#: src/core/auth/AuthController.cpp:106
 #, c-format
 msgid ""
 "#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
@@ -102,28 +136,28 @@ msgstr ""
 "recovery at our discord server:\n"
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 
-#: src/core/auth/AuthController.cpp:141
+#: src/core/auth/AuthController.cpp:140
 msgid "You have been logged in!"
 msgstr "You have been logged in!"
 
-#: src/core/auth/AuthController.cpp:155
+#: src/core/auth/AuthController.cpp:154
 msgid "Too much login attempts!"
 msgstr "Too much login attempts!"
 
-#: src/core/auth/AuthController.cpp:166
+#: src/core/auth/AuthController.cpp:165
 msgid "Password length must be between 6-48"
 msgstr "Password length must be between 6-48"
 
-#: src/core/auth/AuthController.cpp:200
+#: src/core/auth/AuthController.cpp:199
 msgid "Something went wrong when trying to create user!"
 msgstr "Something went wrong when trying to create user!"
 
-#: src/core/auth/AuthController.cpp:246
+#: src/core/auth/AuthController.cpp:245
 #, c-format
 msgid "Enter your email"
 msgstr "Enter your email"
 
-#: src/core/auth/AuthController.cpp:247
+#: src/core/auth/AuthController.cpp:246
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -139,20 +173,20 @@ msgstr ""
 "You can skip entering email, but account features will be limited! Use "
 "#WHITE#/verify#LIGHT_GRAY# later"
 
-#: src/core/auth/AuthController.cpp:254
+#: src/core/auth/AuthController.cpp:253
 msgid "Skip"
 msgstr "Skip"
 
-#: src/core/auth/AuthController.cpp:279
+#: src/core/auth/AuthController.cpp:278
 msgid "Invalid email!"
 msgstr "Invalid email!"
 
-#: src/core/auth/AuthController.cpp:293
+#: src/core/auth/AuthController.cpp:292
 #, c-format
 msgid "Registration info"
 msgstr "Registration info"
 
-#: src/core/auth/AuthController.cpp:294
+#: src/core/auth/AuthController.cpp:293
 #, c-format
 msgid ""
 "#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
@@ -177,59 +211,13 @@ msgstr ""
 "#MILLION_GREY#Use '#RED#F8#MILLION_GREY#' to take screenshot and save the "
 "password."
 
-#: src/core/auth/AuthController.cpp:305
+#: src/core/auth/AuthController.cpp:304
 msgid "OK"
 msgstr "OK"
 
-#: src/core/auth/AuthController.cpp:308
+#: src/core/auth/AuthController.cpp:307
 msgid "You have successfully registered!"
 msgstr "You have successfully registered!"
-
-#: src/core/CoreManager.cpp:93
-msgid "You have killed yourself!"
-msgstr "You have killed yourself!"
-
-#: src/core/CoreManager.cpp:106
-msgid "Invalid skin ID!"
-msgstr "Invalid skin ID!"
-
-#: src/core/CoreManager.cpp:112
-#, c-format
-msgid "You have changed your skin to ID: %d!"
-msgstr "You have changed your skin to ID: %d!"
-
-#: src/core/CoreManager.cpp:242
-msgid "You are not logged in yet!"
-msgstr "You are not logged in yet!"
-
-#: src/core/CoreManager.cpp:258
-msgid "Modes"
-msgstr "Modes"
-
-#: src/core/CoreManager.cpp:259
-#, c-format
-msgid ""
-"Mode\tCommand\tPlayers\n"
-"Freeroam\t/fr\t%d\n"
-"Deathmatch\t/dm\t%d\n"
-"Protect the President\t/ptp\t%d\n"
-"Derby\t/derby\t%d\n"
-"Cops and Robbers\t/cnr\t%d"
-msgstr ""
-"Mode\tCommand\tPlayers\n"
-"Freeroam\t/fr\t%d\n"
-"Deathmatch\t/dm\t%d\n"
-"Protect the President\t/ptp\t%d\n"
-"Derby\t/derby\t%d\n"
-"Cops and Robbers\t/cnr\t%d"
-
-#: src/core/CoreManager.cpp:271
-msgid "Select"
-msgstr "Select"
-
-#: src/core/CoreManager.cpp:297
-msgid "Mode is not implemented yet!"
-msgstr "Mode is not implemented yet!"
 
 #: src/core/commands/CommandManager.cpp:72
 msgid "Failed to invoke command!"
@@ -239,22 +227,76 @@ msgstr "Failed to invoke command!"
 msgid "#GOLD_FUSION#[USAGE]#WHITE#"
 msgstr "#GOLD_FUSION#[USAGE]#WHITE#"
 
-#: src/core/player/PlayerExtension.cpp:50
+#: src/core/player/PlayerExtension.cpp:60
 msgid "#RED#[ERROR]#WHITE#"
 msgstr "#RED#[ERROR]#WHITE#"
 
-#: src/core/player/PlayerExtension.cpp:56
+#: src/core/player/PlayerExtension.cpp:66
 msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr "#BRIGHT_BLUE#[INFO]#WHITE#"
 
-#: src/modes/freeroam/Freeroam.cpp:63
+#: src/modes/freeroam/FreeroamController.cpp:66
 msgid "Invalid car model ID!"
 msgstr "Invalid car model ID!"
 
-#: src/modes/freeroam/Freeroam.cpp:68
+#: src/modes/freeroam/FreeroamController.cpp:71
 msgid "Invalid color ID!"
 msgstr "Invalid color ID!"
 
-#: src/modes/freeroam/Freeroam.cpp:75
+#: src/modes/freeroam/FreeroamController.cpp:85
 msgid "You have sucessfully spawned the vehicle!"
 msgstr "You have sucessfully spawned the vehicle!"
+
+#: src/modes/freeroam/FreeroamController.cpp:94
+msgid "You have killed yourself!"
+msgstr "You have killed yourself!"
+
+#: src/modes/freeroam/FreeroamController.cpp:107
+msgid "Invalid skin ID!"
+msgstr "Invalid skin ID!"
+
+#: src/modes/freeroam/FreeroamController.cpp:113
+#, c-format
+msgid "You have changed your skin to ID: %d!"
+msgstr "You have changed your skin to ID: %d!"
+
+#: src/modes/deathmatch/WeaponSet.hpp:24
+msgid "Run"
+msgstr "Run"
+
+#: src/modes/deathmatch/WeaponSet.hpp:26
+msgid "Walk"
+msgstr "Walk"
+
+#: src/modes/deathmatch/WeaponSet.hpp:28
+msgid "DSS"
+msgstr "DSS"
+
+#: src/modes/deathmatch/WeaponSet.hpp:30
+msgid "Custom"
+msgstr "Custom"
+
+#: src/modes/deathmatch/WeaponSet.hpp:32
+msgid "Team"
+msgstr "Team"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:93
+msgid "Map\tWeapon\tHost\tPlayers\n"
+msgstr "Map\tWeapon\tHost\tPlayers\n"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:94
+msgid "Create custom room\n"
+msgstr "Create custom room\n"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:103
+msgid "Server"
+msgstr "Server"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:109
+#, c-format
+msgid "Select Deathmatch room"
+msgstr "Select Deathmatch room"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:112
+msgid "Close"
+msgstr "Close"

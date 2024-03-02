@@ -5,6 +5,7 @@
 #include "../utils/PgTimestamp.hpp"
 #include "../utils/Localization.hpp"
 
+#include <cstddef>
 #include <date/date.h>
 #include <memory>
 #include <optional>
@@ -15,7 +16,7 @@
 
 namespace Core
 {
-typedef std::variant<int, float, std::string, bool> PrimitiveType;
+typedef std::variant<int, float, std::string, bool, std::size_t> PrimitiveType;
 struct PlayerModel
 {
 	unsigned long userId;

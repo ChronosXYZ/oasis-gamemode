@@ -13,6 +13,7 @@
 #include "utils/QueryNames.hpp"
 #include "utils/ServiceLocator.hpp"
 #include "../modes/freeroam/FreeroamController.hpp"
+#include "../modes/deathmatch/DeathmatchController.hpp"
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -116,7 +117,9 @@ void CoreManager::initHandlers()
 	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
 		weak_from_this(),
 		_playerPool));
-
+	_modes->registerInstance(Modes::Deathmatch::DeathmatchController::create(
+		weak_from_this(),
+		_playerPool));
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool,
 		components->queryComponent<IVehiclesComponent>(),
@@ -290,11 +293,18 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	{
 	case Modes::Mode::Freeroam:
 	{
-		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
 		player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
 		this->_modePlayerCount[mode].insert(player.getID());
 		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player);
 		player.spawn();
+		spdlog::info("Player {} has joined mode id {}", player.getName().to_string(), static_cast<int>(mode));
+		break;
+	}
+	case Modes::Mode::Deathmatch:
+	{
+		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Deathmatch));
+		this->_modePlayerCount[mode].insert(player.getID());
+		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeJoin(player);
 		spdlog::info("Player {} has joined mode id {}", player.getName().to_string(), static_cast<int>(mode));
 		break;
 	}
@@ -322,6 +332,12 @@ void CoreManager::removePlayerFromModes(IPlayer& player)
 					case Modes::Mode::Freeroam:
 					{
 						_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeLeave(player);
+						break;
+					}
+					case Modes::Mode::Deathmatch:
+					{
+						_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeLeave(player);
+						break;
 					}
 					default:
 					{

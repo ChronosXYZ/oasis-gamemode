@@ -12,6 +12,16 @@
 #include <memory>
 #include <player.hpp>
 
+#define ACCENT_MAIN 0xFF0000FF // SERVER COLOR
+#define ACCENT_SECONDARY 0xFFFFFFFF // SERVER COLOR
+#define ACCENT_MAIN_E "{FF0000}" // SERVER COLOR Embedded
+#define ACCENT_SECONDARY_E "{FFFFFF}" // SERVER COLOR Embedded
+
+#define DIALOG_HEADER_TITLE "" ACCENT_MAIN_E "Oasis " ACCENT_SECONDARY_E " | %s"
+#define DIALOG_TABLIST_TITLE_COLOR ACCENT_MAIN_E // Embedded
+#define DIALOG_HEADER DIALOG_HEADER_TITLE // embedded
+#define DIALOG_TABLIST DIALOG_TABLIST_TITLE_COLOR
+
 namespace Core
 {
 using namespace std::string_literals;
@@ -43,6 +53,7 @@ public:
 
 	bool refreshPlayerData(IPlayer& player);
 	void selectMode(IPlayer& player, Modes::Mode mode);
+	void showModeSelectionDialog(IPlayer& player);
 
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
@@ -62,7 +73,6 @@ private:
 	void savePlayer(IPlayer& player);
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
-	void showModeSelectionDialog(IPlayer& player);
 	void removePlayerFromModes(IPlayer& player);
 
 	IPlayerPool* const _playerPool = nullptr;

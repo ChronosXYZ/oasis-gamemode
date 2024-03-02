@@ -15,7 +15,7 @@
 #define OASIS_GM_UID 0xF09FC558499EF9D7
 #define OASIS_GAMEMODE_NAME "Oasis Freeroam"
 
-class OasisGamemodeComponent final : public IComponent, public PlayerSpawnEventHandler, public PlayerConnectEventHandler, public PlayerTextEventHandler
+class OasisGamemodeComponent final : public IComponent, public PlayerTextEventHandler
 {
 private:
 	ICore* _core = nullptr;
@@ -30,8 +30,6 @@ public:
 	// When this component is destroyed we need to tell any linked components this it is gone.
 	~OasisGamemodeComponent()
 	{
-		playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
-		playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 	}
 
 	// Implement the main component API.
@@ -66,21 +64,9 @@ public:
 		dotenv::init();
 		spdlog::set_level(spdlog::level::debug);
 
-		// dispatch player callbacks
-		playerPool->getPlayerConnectDispatcher().addEventHandler(this);
-		playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
-
 		this->coreManager = Core::CoreManager::create(components, _core, playerPool);
 
 		srand(time(NULL));
-	}
-
-	void onPlayerConnect(IPlayer& player) override
-	{
-	}
-
-	void onPlayerSpawn(IPlayer& player) override
-	{
 	}
 
 	void onReady() override
