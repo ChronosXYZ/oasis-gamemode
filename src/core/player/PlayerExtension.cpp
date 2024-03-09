@@ -94,8 +94,6 @@ float OasisPlayerExt::getVehicleSpeed()
 
 bool OasisPlayerExt::isInMode(Modes::Mode mode)
 {
-	auto modeData = *this->getPlayerData()->getTempData(Core::PlayerVars::CURRENT_MODE);
-	auto currentMode = static_cast<Modes::Mode>(std::get<int>(modeData));
-	return currentMode == mode;
+	return PlayerVars::getPlayerMode(this->_playerData) == mode;
 }
 }

@@ -5,7 +5,10 @@
 #include "../utils/PgTimestamp.hpp"
 #include "../utils/Localization.hpp"
 
+#include <Server/Components/Timers/timers.hpp>
+
 #include <cstddef>
+#include <ctime>
 #include <date/date.h>
 #include <memory>
 #include <optional>
@@ -16,7 +19,7 @@
 
 namespace Core
 {
-typedef std::variant<int, float, std::string, bool, std::size_t> PrimitiveType;
+typedef std::variant<int, float, std::string, bool, std::size_t, std::time_t> PrimitiveType;
 struct PlayerModel
 {
 	unsigned long userId;
@@ -77,11 +80,13 @@ struct PlayerModel
 		}
 	}
 
-	std::optional<const PrimitiveType> getTempData(const std::string& key)
+	template <typename T>
+	std::optional<const T> getTempData(const std::string& key)
 	{
 		if (tempData.contains(key))
 		{
-			return tempData.at(key);
+			auto data = tempData.at(key);
+			return std::get<T>(data);
 		}
 		return {};
 	}

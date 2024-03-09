@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-09 19:29+0000\n"
-"PO-Revision-Date: 2024-03-09 19:29+0000\n"
+"POT-Creation-Date: 2024-03-09 22:44+0000\n"
+"PO-Revision-Date: 2024-03-09 22:44+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -185,15 +185,15 @@ msgstr "OK"
 msgid "You have successfully registered!"
 msgstr "You have successfully registered!"
 
-#: src/core/CoreManager.cpp:251
+#: src/core/CoreManager.cpp:253
 msgid "You are not logged in yet!"
 msgstr "You are not logged in yet!"
 
-#: src/core/CoreManager.cpp:267
+#: src/core/CoreManager.cpp:269
 msgid "Modes"
 msgstr "Modes"
 
-#: src/core/CoreManager.cpp:268
+#: src/core/CoreManager.cpp:270
 #, c-format
 msgid ""
 "Mode\tCommand\tPlayers\n"
@@ -210,20 +210,20 @@ msgstr ""
 "Derby\t/derby\t%d\n"
 "Cops and Robbers\t/cnr\t%d"
 
-#: src/core/CoreManager.cpp:280
-#: src/modes/deathmatch/DeathmatchController.cpp:151
+#: src/core/CoreManager.cpp:282
+#: src/modes/deathmatch/DeathmatchController.cpp:224
 msgid "Select"
 msgstr "Select"
 
-#: src/core/CoreManager.cpp:314
+#: src/core/CoreManager.cpp:316
 msgid "Mode is not implemented yet!"
 msgstr "Mode is not implemented yet!"
 
-#: src/core/commands/CommandManager.cpp:72
+#: src/core/commands/CommandManager.cpp:68
 msgid "Failed to invoke command!"
 msgstr "Failed to invoke command!"
 
-#: src/core/commands/CommandManager.cpp:89
+#: src/core/commands/CommandManager.cpp:105
 msgid "#GOLD_FUSION#[USAGE]#WHITE#"
 msgstr "#GOLD_FUSION#[USAGE]#WHITE#"
 
@@ -235,36 +235,44 @@ msgstr "#RED#[ERROR]#WHITE#"
 msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr "#BRIGHT_BLUE#[INFO]#WHITE#"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:95
+#: src/modes/deathmatch/DeathmatchController.cpp:117
+msgid "~r~Don't use C-bug!"
+msgstr "~r~Don't use C-bug!"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:159
 msgid "Such room doesn't exist!"
 msgstr "Such room doesn't exist!"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:101
+#: src/modes/deathmatch/DeathmatchController.cpp:165
 msgid "room number"
 msgstr "room number"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:101
+#: src/modes/deathmatch/DeathmatchController.cpp:165
 msgid "Enter DM room"
 msgstr "Enter DM room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:133
+#: src/modes/deathmatch/DeathmatchController.cpp:171
+msgid "Enter DM mode"
+msgstr "Enter DM mode"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:206
 msgid "Map\tWeapon\tHost\tPlayers\n"
 msgstr "Map\tWeapon\tHost\tPlayers\n"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:134
+#: src/modes/deathmatch/DeathmatchController.cpp:207
 msgid "Create custom room\n"
 msgstr "Create custom room\n"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:143
+#: src/modes/deathmatch/DeathmatchController.cpp:216
 msgid "Server"
 msgstr "Server"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:149
+#: src/modes/deathmatch/DeathmatchController.cpp:222
 #, c-format
 msgid "Select Deathmatch room"
 msgstr "Select Deathmatch room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:152
+#: src/modes/deathmatch/DeathmatchController.cpp:225
 msgid "Close"
 msgstr "Close"
 

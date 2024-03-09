@@ -58,6 +58,7 @@ conan_cmake_configure(REQUIRES
                             date/3.0.1
                             fmt/10.2.1
                             magic_enum/0.9.5
+                            stduuid/1.2.3
                         OPTIONS "date:use_system_tz_db=True"
                         GENERATORS CMakeDeps)
 
@@ -93,6 +94,7 @@ find_package(argon2 REQUIRED CONFIG)
 find_package(date REQUIRED)
 find_package(fmt REQUIRED)
 find_package(magic_enum REQUIRED CONFIG)
+find_package(stduuid REQUIRED CONFIG)
 
 add_library(${PROJECT_NAME} SHARED ${source_list})
 
@@ -105,6 +107,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     date::date
     fmt::fmt
     magic_enum::magic_enum
+    stduuid::stduuid
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}::rc)

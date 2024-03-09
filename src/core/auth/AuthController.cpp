@@ -92,7 +92,7 @@ void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 	if (wrongPass)
 	{
 		auto data = this->_coreManager.lock()->getPlayerData(player);
-		loginAttempts = std::get<int>(data->getTempData(PlayerVars::LOGIN_ATTEMPTS_KEY).value());
+		loginAttempts = *data->getTempData<int>(PlayerVars::LOGIN_ATTEMPTS_KEY);
 	}
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
@@ -147,7 +147,7 @@ void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 		}
 	}
 
-	auto loginAttempts = std::get<int>(playerData->getTempData(PlayerVars::LOGIN_ATTEMPTS_KEY).value());
+	auto loginAttempts = *playerData->getTempData<int>(PlayerVars::LOGIN_ATTEMPTS_KEY);
 	playerData->setTempData(PlayerVars::LOGIN_ATTEMPTS_KEY, ++loginAttempts);
 	if (loginAttempts > 3)
 	{
@@ -299,7 +299,7 @@ void AuthController::showRegistrationInfoDialog(IPlayer& player)
 						 player),
 			pData->name,
 			pData->userId,
-			std::get<std::string>(*pData->getTempData(PlayerVars::PLAIN_TEXT_PASSWORD)),
+			*pData->getTempData<std::string>(PlayerVars::PLAIN_TEXT_PASSWORD),
 			std::format("{:%Y-%m-%d}", pData->registrationDate)),
 		_("OK", player), "",
 		[&](DialogResponse resp, int listItem, StringView inputText)

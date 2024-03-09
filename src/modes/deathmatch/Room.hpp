@@ -20,5 +20,6 @@ struct Room
 	std::vector<int> playerIds;
 	std::optional<std::string> host;
 	unsigned int virtualWorld;
+	bool cbugEnabled;
 };
 }

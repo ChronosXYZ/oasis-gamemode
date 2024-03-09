@@ -20,7 +20,7 @@ inline const auto SKIN_SELECTION_MODE = "SKIN_SELECTION_MODE"s;
 inline Modes::Mode getPlayerMode(std::shared_ptr<PlayerModel> pData)
 {
 	return magic_enum::enum_cast<Modes::Mode>(
-		std::get<int>(*pData->getTempData(CURRENT_MODE)))
+		*pData->getTempData<int>(CURRENT_MODE))
 		.value_or(Modes::Mode::None);
 }
 }

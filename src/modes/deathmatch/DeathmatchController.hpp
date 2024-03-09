@@ -3,11 +3,13 @@
 #include "../../modes/IMode.hpp"
 #include "../../core/CoreManager.hpp"
 #include "Room.hpp"
+#include "Server/Components/Timers/timers.hpp"
 
 #include <cstddef>
 #include <player.hpp>
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace Modes::Deathmatch
@@ -15,9 +17,12 @@ namespace Modes::Deathmatch
 inline const unsigned int VIRTUAL_WORLD_PREFIX = 100;
 inline const std::string MODE_NAME = "deathmatch";
 
-class DeathmatchController : public Modes::IMode, public PlayerDamageEventHandler, public PlayerSpawnEventHandler
+class DeathmatchController : public Modes::IMode,
+							 public PlayerDamageEventHandler,
+							 public PlayerSpawnEventHandler,
+							 public PlayerChangeEventHandler
 {
-	DeathmatchController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
+	DeathmatchController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, ITimersComponent* timersComponent);
 
 	void initCommand();
 	void initRooms();
@@ -28,9 +33,11 @@ class DeathmatchController : public Modes::IMode, public PlayerDamageEventHandle
 	void removePlayerFromRoom(IPlayer& player);
 
 	std::vector<std::shared_ptr<Room>> _rooms;
+	std::unordered_map<std::string, ITimer*> _freezeTimers;
 
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
+	ITimersComponent* _timersComponent;
 
 public:
 	~DeathmatchController();
@@ -39,7 +46,8 @@ public:
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
+	void onPlayerKeyStateChange(IPlayer& player, uint32_t newKeys, uint32_t oldKeys) override;
 
-	static DeathmatchController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
+	static DeathmatchController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, ITimersComponent* timersComponent);
 };
 }

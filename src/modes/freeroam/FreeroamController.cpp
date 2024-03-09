@@ -156,11 +156,10 @@ void FreeroamController::onModeLeave(IPlayer& player)
 void FreeroamController::deleteLastSpawnedCar(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
-	if (auto lastVehicleId = playerExt->getPlayerData()->getTempData(PlayerVars::LAST_VEHICLE_ID))
+	if (auto lastVehicleId = playerExt->getPlayerData()->getTempData<int>(PlayerVars::LAST_VEHICLE_ID))
 	{
-		auto vid = std::get<int>(*lastVehicleId);
-		auto vehicle = _vehiclesComponent->get(vid);
-		_vehiclesComponent->release(vid);
+		auto vehicle = _vehiclesComponent->get(*lastVehicleId);
+		_vehiclesComponent->release(*lastVehicleId);
 	}
 }
 }
