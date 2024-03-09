@@ -52,9 +52,10 @@ DeathmatchController::~DeathmatchController()
 void DeathmatchController::onModeJoin(IPlayer& player)
 {
 	auto playerData = Core::Player::getPlayerData(player);
-	if (auto roomIdOpt = playerData->getTempData<std::size_t>(PlayerVars::ROOM_ID_TO_JOIN))
+	if (auto roomId = playerData->getTempData<std::size_t>(PlayerVars::ROOM_ID_TO_JOIN))
 	{
-		onRoomJoin(player, this->_rooms[*roomIdOpt], *roomIdOpt);
+		onRoomJoin(player, this->_rooms[*roomId], *roomId);
+		playerData->deleteTempData(PlayerVars::ROOM_ID_TO_JOIN);
 		return;
 	}
 	showRoomSelectionDialog(player);
