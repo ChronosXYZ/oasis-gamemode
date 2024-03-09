@@ -140,6 +140,8 @@ void FreeroamController::onModeJoin(IPlayer& player)
 
 void FreeroamController::setupSpawn(IPlayer& player)
 {
+	player.setVirtualWorld(VIRTUAL_WORLD_ID);
+	player.setInterior(0);
 	auto classData = queryExtension<IPlayerClassData>(player);
 	classData->setSpawnInfo(PlayerClass(Core::Player::getPlayerData(player)->lastSkinId,
 		TEAM_NONE,
