@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-09 22:44+0000\n"
-"PO-Revision-Date: 2024-03-09 22:44+0000\n"
+"POT-Creation-Date: 2024-03-09 22:57+0000\n"
+"PO-Revision-Date: 2024-03-09 22:57+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -211,7 +211,7 @@ msgstr ""
 "Cops and Robbers\t/cnr\t%d"
 
 #: src/core/CoreManager.cpp:282
-#: src/modes/deathmatch/DeathmatchController.cpp:224
+#: src/modes/deathmatch/DeathmatchController.cpp:226
 msgid "Select"
 msgstr "Select"
 
@@ -236,8 +236,8 @@ msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr "#BRIGHT_BLUE#[INFO]#WHITE#"
 
 #: src/modes/deathmatch/DeathmatchController.cpp:117
-msgid "~r~Don't use C-bug!"
-msgstr "~r~Don't use C-bug!"
+msgid "Don't use ~r~C-bug!"
+msgstr "Don't use ~r~C-bug!"
 
 #: src/modes/deathmatch/DeathmatchController.cpp:159
 msgid "Such room doesn't exist!"
@@ -256,23 +256,23 @@ msgid "Enter DM mode"
 msgstr "Enter DM mode"
 
 #: src/modes/deathmatch/DeathmatchController.cpp:206
-msgid "Map\tWeapon\tHost\tPlayers\n"
-msgstr "Map\tWeapon\tHost\tPlayers\n"
+msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
+msgstr "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:207
-msgid "Create custom room\n"
-msgstr "Create custom room\n"
+#: src/modes/deathmatch/DeathmatchController.cpp:208
+msgid "Create custom room"
+msgstr "Create custom room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:216
+#: src/modes/deathmatch/DeathmatchController.cpp:218
 msgid "Server"
 msgstr "Server"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:222
+#: src/modes/deathmatch/DeathmatchController.cpp:224
 #, c-format
 msgid "Select Deathmatch room"
 msgstr "Select Deathmatch room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:225
+#: src/modes/deathmatch/DeathmatchController.cpp:227
 msgid "Close"
 msgstr "Close"
 

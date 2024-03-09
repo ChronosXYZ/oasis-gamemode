@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-09 22:44+0000\n"
+"POT-Creation-Date: 2024-03-09 22:57+0000\n"
 "PO-Revision-Date: 2024-01-28 13:50+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -179,7 +179,7 @@ msgstr ""
 "Полицейские и грабители\t/cnr\t%d"
 
 #: src/core/CoreManager.cpp:282
-#: src/modes/deathmatch/DeathmatchController.cpp:224
+#: src/modes/deathmatch/DeathmatchController.cpp:226
 msgid "Select"
 msgstr "Выбрать"
 
@@ -204,7 +204,7 @@ msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr "#BRIGHT_BLUE#[ИНФО]#WHITE#"
 
 #: src/modes/deathmatch/DeathmatchController.cpp:117
-msgid "~r~Don't use C-bug!"
+msgid "Don't use ~r~C-bug!"
 msgstr ""
 
 #: src/modes/deathmatch/DeathmatchController.cpp:159
@@ -224,23 +224,25 @@ msgid "Enter DM mode"
 msgstr ""
 
 #: src/modes/deathmatch/DeathmatchController.cpp:206
-msgid "Map\tWeapon\tHost\tPlayers\n"
+#, fuzzy
+msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
 msgstr "Карта\tОружие\tСоздатель\tИгроки\n"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:207
-msgid "Create custom room\n"
+#: src/modes/deathmatch/DeathmatchController.cpp:208
+#, fuzzy
+msgid "Create custom room"
 msgstr "Создать произвольную комнату\n"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:216
+#: src/modes/deathmatch/DeathmatchController.cpp:218
 msgid "Server"
 msgstr "Сервер"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:222
+#: src/modes/deathmatch/DeathmatchController.cpp:224
 #, c-format
 msgid "Select Deathmatch room"
 msgstr "Выбрать комнату Deathmatch"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:225
+#: src/modes/deathmatch/DeathmatchController.cpp:227
 msgid "Close"
 msgstr "Закрыть"
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-09 22:44+0000\n"
+"POT-Creation-Date: 2024-03-09 22:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -163,7 +163,7 @@ msgid ""
 msgstr ""
 
 #: src/core/CoreManager.cpp:282
-#: src/modes/deathmatch/DeathmatchController.cpp:224
+#: src/modes/deathmatch/DeathmatchController.cpp:226
 msgid "Select"
 msgstr ""
 
@@ -188,7 +188,7 @@ msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr ""
 
 #: src/modes/deathmatch/DeathmatchController.cpp:117
-msgid "~r~Don't use C-bug!"
+msgid "Don't use ~r~C-bug!"
 msgstr ""
 
 #: src/modes/deathmatch/DeathmatchController.cpp:159
@@ -208,23 +208,23 @@ msgid "Enter DM mode"
 msgstr ""
 
 #: src/modes/deathmatch/DeathmatchController.cpp:206
-msgid "Map\tWeapon\tHost\tPlayers\n"
+msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:207
-msgid "Create custom room\n"
+#: src/modes/deathmatch/DeathmatchController.cpp:208
+msgid "Create custom room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:216
+#: src/modes/deathmatch/DeathmatchController.cpp:218
 msgid "Server"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:222
+#: src/modes/deathmatch/DeathmatchController.cpp:224
 #, c-format
 msgid "Select Deathmatch room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:225
+#: src/modes/deathmatch/DeathmatchController.cpp:227
 msgid "Close"
 msgstr ""
 

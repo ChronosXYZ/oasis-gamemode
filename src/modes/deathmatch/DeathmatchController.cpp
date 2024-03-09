@@ -114,7 +114,7 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 			{
 				player.setControllable(false);
 				playerData->setTempData(PlayerVars::CBUGGING, true);
-				player.sendGameText(_("~r~Don't use C-bug!", player), Milliseconds(3000), 5);
+				player.sendGameText(_("Don't use ~r~C-bug!", player), Milliseconds(3000), 5);
 				if (auto timerIdOpt = playerData->getTempData<std::string>(PlayerVars::CBUG_FREEZE_TIMER_ID))
 				{
 					this->_freezeTimers[*timerIdOpt]->kill();
@@ -203,13 +203,15 @@ void DeathmatchController::initRooms()
 
 void DeathmatchController::showRoomSelectionDialog(IPlayer& player)
 {
-	std::string body = _("Map\tWeapon\tHost\tPlayers\n", player);
-	body += _("Create custom room\n", player);
+	std::string body = _("#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players", player);
+	body += "\n";
+	body += _("Create custom room", player);
+	body += "\n";
 	for (std::size_t i = 0; i < _rooms.size(); i++)
 	{
 		auto room = _rooms[i];
 
-		body += fmt::sprintf("%d. %s\t%s\t%s\t%d\n",
+		body += fmt::sprintf("{999999}%d. {00FF00}%s\t{00FF00}%s\t{00FF00}%s\t{00FF00}%d\n",
 			i + 1,
 			room->map.name,
 			weaponSetToString(room->weaponSet, player),
