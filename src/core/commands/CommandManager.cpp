@@ -5,6 +5,8 @@
 
 #include <spdlog/spdlog.h>
 #include <player.hpp>
+#include <stdexcept>
+#include <variant>
 
 namespace Core::Commands
 {
@@ -56,15 +58,9 @@ bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText
 	{
 		this->callCommandHandler(commandName, args);
 	}
-	catch (const std::bad_variant_access& e)
-	{
-		spdlog::debug(e.what());
-		this->sendCommandUsage(player, commandName, this->_commandInfo[commandName]);
-	}
 	catch (const std::invalid_argument& e)
 	{
-		spdlog::debug(e.what());
-		this->sendCommandUsage(player, commandName, this->_commandInfo[commandName]);
+		this->sendCommandUsage(player, commandName);
 	}
 	catch (const std::exception& e)
 	{
@@ -76,16 +72,37 @@ bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText
 
 void CommandManager::callCommandHandler(const std::string& cmdName, CommandCallbackValues args)
 {
-	(*this->_commandHandlers[cmdName])(args);
+	bool notFound = true;
+	for (const auto& handler : this->_commandHandlers[cmdName])
+	{
+		try
+		{
+			(*handler)(args);
+		}
+		catch (const std::invalid_argument& e)
+		{
+			spdlog::debug(e.what());
+			continue;
+		}
+		notFound = false;
+		break;
+	}
+	if (notFound)
+	{
+		throw std::invalid_argument("command called with invalid arguments");
+	}
 }
 
-void CommandManager::sendCommandUsage(IPlayer& player, const std::string& name, std::shared_ptr<CommandInfo> info)
+void CommandManager::sendCommandUsage(IPlayer& player, const std::string& name)
 {
-	std::string usageText = "/" + name;
-	for (const auto& arg : info->args)
+	for (auto info : this->_commandInfo[name])
 	{
-		usageText += fmt::format(" [{}]", _(arg, player));
+		std::string usageText = "/" + name;
+		for (const auto& arg : info->args)
+		{
+			usageText += fmt::format(" [{}]", _(arg, player));
+		}
+		player.sendClientMessage(Colour::White(), fmt::format("{} {}", _("#GOLD_FUSION#[USAGE]#WHITE#", player), usageText));
 	}
-	player.sendClientMessage(Colour::White(), fmt::format("{} {}", _("#GOLD_FUSION#[USAGE]#WHITE#", player), usageText));
 }
 }

@@ -2,6 +2,7 @@
 
 #include <fmt/core.h>
 #include <player.hpp>
+#include <stdexcept>
 #include <variant>
 #include <vector>
 
@@ -59,7 +60,14 @@ private:
 						vv.size(),
 						sizeof...(Is)));
 			}
-			/* if signature matches */ fn_(std::get<Args>(vv[Is])...);
+			try
+			{
+				fn_(std::get<Args>(vv[Is])...);
+			}
+			catch (const std::bad_variant_access)
+			{
+				throw std::invalid_argument("invalid type of argument when tried to call the callback");
+			}
 		};
 	}
 
