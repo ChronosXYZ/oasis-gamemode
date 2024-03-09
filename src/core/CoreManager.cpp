@@ -293,6 +293,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	{
 	case Modes::Mode::Freeroam:
 	{
+		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
 		player.setVirtualWorld(Modes::Freeroam::VIRTUAL_WORLD_ID);
 		this->_modePlayerCount[mode].insert(player.getID());
 		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player);

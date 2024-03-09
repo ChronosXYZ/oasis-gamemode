@@ -1,12 +1,13 @@
 #include "PlayerExtension.hpp"
 #include "../utils/Localization.hpp"
-#include "Server/Components/Vehicles/vehicles.hpp"
 #include "TextDrawManager.hpp"
+#include "../PlayerVars.hpp"
 
 #include <player.hpp>
 #include <component.hpp>
 #include <Server/Components/Timers/timers.hpp>
 #include <Server/Components/Timers/Impl/timers_impl.hpp>
+#include <Server/Components/Vehicles/vehicles.hpp>
 
 #include <functional>
 #include <memory>
@@ -89,5 +90,12 @@ float OasisPlayerExt::getVehicleSpeed()
 		return std::sqrt(std::pow(velocity.x, 2) + std::pow(velocity.y, 2)) * 100.0 * 1.6;
 	}
 	return 0.0;
+}
+
+bool OasisPlayerExt::isInMode(Modes::Mode mode)
+{
+	auto modeData = *this->getPlayerData()->getTempData(Core::PlayerVars::CURRENT_MODE);
+	auto currentMode = static_cast<Modes::Mode>(std::get<int>(modeData));
+	return currentMode == mode;
 }
 }

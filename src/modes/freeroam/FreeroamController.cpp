@@ -34,8 +34,7 @@ FreeroamController::~FreeroamController()
 void FreeroamController::onPlayerSpawn(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
-	auto mode = static_cast<Mode>(std::get<int>(*playerExt->getPlayerData()->getTempData(Core::PlayerVars::CURRENT_MODE)));
-	if (mode != Mode::Freeroam)
+	if (!playerExt->isInMode(Mode::Freeroam))
 	{
 		return;
 	}
@@ -61,6 +60,11 @@ void FreeroamController::initCommands()
 		"v", [&](std::reference_wrapper<IPlayer> player, int modelId, int color1, int color2)
 		{
 			auto playerExt = Core::Player::getPlayerExt(player);
+			if (!playerExt->isInMode(Mode::Freeroam))
+			{
+				playerExt->sendErrorMessage(_("You can spawn vehicles only in Freeroam mode!", player));
+				return;
+			}
 			if (modelId < 400 || modelId > 611)
 			{
 				playerExt->sendErrorMessage(_("Invalid car model ID!", player));
@@ -121,9 +125,8 @@ void FreeroamController::initCommands()
 
 void FreeroamController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
-	auto data = Core::Player::getPlayerData(player);
-	auto mode = static_cast<Mode>(std::get<int>(*data->getTempData(Core::PlayerVars::CURRENT_MODE)));
-	if (mode != Mode::Freeroam)
+	auto playerExt = Core::Player::getPlayerExt(player);
+	if (!playerExt->isInMode(Mode::Freeroam))
 	{
 		return;
 	}
