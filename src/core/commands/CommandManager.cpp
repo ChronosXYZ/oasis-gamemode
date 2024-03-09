@@ -84,7 +84,7 @@ void CommandManager::sendCommandUsage(IPlayer& player, const std::string& name, 
 	std::string usageText = "/" + name;
 	for (const auto& arg : info->args)
 	{
-		usageText += fmt::format(" [{}]", arg);
+		usageText += fmt::format(" [{}]", _(arg, player));
 	}
 	player.sendClientMessage(Colour::White(), fmt::format("{} {}", _("#GOLD_FUSION#[USAGE]#WHITE#", player), usageText));
 }

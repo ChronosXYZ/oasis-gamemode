@@ -34,3 +34,8 @@ static inline tinygettext::Dictionary& getDictionary(const std::string& lang, co
 }
 
 std::string _(const std::string& message, IPlayer& player);
+
+inline const std::string& __(const std::string& message)
+{
+	return message;
+}
