@@ -99,6 +99,12 @@ void DeathmatchController::initCommand()
 			this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") }, .description = __("Enter DM room"), .category = MODE_NAME });
+	this->_coreManager.lock()->getCommandManager()->addCommand(
+		"dm", [&](std::reference_wrapper<IPlayer> player)
+		{
+			this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
+		},
+		Core::Commands::CommandInfo { .args = {}, .description = __("Enter DM mode"), .category = MODE_NAME });
 }
 
 void DeathmatchController::initRooms()
