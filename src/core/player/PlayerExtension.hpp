@@ -2,8 +2,9 @@
 
 #include "PlayerModel.hpp"
 #include "TextDrawManager.hpp"
-#include "types.hpp"
+#include "../../modes/Modes.hpp"
 
+#include <types.hpp>
 #include <Server/Components/Timers/timers.hpp>
 
 #include <fmt/core.h>
@@ -42,6 +43,7 @@ public:
 	void sendInfoMessage(const std::string& message);
 	const std::string getIP();
 	float getVehicleSpeed();
+	bool isInMode(Modes::Mode mode);
 
 	void freeExtension() override;
 	void reset() override;

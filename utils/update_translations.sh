@@ -14,7 +14,7 @@ update_translations() {
     # Update or create the POT file
     pot_file="${pot_folder}/${domain}.pot"
     echo "Updating .pot file from sources..."
-    xgettext --from-code=UTF-8 -c++ --keyword=_ --output="${pot_file}" ${source_files}
+    xgettext --from-code=UTF-8 -c++ --keyword=_ --keyword=__ --output="${pot_file}" ${source_files}
 
     # Update existing or create new PO files for each locale
     for locale in "${locales[@]}"; do

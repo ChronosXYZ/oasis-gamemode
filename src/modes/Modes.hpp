@@ -8,6 +8,7 @@ enum class Mode
 	Deathmatch,
 	Derby,
 	PTP,
-	CnR
+	CnR,
+	None
 };
 }

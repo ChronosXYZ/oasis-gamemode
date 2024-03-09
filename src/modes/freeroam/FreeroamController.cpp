@@ -34,8 +34,7 @@ FreeroamController::~FreeroamController()
 void FreeroamController::onPlayerSpawn(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
-	auto mode = static_cast<Mode>(std::get<int>(*playerExt->getPlayerData()->getTempData(Core::PlayerVars::CURRENT_MODE)));
-	if (mode != Mode::Freeroam)
+	if (!playerExt->isInMode(Mode::Freeroam))
 	{
 		return;
 	}
@@ -55,12 +54,17 @@ void FreeroamController::initCommands()
 		{
 			this->_coreManager.lock()->selectMode(player, Mode::Freeroam);
 		},
-		Core::Commands::CommandInfo { .args = {}, .description = "Teleports player to the Freeroam mode", .category = MODE_NAME });
+		Core::Commands::CommandInfo { .args = {}, .description = __("Teleports player to the Freeroam mode"), .category = MODE_NAME });
 
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"v", [&](std::reference_wrapper<IPlayer> player, int modelId, int color1, int color2)
 		{
 			auto playerExt = Core::Player::getPlayerExt(player);
+			if (!playerExt->isInMode(Mode::Freeroam))
+			{
+				playerExt->sendErrorMessage(_("You can spawn vehicles only in Freeroam mode!", player));
+				return;
+			}
 			if (modelId < 400 || modelId > 611)
 			{
 				playerExt->sendErrorMessage(_("Invalid car model ID!", player));
@@ -85,7 +89,7 @@ void FreeroamController::initCommands()
 			playerExt->sendInfoMessage(_("You have sucessfully spawned the vehicle!", player));
 			playerExt->getPlayerData()->setTempData(PlayerVars::LAST_VEHICLE_ID, vehicle->getID());
 		},
-		Core::Commands::CommandInfo { .args = { "vehicle model id", "color 1", "color 2" }, .description = "Spawns a vehicle", .category = MODE_NAME });
+		Core::Commands::CommandInfo { .args = { __("vehicle model id"), __("color 1"), __("color 2") }, .description = __("Spawns a vehicle"), .category = MODE_NAME });
 
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"kill", [](std::reference_wrapper<IPlayer> player)
@@ -95,7 +99,7 @@ void FreeroamController::initCommands()
 		},
 		Core::Commands::CommandInfo {
 			.args = {},
-			.description = "Kill yourself",
+			.description = __("Kill yourself"),
 			.category = MODE_NAME,
 		});
 	this->_coreManager.lock()->getCommandManager()->addCommand(
@@ -113,17 +117,16 @@ void FreeroamController::initCommands()
 			playerExt->sendInfoMessage(fmt::sprintf(_("You have changed your skin to ID: %d!", player), skinId));
 		},
 		Core::Commands::CommandInfo {
-			.args = { "skin ID" },
-			.description = "Set player skin",
+			.args = { __("skin ID") },
+			.description = __("Set player skin"),
 			.category = MODE_NAME,
 		});
 }
 
 void FreeroamController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
-	auto data = Core::Player::getPlayerData(player);
-	auto mode = static_cast<Mode>(std::get<int>(*data->getTempData(Core::PlayerVars::CURRENT_MODE)));
-	if (mode != Mode::Freeroam)
+	auto playerExt = Core::Player::getPlayerExt(player);
+	if (!playerExt->isInMode(Mode::Freeroam))
 	{
 		return;
 	}
@@ -153,11 +156,10 @@ void FreeroamController::onModeLeave(IPlayer& player)
 void FreeroamController::deleteLastSpawnedCar(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
-	if (auto lastVehicleId = playerExt->getPlayerData()->getTempData(PlayerVars::LAST_VEHICLE_ID))
+	if (auto lastVehicleId = playerExt->getPlayerData()->getTempData<int>(PlayerVars::LAST_VEHICLE_ID))
 	{
-		auto vid = std::get<int>(*lastVehicleId);
-		auto vehicle = _vehiclesComponent->get(vid);
-		_vehiclesComponent->release(vid);
+		auto vehicle = _vehiclesComponent->get(*lastVehicleId);
+		_vehiclesComponent->release(*lastVehicleId);
 	}
 }
 }
