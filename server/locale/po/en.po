@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-09 19:06+0000\n"
-"PO-Revision-Date: 2024-03-09 19:06+0000\n"
+"POT-Creation-Date: 2024-03-09 19:29+0000\n"
+"PO-Revision-Date: 2024-03-09 19:29+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -211,7 +211,7 @@ msgstr ""
 "Cops and Robbers\t/cnr\t%d"
 
 #: src/core/CoreManager.cpp:280
-#: src/modes/deathmatch/DeathmatchController.cpp:136
+#: src/modes/deathmatch/DeathmatchController.cpp:151
 msgid "Select"
 msgstr "Select"
 
@@ -235,24 +235,36 @@ msgstr "#RED#[ERROR]#WHITE#"
 msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr "#BRIGHT_BLUE#[INFO]#WHITE#"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:118
+#: src/modes/deathmatch/DeathmatchController.cpp:95
+msgid "Such room doesn't exist!"
+msgstr "Such room doesn't exist!"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:101
+msgid "room number"
+msgstr "room number"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:101
+msgid "Enter DM room"
+msgstr "Enter DM room"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:133
 msgid "Map\tWeapon\tHost\tPlayers\n"
 msgstr "Map\tWeapon\tHost\tPlayers\n"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:119
+#: src/modes/deathmatch/DeathmatchController.cpp:134
 msgid "Create custom room\n"
 msgstr "Create custom room\n"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:128
+#: src/modes/deathmatch/DeathmatchController.cpp:143
 msgid "Server"
 msgstr "Server"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:134
+#: src/modes/deathmatch/DeathmatchController.cpp:149
 #, c-format
 msgid "Select Deathmatch room"
 msgstr "Select Deathmatch room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:137
+#: src/modes/deathmatch/DeathmatchController.cpp:152
 msgid "Close"
 msgstr "Close"
 

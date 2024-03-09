@@ -35,6 +35,9 @@ static inline tinygettext::Dictionary& getDictionary(const std::string& lang, co
 
 std::string _(const std::string& message, IPlayer& player);
 
+/**
+	Mark message for localization, but don't translate it right away.
+*/
 inline const std::string& __(const std::string& message)
 {
 	return message;

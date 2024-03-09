@@ -17,7 +17,7 @@ struct Room
 	Map map;
 	std::array<PlayerWeapon, MAX_WEAPON_SLOTS> allowedWeapons;
 	WeaponSet weaponSet;
-	unsigned int playerCount;
+	std::vector<int> playerIds;
 	std::optional<std::string> host;
 	unsigned int virtualWorld;
 };

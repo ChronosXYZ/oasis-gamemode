@@ -13,6 +13,8 @@
 namespace Modes::Deathmatch
 {
 inline const unsigned int VIRTUAL_WORLD_PREFIX = 100;
+inline const std::string MODE_NAME = "deathmatch";
+
 class DeathmatchController : public Modes::IMode, public PlayerDamageEventHandler, public PlayerSpawnEventHandler
 {
 	DeathmatchController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);

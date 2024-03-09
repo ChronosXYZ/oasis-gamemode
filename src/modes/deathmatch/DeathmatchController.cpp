@@ -38,6 +38,13 @@ DeathmatchController::~DeathmatchController()
 
 void DeathmatchController::onModeJoin(IPlayer& player)
 {
+	auto playerData = Core::Player::getPlayerData(player);
+	if (auto roomIdOpt = playerData->getTempData(PlayerVars::ROOM_ID_TO_JOIN))
+	{
+		auto roomId = std::get<std::size_t>(*roomIdOpt);
+		onRoomJoin(player, this->_rooms[roomId], roomId);
+		return;
+	}
 	showRoomSelectionDialog(player);
 }
 
@@ -78,7 +85,20 @@ DeathmatchController* DeathmatchController::create(std::weak_ptr<Core::CoreManag
 
 void DeathmatchController::initCommand()
 {
-	// init DM-specific commands
+	this->_coreManager.lock()->getCommandManager()->addCommand(
+		"dm", [&](std::reference_wrapper<IPlayer> player, int id)
+		{
+			auto playerExt = Core::Player::getPlayerExt(player.get());
+			auto playerData = Core::Player::getPlayerData(player.get());
+			if (id > this->_rooms.size() || id <= 0)
+			{
+				playerExt->sendErrorMessage(_("Such room doesn't exist!", player));
+				return;
+			}
+			playerData->setTempData(PlayerVars::ROOM_ID_TO_JOIN, std::size_t(id - 1));
+			this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
+		},
+		Core::Commands::CommandInfo { .args = { __("room number") }, .description = __("Enter DM room"), .category = MODE_NAME });
 }
 
 void DeathmatchController::initRooms()
@@ -121,7 +141,7 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player)
 			room->map.name,
 			weaponSetToString(room->weaponSet, player),
 			room->host.value_or(_("Server", player)),
-			room->playerCount);
+			room->playerIds.size());
 	}
 	this->_coreManager.lock()->getDialogManager()->createDialog(
 		player,
@@ -162,7 +182,7 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::shared_ptr<Room> roo
 	this->removePlayerFromRoom(player);
 	auto pData = Core::Player::getPlayerData(player);
 	pData->setTempData(PlayerVars::ROOM_ID, roomId);
-	room->playerCount++;
+	room->playerIds.push_back(player.getID());
 	player.setHealth(100.0);
 	player.resetWeapons();
 	this->setupSpawn(player, room);
@@ -206,7 +226,11 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 	if (auto roomIdOpt = pData->getTempData(PlayerVars::ROOM_ID))
 	{
 		auto roomId = std::get<std::size_t>(*roomIdOpt);
-		this->_rooms[roomId]->playerCount--;
+		// this->_rooms[roomId]->playerIds;
+		std::erase_if(this->_rooms[roomId]->playerIds, [&](const auto& x)
+			{
+				return x == player.getID();
+			});
 		pData->deleteTempData(PlayerVars::ROOM_ID);
 	}
 }

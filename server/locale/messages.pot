@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-09 19:06+0000\n"
+"POT-Creation-Date: 2024-03-09 19:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -163,7 +163,7 @@ msgid ""
 msgstr ""
 
 #: src/core/CoreManager.cpp:280
-#: src/modes/deathmatch/DeathmatchController.cpp:136
+#: src/modes/deathmatch/DeathmatchController.cpp:151
 msgid "Select"
 msgstr ""
 
@@ -187,24 +187,36 @@ msgstr ""
 msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:118
+#: src/modes/deathmatch/DeathmatchController.cpp:95
+msgid "Such room doesn't exist!"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:101
+msgid "room number"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:101
+msgid "Enter DM room"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:133
 msgid "Map\tWeapon\tHost\tPlayers\n"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:119
+#: src/modes/deathmatch/DeathmatchController.cpp:134
 msgid "Create custom room\n"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:128
+#: src/modes/deathmatch/DeathmatchController.cpp:143
 msgid "Server"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:134
+#: src/modes/deathmatch/DeathmatchController.cpp:149
 #, c-format
 msgid "Select Deathmatch room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:137
+#: src/modes/deathmatch/DeathmatchController.cpp:152
 msgid "Close"
 msgstr ""
 
