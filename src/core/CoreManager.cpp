@@ -39,6 +39,7 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 	_playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 	_playerPool->getPlayerTextDispatcher().addEventHandler(this);
+	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 
 	_classesComponent->getEventDispatcher().addEventHandler(this);
 
@@ -63,6 +64,7 @@ CoreManager::~CoreManager()
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
+	_playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
 
 	_classesComponent->getEventDispatcher().removeEventHandler(this);
 }
@@ -363,5 +365,10 @@ bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 {
 	player.setChatBubble(message, Colour::White(), 100.0, Milliseconds(CHAT_BUBBLE_EXPIRATION));
 	return true;
+}
+
+void CoreManager::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
+{
+	_playerPool->sendDeathMessageToAll(killer, player, reason);
 }
 }

@@ -38,7 +38,8 @@ class CoreManager : public PlayerConnectEventHandler,
 					public std::enable_shared_from_this<CoreManager>,
 					public ClassEventHandler,
 					public PlayerSpawnEventHandler,
-					public PlayerTextEventHandler
+					public PlayerTextEventHandler,
+					public PlayerDamageEventHandler
 {
 public:
 	IComponentList* const components;
@@ -60,6 +61,7 @@ public:
 	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 	bool onPlayerRequestSpawn(IPlayer& player) override;
 	bool onPlayerText(IPlayer& player, StringView message) override;
+	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
 
 	void onPlayerLoggedIn(IPlayer& player);
 
