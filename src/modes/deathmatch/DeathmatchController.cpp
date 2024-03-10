@@ -169,7 +169,11 @@ void DeathmatchController::initCommand()
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"dm", [&](std::reference_wrapper<IPlayer> player)
 		{
-			this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
+			auto playerExt = Core::Player::getPlayerExt(player.get());
+			if (playerExt->isInMode(Mode::Deathmatch))
+				this->showRoomSelectionDialog(player, false);
+			else
+				this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
 		},
 		Core::Commands::CommandInfo { .args = {}, .description = __("Enter DM mode"), .category = MODE_NAME });
 }
@@ -204,7 +208,7 @@ void DeathmatchController::initRooms()
 	};
 }
 
-void DeathmatchController::showRoomSelectionDialog(IPlayer& player)
+void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSelection)
 {
 	std::string body = _("#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players", player);
 	body += "\n";
@@ -250,7 +254,8 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player)
 			}
 			else
 			{
-				this->_coreManager.lock()->showModeSelectionDialog(player);
+				if (modeSelection)
+					this->_coreManager.lock()->showModeSelectionDialog(player);
 			}
 		});
 }
@@ -301,9 +306,9 @@ void DeathmatchController::setupRoomForPlayer(IPlayer& player, std::shared_ptr<R
 void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 {
 	auto pData = Core::Player::getPlayerData(player);
-	if (auto roomIdOpt = pData->getTempData<std::size_t>(PlayerVars::ROOM_ID))
+	if (auto roomId = pData->getTempData<std::size_t>(PlayerVars::ROOM_ID))
 	{
-		std::erase_if(this->_rooms[*roomIdOpt]->playerIds, [&](const auto& x)
+		std::erase_if(this->_rooms[*roomId]->playerIds, [&](const auto& x)
 			{
 				return x == player.getID();
 			});

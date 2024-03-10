@@ -26,7 +26,7 @@ class DeathmatchController : public Modes::IMode,
 
 	void initCommand();
 	void initRooms();
-	void showRoomSelectionDialog(IPlayer& player);
+	void showRoomSelectionDialog(IPlayer& player, bool modeSelection = true);
 	void onRoomJoin(IPlayer& player, std::shared_ptr<Room> room, std::size_t roomId);
 	void setupSpawn(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
