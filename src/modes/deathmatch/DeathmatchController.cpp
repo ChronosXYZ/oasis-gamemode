@@ -98,8 +98,10 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 	if (player.getState() != PlayerState_OnFoot)
 		return;
 
-	auto roomIdOpt = playerData->getTempData<std::size_t>(PlayerVars::ROOM_ID);
-	if (_rooms[*roomIdOpt]->cbugEnabled)
+	auto roomId = playerData->getTempData<std::size_t>(PlayerVars::ROOM_ID);
+	if (!roomId)
+		return;
+	if (this->_rooms.at(*roomId)->cbugEnabled)
 		return;
 	using namespace std::chrono;
 	if (PRESSED(newKeys, oldKeys, Key::FIRE))
