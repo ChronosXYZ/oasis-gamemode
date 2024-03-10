@@ -122,7 +122,7 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 					this->_freezeTimers.erase(*timerIdOpt);
 				}
 				auto timerId = uuids::to_string(Utils::getUuidGenerator()());
-				auto timer = _timersComponent->create(new Impl::SimpleTimerHandler([&player, playerData, this, &timerId]()
+				auto timer = _timersComponent->create(new Impl::SimpleTimerHandler([&player, playerData, this, timerId]()
 														  {
 															  player.setControllable(true);
 															  playerData->deleteTempData(PlayerVars::CBUGGING);
