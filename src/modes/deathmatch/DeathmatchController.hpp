@@ -31,6 +31,7 @@ class DeathmatchController : public Modes::IMode,
 	void setupSpawn(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
 	void removePlayerFromRoom(IPlayer& player);
+	void onTick();
 
 	std::vector<std::shared_ptr<Room>> _rooms;
 	std::unordered_map<std::string, ITimer*> _freezeTimers;
@@ -38,6 +39,8 @@ class DeathmatchController : public Modes::IMode,
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
 	ITimersComponent* _timersComponent;
+
+	ITimer* _ticker;
 
 public:
 	~DeathmatchController();

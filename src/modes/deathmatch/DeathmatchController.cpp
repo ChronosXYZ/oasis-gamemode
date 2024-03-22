@@ -7,11 +7,14 @@
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/PlayerVars.hpp"
 #include "../../core/utils/Random.hpp"
+#include "textdraws/DeathmatchTimer.hpp"
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <fmt/printf.h>
 #include <magic_enum/magic_enum.hpp>
+#include <memory>
 #include <string>
 #include <types.hpp>
 #include <player.hpp>
@@ -43,6 +46,9 @@ DeathmatchController::DeathmatchController(
 	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 	_playerPool->getPlayerChangeDispatcher().addEventHandler(this);
+	_ticker = _timersComponent->create(new Impl::SimpleTimerHandler(
+										   std::bind(&DeathmatchController::onTick, this)),
+		Milliseconds(1000), true);
 }
 
 DeathmatchController::~DeathmatchController()
@@ -50,6 +56,7 @@ DeathmatchController::~DeathmatchController()
 	_playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerChangeDispatcher().removeEventHandler(this);
+	_ticker->kill();
 }
 
 void DeathmatchController::onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData)
@@ -127,14 +134,14 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 					this->_freezeTimers.erase(*timerIdOpt);
 				}
 				auto timerId = uuids::to_string(Utils::getUuidGenerator()());
-				auto timer = _timersComponent->create(new Impl::SimpleTimerHandler([&player, playerData, this, timerId]()
-														  {
-															  player.setControllable(true);
-															  playerData->deleteTempData(PlayerVars::CBUGGING);
-															  playerData->deleteTempData(PlayerVars::CBUG_FREEZE_TIMER_ID);
-															  this->_freezeTimers.erase(timerId);
-														  }),
-					Milliseconds(1500), false);
+				auto timerHandler = new Impl::SimpleTimerHandler([&player, playerData, this, timerId]()
+					{
+						player.setControllable(true);
+						playerData->deleteTempData(PlayerVars::CBUGGING);
+						playerData->deleteTempData(PlayerVars::CBUG_FREEZE_TIMER_ID);
+						this->_freezeTimers.erase(timerId);
+					});
+				auto timer = _timersComponent->create(timerHandler, Milliseconds(1500), false);
 				playerData->setTempData(PlayerVars::CBUG_FREEZE_TIMER_ID, timerId);
 				this->_freezeTimers[timerId] = timer;
 			}
@@ -165,7 +172,7 @@ void DeathmatchController::initCommand()
 				playerExt->sendErrorMessage(_("Such room doesn't exist!", player));
 				return;
 			}
-			this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, std::size_t(id) } });
+			this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, std::size_t(id - 1) } });
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") }, .description = __("Enter DM room"), .category = MODE_NAME });
 	this->_coreManager.lock()->getCommandManager()->addCommand(
@@ -262,7 +269,7 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSel
 
 void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 {
-	auto room = this->_rooms[roomId];
+	auto room = this->_rooms.at(roomId);
 	auto pData = Core::Player::getPlayerData(player);
 	pData->setTempData(PlayerVars::ROOM_ID, roomId);
 	room->playerIds.push_back(player.getID());
@@ -270,6 +277,11 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 	player.resetWeapons();
 	this->setupSpawn(player, room);
 	player.spawn();
+
+	auto playerExt = Core::Player::getPlayerExt(player);
+	std::shared_ptr<TextDraws::DeathmatchTimer> timer(new TextDraws::DeathmatchTimer(player));
+	playerExt->getTextDrawManager()->add(TextDraws::DeathmatchTimer::NAME, timer);
+	timer->show();
 }
 
 void DeathmatchController::setupSpawn(IPlayer& player, std::shared_ptr<Room> room)
@@ -313,6 +325,29 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 				return x == player.getID();
 			});
 		pData->deleteTempData(PlayerVars::ROOM_ID);
+	}
+	auto playerExt = Core::Player::getPlayerExt(player);
+	playerExt->getTextDrawManager()->destroy(TextDraws::DeathmatchTimer::NAME);
+}
+
+void DeathmatchController::onTick()
+{
+	for (int i = 0; i < this->_rooms.size(); i++)
+	{
+		auto room = this->_rooms[i];
+		for (int j = 0; j < room->playerIds.size(); j++)
+		{
+			IPlayer* player = _playerPool->get(room->playerIds[j]);
+			auto playerExt = Core::Player::getPlayerExt(*player);
+			auto txd = std::dynamic_pointer_cast<TextDraws::DeathmatchTimer>(playerExt->getTextDrawManager()->get(TextDraws::DeathmatchTimer::NAME).value());
+			// TODO update player dm timer txd
+			txd->update(
+				fmt::sprintf(_("~w~Mode Deathmatch /DM %d", *player), i + 1),
+				0,
+				0,
+				0.0,
+				0);
+		}
 	}
 }
 }
