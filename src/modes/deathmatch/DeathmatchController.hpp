@@ -27,7 +27,7 @@ class DeathmatchController : public Modes::IMode,
 	void initCommand();
 	void initRooms();
 	void showRoomSelectionDialog(IPlayer& player, bool modeSelection = true);
-	void onRoomJoin(IPlayer& player, std::shared_ptr<Room> room, std::size_t roomId);
+	void onRoomJoin(IPlayer& player, std::size_t roomId);
 	void setupSpawn(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
 	void removePlayerFromRoom(IPlayer& player);
@@ -41,7 +41,8 @@ class DeathmatchController : public Modes::IMode,
 
 public:
 	~DeathmatchController();
-	void onModeJoin(IPlayer& player) override;
+	void onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData) override;
+	void onModeSelect(IPlayer& player) override;
 	void onModeLeave(IPlayer& player) override;
 
 	void onPlayerSpawn(IPlayer& player) override;

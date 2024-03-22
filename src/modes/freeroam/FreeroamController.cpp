@@ -47,6 +47,12 @@ FreeroamController* FreeroamController::create(std::weak_ptr<Core::CoreManager> 
 	return handler;
 }
 
+void FreeroamController::onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData)
+{
+	setupSpawn(player);
+	player.spawn();
+}
+
 void FreeroamController::initCommands()
 {
 	this->_coreManager.lock()->getCommandManager()->addCommand(
@@ -133,11 +139,6 @@ void FreeroamController::onPlayerDeath(IPlayer& player, IPlayer* killer, int rea
 	setupSpawn(player);
 }
 
-void FreeroamController::onModeJoin(IPlayer& player)
-{
-	setupSpawn(player);
-}
-
 void FreeroamController::setupSpawn(IPlayer& player)
 {
 	player.setVirtualWorld(VIRTUAL_WORLD_ID);
@@ -153,6 +154,11 @@ void FreeroamController::setupSpawn(IPlayer& player)
 void FreeroamController::onModeLeave(IPlayer& player)
 {
 	this->deleteLastSpawnedCar(player);
+}
+
+void FreeroamController::onModeSelect(IPlayer& player)
+{
+	this->_coreManager.lock()->joinMode(player, Modes::Mode::Freeroam, {});
 }
 
 void FreeroamController::deleteLastSpawnedCar(IPlayer& player)

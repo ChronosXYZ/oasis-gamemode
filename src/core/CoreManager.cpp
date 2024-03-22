@@ -291,25 +291,16 @@ void CoreManager::showModeSelectionDialog(IPlayer& player)
 
 void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 {
-	this->removePlayerFromModes(player);
-	auto pData = this->getPlayerData(player);
 	switch (mode)
 	{
 	case Modes::Mode::Freeroam:
 	{
-		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
-		this->_modePlayerCount[mode].insert(player.getID());
-		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player);
-		player.spawn();
-		spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
+		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeSelect(player);
 		break;
 	}
 	case Modes::Mode::Deathmatch:
 	{
-		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Deathmatch));
-		this->_modePlayerCount[mode].insert(player.getID());
-		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeJoin(player);
-		spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
+		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeSelect(player);
 		break;
 	}
 	default:
@@ -319,6 +310,36 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 		break;
 	}
 	}
+}
+
+void CoreManager::joinMode(IPlayer& player, Modes::Mode mode, std::unordered_map<std::string, Core::PrimitiveType> joinData)
+{
+	this->removePlayerFromModes(player);
+	auto pData = this->getPlayerData(player);
+
+	pData->setTempData(PlayerVars::CURRENT_MODE, magic_enum::enum_integer(mode));
+	this->_modePlayerCount[mode].insert(player.getID());
+
+	switch (mode)
+	{
+	case Modes::Mode::Freeroam:
+	{
+		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player, joinData);
+		break;
+	}
+	case Modes::Mode::Deathmatch:
+	{
+		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeJoin(player, joinData);
+		break;
+	}
+	default:
+	{
+		Player::getPlayerExt(player)->sendErrorMessage(_("Mode is not implemented yet!", player));
+		this->showModeSelectionDialog(player);
+		break;
+	}
+	}
+	spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
 }
 
 void CoreManager::removePlayerFromModes(IPlayer& player)

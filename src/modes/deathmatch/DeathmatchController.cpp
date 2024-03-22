@@ -12,10 +12,12 @@
 #include <chrono>
 #include <fmt/printf.h>
 #include <magic_enum/magic_enum.hpp>
+#include <string>
 #include <types.hpp>
 #include <player.hpp>
 #include <Server/Components/Dialogs/dialogs.hpp>
 #include <Server/Components/Timers/Impl/timers_impl.hpp>
+#include <unordered_map>
 #include <uuid.h>
 
 #include <cstddef>
@@ -26,6 +28,7 @@
 	(((newkeys & (k)) == (k)) && ((oldkeys & (k)) != (k)))
 
 #define CBUG_FREEZE_DELAY 1500
+#define ROOM_INDEX "roomIndex"
 
 namespace Modes::Deathmatch
 {
@@ -49,16 +52,16 @@ DeathmatchController::~DeathmatchController()
 	_playerPool->getPlayerChangeDispatcher().removeEventHandler(this);
 }
 
-void DeathmatchController::onModeJoin(IPlayer& player)
+void DeathmatchController::onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
-	auto playerData = Core::Player::getPlayerData(player);
-	if (auto roomId = playerData->getTempData<std::size_t>(PlayerVars::ROOM_ID_TO_JOIN))
-	{
-		onRoomJoin(player, this->_rooms[*roomId], *roomId);
-		playerData->deleteTempData(PlayerVars::ROOM_ID_TO_JOIN);
-		return;
-	}
-	showRoomSelectionDialog(player);
+	auto roomIndex = std::get<std::size_t>(joinData[ROOM_INDEX]);
+	this->onRoomJoin(player, roomIndex);
+}
+
+void DeathmatchController::onModeSelect(IPlayer& player)
+{
+	auto isInAnyMode = Core::Player::getPlayerExt(player)->isInAnyMode();
+	showRoomSelectionDialog(player, !isInAnyMode);
 }
 
 void DeathmatchController::onModeLeave(IPlayer& player)
@@ -162,18 +165,13 @@ void DeathmatchController::initCommand()
 				playerExt->sendErrorMessage(_("Such room doesn't exist!", player));
 				return;
 			}
-			playerData->setTempData(PlayerVars::ROOM_ID_TO_JOIN, std::size_t(id - 1));
-			this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
+			this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, std::size_t(id) } });
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") }, .description = __("Enter DM room"), .category = MODE_NAME });
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"dm", [&](std::reference_wrapper<IPlayer> player)
 		{
-			auto playerExt = Core::Player::getPlayerExt(player.get());
-			if (playerExt->isInMode(Mode::Deathmatch))
-				this->showRoomSelectionDialog(player, false);
-			else
-				this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
+			this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
 		},
 		Core::Commands::CommandInfo { .args = {}, .description = __("Enter DM mode"), .category = MODE_NAME });
 }
@@ -248,9 +246,11 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSel
 					this->showRoomSelectionDialog(player);
 					return;
 				}
-				auto roomIndex = listItem - 1;
-				auto room = this->_rooms[roomIndex];
-				this->onRoomJoin(player, room, roomIndex);
+				auto roomIndex = std::size_t(listItem - 1);
+				auto joinData = std::unordered_map<std::string, Core::PrimitiveType> {
+					{ ROOM_INDEX, roomIndex }
+				};
+				this->_coreManager.lock()->joinMode(player, Modes::Mode::Deathmatch, joinData);
 			}
 			else
 			{
@@ -260,9 +260,9 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSel
 		});
 }
 
-void DeathmatchController::onRoomJoin(IPlayer& player, std::shared_ptr<Room> room, std::size_t roomId)
+void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 {
-	this->removePlayerFromRoom(player);
+	auto room = this->_rooms[roomId];
 	auto pData = Core::Player::getPlayerData(player);
 	pData->setTempData(PlayerVars::ROOM_ID, roomId);
 	room->playerIds.push_back(player.getID());

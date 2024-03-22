@@ -38,8 +38,9 @@ public:
 
 	static FreeroamController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
 
-	void onModeJoin(IPlayer& player) override;
+	void onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData) override;
 	void onModeLeave(IPlayer& player) override;
+	void onModeSelect(IPlayer& player) override;
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;

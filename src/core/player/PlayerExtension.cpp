@@ -96,4 +96,9 @@ bool OasisPlayerExt::isInMode(Modes::Mode mode)
 {
 	return PlayerVars::getPlayerMode(this->_playerData) == mode;
 }
+
+bool OasisPlayerExt::isInAnyMode()
+{
+	return !this->isInMode(Modes::Mode::None);
+}
 }
