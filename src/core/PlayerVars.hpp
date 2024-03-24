@@ -13,9 +13,9 @@ namespace Core::PlayerVars
 {
 using namespace std::string_literals;
 
-inline const auto IS_LOGGED_IN = "IS_LOGGED_IN"s;
-inline const auto CURRENT_MODE = "CURRENT_MODE"s;
-inline const auto SKIN_SELECTION_MODE = "SKIN_SELECTION_MODE"s;
+inline const auto IS_LOGGED_IN = "CORE_IS_LOGGED_IN"s;
+inline const auto CURRENT_MODE = "CORE_CURRENT_MODE"s;
+inline const auto SKIN_SELECTION_MODE = "CORE_SKIN_SELECTION_MODE"s;
 
 inline Modes::Mode getPlayerMode(std::shared_ptr<PlayerModel> pData)
 {

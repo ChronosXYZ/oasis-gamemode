@@ -6,5 +6,5 @@ namespace Modes::Freeroam::PlayerVars
 {
 using namespace std::string_literals;
 
-inline const auto LAST_VEHICLE_ID = "LAST_VEHICLE_ID"s;
+inline const auto LAST_VEHICLE_ID = "FR_LAST_VEHICLE_ID"s;
 }
