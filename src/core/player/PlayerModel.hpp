@@ -4,6 +4,7 @@
 #include "BanData.hpp"
 #include "../utils/PgTimestamp.hpp"
 #include "../utils/Localization.hpp"
+#include "PlayerTempData.hpp"
 
 #include <Server/Components/Timers/timers.hpp>
 
@@ -34,7 +35,7 @@ struct PlayerModel
 
 	std::unique_ptr<Ban> ban;
 	std::unique_ptr<AdminData> adminData;
-	std::unordered_map<std::string, PrimitiveType> tempData;
+	std::unique_ptr<Player::PlayerTempData> tempData = std::make_unique<Player::PlayerTempData>();
 
 	PlayerModel() = default;
 
@@ -65,30 +66,6 @@ struct PlayerModel
 			adminData->level = 0;
 		if (!row["admin_pass_hash"].is_null())
 			adminData->passwordHash = row["admin_pass_hash"].as<std::string>();
-	}
-
-	void setTempData(const std::string& key, const PrimitiveType& value)
-	{
-		tempData[key] = value;
-	}
-
-	void deleteTempData(const std::string& key)
-	{
-		if (tempData.contains(key))
-		{
-			tempData.erase(key);
-		}
-	}
-
-	template <typename T>
-	std::optional<const T> getTempData(const std::string& key)
-	{
-		if (tempData.contains(key))
-		{
-			auto data = tempData.at(key);
-			return std::get<T>(data);
-		}
-		return {};
 	}
 };
 }

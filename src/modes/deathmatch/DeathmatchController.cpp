@@ -1,11 +1,9 @@
 #include "DeathmatchController.hpp"
 #include "Maps.hpp"
-#include "PlayerVars.hpp"
 #include "Room.hpp"
 #include "WeaponSet.hpp"
 #include "../../core/utils/Localization.hpp"
 #include "../../core/player/PlayerExtension.hpp"
-#include "../../core/PlayerVars.hpp"
 #include "../../core/utils/Random.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
 
@@ -78,23 +76,27 @@ void DeathmatchController::onModeLeave(IPlayer& player)
 
 void DeathmatchController::onPlayerSpawn(IPlayer& player)
 {
+	auto playerExt = Core::Player::getPlayerExt(player);
 	auto pData = Core::Player::getPlayerData(player);
-	auto mode = Core::PlayerVars::getPlayerMode(pData);
-	if (mode != Modes::Mode::Deathmatch)
+	if (!playerExt->isInMode(Modes::Mode::Deathmatch))
 		return;
-	std::size_t roomId = pData->getTempData<std::size_t>(PlayerVars::ROOM_ID).value_or(0);
-	auto room = this->_rooms[roomId];
+	auto roomId = pData->tempData->deathmatch->roomId;
+	if (!roomId)
+		return;
+	auto room = this->_rooms[roomId.value()];
 	this->setupRoomForPlayer(player, room);
 }
 
 void DeathmatchController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
+	auto playerExt = Core::Player::getPlayerExt(player);
 	auto pData = Core::Player::getPlayerData(player);
-	auto mode = Core::PlayerVars::getPlayerMode(pData);
-	if (mode != Modes::Mode::Deathmatch)
+	if (!playerExt->isInMode(Modes::Mode::Deathmatch))
 		return;
-	auto roomId = pData->getTempData<std::size_t>(PlayerVars::ROOM_ID).value_or(0);
-	auto room = this->_rooms[roomId];
+	auto roomId = pData->tempData->deathmatch->roomId;
+	if (!roomId)
+		return;
+	auto room = this->_rooms[roomId.value()];
 	this->setupSpawn(player, room);
 }
 
@@ -108,7 +110,7 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 	if (player.getState() != PlayerState_OnFoot)
 		return;
 
-	auto roomId = playerData->getTempData<std::size_t>(PlayerVars::ROOM_ID);
+	auto roomId = playerData->tempData->deathmatch->roomId;
 	if (!roomId)
 		return;
 	if (this->_rooms.at(*roomId)->cbugEnabled)
@@ -116,19 +118,19 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 	using namespace std::chrono;
 	if (PRESSED(newKeys, oldKeys, Key::FIRE))
 	{
-		playerData->setTempData(PlayerVars::LAST_SHOOT_TIME, system_clock::to_time_t(system_clock::now()));
+		playerData->tempData->deathmatch->lastShootTime = system_clock::to_time_t(system_clock::now());
 	}
 	else if (PRESSED(newKeys, oldKeys, Key::CROUCH))
 	{
-		if (auto lastShootTime = playerData->getTempData<std::time_t>(PlayerVars::LAST_SHOOT_TIME))
+		if (auto lastShootTime = playerData->tempData->deathmatch->lastShootTime)
 		{
 			auto currentTimestamp = system_clock::to_time_t(system_clock::now());
 			if (currentTimestamp - *lastShootTime < 1)
 			{
 				player.setControllable(false);
-				playerData->setTempData(PlayerVars::CBUGGING, true);
+				playerData->tempData->deathmatch->cbugging = true;
 				player.sendGameText(_("Don't use ~r~C-bug!", player), Milliseconds(3000), 5);
-				if (auto timerIdOpt = playerData->getTempData<std::string>(PlayerVars::CBUG_FREEZE_TIMER_ID))
+				if (auto timerIdOpt = playerData->tempData->deathmatch->cbugFreezeTimerId)
 				{
 					this->_freezeTimers[*timerIdOpt]->kill();
 					this->_freezeTimers.erase(*timerIdOpt);
@@ -137,12 +139,12 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 				auto timerHandler = new Impl::SimpleTimerHandler([&player, playerData, this, timerId]()
 					{
 						player.setControllable(true);
-						playerData->deleteTempData(PlayerVars::CBUGGING);
-						playerData->deleteTempData(PlayerVars::CBUG_FREEZE_TIMER_ID);
+						playerData->tempData->deathmatch->cbugging = false;
+						playerData->tempData->deathmatch->cbugFreezeTimerId.reset();
 						this->_freezeTimers.erase(timerId);
 					});
 				auto timer = _timersComponent->create(timerHandler, Milliseconds(1500), false);
-				playerData->setTempData(PlayerVars::CBUG_FREEZE_TIMER_ID, timerId);
+				playerData->tempData->deathmatch->cbugFreezeTimerId = timerId;
 				this->_freezeTimers[timerId] = timer;
 			}
 		}
@@ -271,7 +273,7 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 {
 	auto room = this->_rooms.at(roomId);
 	auto pData = Core::Player::getPlayerData(player);
-	pData->setTempData(PlayerVars::ROOM_ID, roomId);
+	pData->tempData->deathmatch->roomId = roomId;
 	room->playerIds.push_back(player.getID());
 	player.setHealth(100.0);
 	player.resetWeapons();
@@ -318,13 +320,13 @@ void DeathmatchController::setupRoomForPlayer(IPlayer& player, std::shared_ptr<R
 void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 {
 	auto pData = Core::Player::getPlayerData(player);
-	if (auto roomId = pData->getTempData<std::size_t>(PlayerVars::ROOM_ID))
+	if (auto roomId = pData->tempData->deathmatch->roomId)
 	{
 		std::erase_if(this->_rooms[*roomId]->playerIds, [&](const auto& x)
 			{
 				return x == player.getID();
 			});
-		pData->deleteTempData(PlayerVars::ROOM_ID);
+		pData->tempData->deathmatch->roomId.reset();
 	}
 	auto playerExt = Core::Player::getPlayerExt(player);
 	playerExt->getTextDrawManager()->destroy(TextDraws::DeathmatchTimer::NAME);

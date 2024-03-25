@@ -1,8 +1,6 @@
 #include "FreeroamController.hpp"
 #include "../../core/CoreManager.hpp"
-#include "../../core/PlayerVars.hpp"
 #include "../../core/player/PlayerExtension.hpp"
-#include "PlayerVars.hpp"
 
 #include <fmt/printf.h>
 #include <player.hpp>
@@ -93,7 +91,7 @@ void FreeroamController::initCommands()
 			auto vehicle = _vehiclesComponent->create(false, modelId, playerPosition, 0.0, color1, color2, Seconds(60000));
 			vehicle->putPlayer(player, 0);
 			playerExt->sendInfoMessage(_("You have sucessfully spawned the vehicle!", player));
-			playerExt->getPlayerData()->setTempData(PlayerVars::LAST_VEHICLE_ID, vehicle->getID());
+			playerExt->getPlayerData()->tempData->freeroam->lastVehicleId = vehicle->getID();
 		},
 		Core::Commands::CommandInfo { .args = { __("vehicle model id"), __("color 1"), __("color 2") }, .description = __("Spawns a vehicle"), .category = MODE_NAME });
 
@@ -163,11 +161,12 @@ void FreeroamController::onModeSelect(IPlayer& player)
 
 void FreeroamController::deleteLastSpawnedCar(IPlayer& player)
 {
-	auto playerExt = Core::Player::getPlayerExt(player);
-	if (auto lastVehicleId = playerExt->getPlayerData()->getTempData<int>(PlayerVars::LAST_VEHICLE_ID))
+	auto playerData = Core::Player::getPlayerData(player);
+	if (auto lastVehicleId = playerData->tempData->freeroam->lastVehicleId)
 	{
-		auto vehicle = _vehiclesComponent->get(*lastVehicleId);
-		_vehiclesComponent->release(*lastVehicleId);
+		auto vehicle = _vehiclesComponent->get(lastVehicleId.value());
+		_vehiclesComponent->release(lastVehicleId.value());
+		playerData->tempData->freeroam->lastVehicleId.reset();
 	}
 }
 }

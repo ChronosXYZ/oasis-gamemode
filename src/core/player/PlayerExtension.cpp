@@ -1,7 +1,6 @@
 #include "PlayerExtension.hpp"
 #include "../utils/Localization.hpp"
 #include "TextDrawManager.hpp"
-#include "../PlayerVars.hpp"
 
 #include <player.hpp>
 #include <component.hpp>
@@ -94,7 +93,7 @@ float OasisPlayerExt::getVehicleSpeed()
 
 bool OasisPlayerExt::isInMode(Modes::Mode mode)
 {
-	return PlayerVars::getPlayerMode(this->_playerData) == mode;
+	return this->_playerData->tempData->core->currentMode == mode;
 }
 
 bool OasisPlayerExt::isInAnyMode()
