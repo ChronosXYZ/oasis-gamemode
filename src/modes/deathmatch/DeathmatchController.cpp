@@ -99,6 +99,25 @@ void DeathmatchController::onPlayerDeath(IPlayer& player, IPlayer* killer, int r
 	auto roomId = pData->tempData->deathmatch->roomId;
 	if (!roomId)
 		return;
+
+	auto kills = pData->tempData->deathmatch->kills.value();
+	auto deaths = ++pData->tempData->deathmatch->deaths.value();
+	pData->tempData->deathmatch->deaths = deaths;
+	pData->tempData->deathmatch->ratio = kills / deaths;
+
+	if (killer)
+	{
+		auto killerData = Core::Player::getPlayerData(*killer);
+		auto killerKills = ++killerData->tempData->deathmatch->kills.value();
+		// TODO add score to player stats
+		killerData->tempData->deathmatch->kills = killerKills;
+		auto killerDeaths = 1;
+		if (killerData->tempData->deathmatch->deaths.value() > 0)
+		{
+			killerDeaths = killerData->tempData->deathmatch->deaths.value();
+		}
+		killerData->tempData->deathmatch->ratio = killerData->tempData->deathmatch->kills.value() / killerDeaths;
+	}
 	auto room = this->_rooms[roomId.value()];
 	this->setupSpawn(player, room);
 }
