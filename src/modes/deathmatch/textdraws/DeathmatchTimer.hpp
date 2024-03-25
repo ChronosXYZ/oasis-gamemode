@@ -20,7 +20,7 @@ public:
 	void hide() override;
 	void destroy() override;
 
-	void update(std::string header, int kills, int deaths, float damage, int time);
+	void update(std::string header, int kills, int deaths, float damage, std::chrono::seconds countdown);
 
 	inline const static auto NAME = "DeathmatchTimer"s;
 };

@@ -236,7 +236,7 @@ void DeathmatchTimer::destroy()
 		});
 }
 
-void DeathmatchTimer::update(std::string header, int kills, int deaths, float damage, int seconds)
+void DeathmatchTimer::update(std::string header, int kills, int deaths, float damage, std::chrono::seconds countdown)
 {
 	dmmode_PTD[0]->setText(header);
 	dmmode_PTD[11]->setText(std::to_string(kills));
@@ -256,7 +256,7 @@ void DeathmatchTimer::update(std::string header, int kills, int deaths, float da
 	}
 	dmmode_PTD[14]->setText(damageText);
 
-	std::chrono::hh_mm_ss time { std::chrono::seconds(seconds) };
+	std::chrono::hh_mm_ss time { countdown };
 	dmmode_PTD[15]->setText(fmt::sprintf("%02d:%02d", time.minutes().count(), time.seconds().count()));
 
 	this->show();

@@ -6,6 +6,7 @@
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/utils/Random.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
+#include "DeathmatchResult.hpp"
 
 #include <algorithm>
 #include <array>
@@ -14,6 +15,7 @@
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <string>
+#include <thread>
 #include <types.hpp>
 #include <player.hpp>
 #include <Server/Components/Dialogs/dialogs.hpp>
@@ -30,6 +32,7 @@
 
 #define CBUG_FREEZE_DELAY 1500
 #define ROOM_INDEX "roomIndex"
+#define DEFAULT_ROOM_ROUND_TIME_MIN 1
 
 namespace Modes::Deathmatch
 {
@@ -195,22 +198,28 @@ void DeathmatchController::initRooms()
 			.host = {},
 			.virtualWorld = VIRTUAL_WORLD_PREFIX + 0,
 			.cbugEnabled = true,
+			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 		}),
 		std::shared_ptr<Room>(new Room {
-			.map = randomlySelectMap(WeaponSet::Run),
+			.map = randomlySelectMap(WeaponSet::Walk),
 			.allowedWeapons = { PlayerWeapon_Deagle, PlayerWeapon_Shotgun, PlayerWeapon_Sniper },
 			.weaponSet = WeaponSet::Walk,
 			.host = {},
 			.virtualWorld = VIRTUAL_WORLD_PREFIX + 1,
 			.cbugEnabled = true,
+			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 		}),
 		std::shared_ptr<Room>(new Room {
-			.map = randomlySelectMap(WeaponSet::Run),
+			.map = randomlySelectMap(WeaponSet::Walk),
 			.allowedWeapons = { PlayerWeapon_Deagle },
 			.weaponSet = WeaponSet::DSS,
 			.host = {},
 			.virtualWorld = VIRTUAL_WORLD_PREFIX + 2,
 			.cbugEnabled = false,
+			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 		}),
 	};
 }
@@ -274,6 +283,9 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 	auto room = this->_rooms.at(roomId);
 	auto pData = Core::Player::getPlayerData(player);
 	pData->tempData->deathmatch->roomId = roomId;
+	pData->tempData->deathmatch->kills = 0;
+	pData->tempData->deathmatch->deaths = 0;
+	pData->tempData->deathmatch->ratio = 0;
 	room->playerIds.push_back(player.getID());
 	player.setHealth(100.0);
 	player.resetWeapons();
@@ -284,6 +296,66 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 	std::shared_ptr<TextDraws::DeathmatchTimer> timer(new TextDraws::DeathmatchTimer(player));
 	playerExt->getTextDrawManager()->add(TextDraws::DeathmatchTimer::NAME, timer);
 	timer->show();
+}
+
+void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
+{
+	room->restarting = true;
+	std::vector<DeathmatchResult> resultArray;
+	for (auto& playerId : room->playerIds)
+	{
+		auto player = this->_playerPool->get(playerId);
+		auto playerData = Core::Player::getPlayerData(*player);
+		resultArray.push_back(DeathmatchResult {
+			.playerName = player->getName().to_string(),
+			.kills = playerData->tempData->deathmatch->kills.value(),
+			.deaths = playerData->tempData->deathmatch->deaths.value(),
+			.ratio = playerData->tempData->deathmatch->ratio.value(),
+		});
+	}
+	std::sort(resultArray.begin(), resultArray.end(), [](DeathmatchResult x1, DeathmatchResult x2)
+		{
+			return x1.kills > x2.kills;
+		});
+	std::string body;
+	for (int i = 0; i < resultArray.size(); i++)
+	{
+		auto result = resultArray[i];
+		body += fmt::sprintf("%d. %s\t%d : %d\t%.2f\n",
+			i,
+			result.playerName,
+			result.kills,
+			result.deaths,
+			result.ratio);
+	}
+
+	auto weaponSet = room->weaponSet;
+	if (room->weaponSet == WeaponSet::DSS)
+		weaponSet = WeaponSet::Walk;
+
+	room->map = randomlySelectMap(weaponSet);
+	room->countdown = room->defaultTime;
+	room->restarting = false;
+
+	for (auto& playerId : room->playerIds)
+	{
+		auto player = this->_playerPool->get(playerId);
+		player->setControllable(false);
+		std::string header = _("Player\tK : D\tRatio\n", *player);
+		this->_coreManager.lock()->getDialogManager()->createDialog(
+			*player,
+			DialogStyle_TABLIST_HEADERS,
+			fmt::sprintf(DIALOG_HEADER_TITLE, _("Deathmatch statistics", *player)),
+			header + body,
+			_("OK", *player),
+			"",
+			[this, player, room](DialogResponse response, int listitem, StringView inputText)
+			{
+				this->setupSpawn(*player, room);
+				player->resetWeapons();
+				player->spawn();
+			});
+	}
 }
 
 void DeathmatchController::setupSpawn(IPlayer& player, std::shared_ptr<Room> room)
@@ -327,6 +399,9 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 				return x == player.getID();
 			});
 		pData->tempData->deathmatch->roomId.reset();
+		pData->tempData->deathmatch->kills.reset();
+		pData->tempData->deathmatch->deaths.reset();
+		pData->tempData->deathmatch->ratio.reset();
 	}
 	auto playerExt = Core::Player::getPlayerExt(player);
 	playerExt->getTextDrawManager()->destroy(TextDraws::DeathmatchTimer::NAME);
@@ -337,18 +412,28 @@ void DeathmatchController::onTick()
 	for (int i = 0; i < this->_rooms.size(); i++)
 	{
 		auto room = this->_rooms[i];
+		if (room->restarting)
+			continue;
+		if (room->countdown == std::chrono::seconds(0))
+		{
+			this->onRoundEnd(room);
+		}
+		if (!room->playerIds.empty() && room->countdown > std::chrono::seconds(0))
+		{
+			room->countdown--;
+		}
 		for (int j = 0; j < room->playerIds.size(); j++)
 		{
 			IPlayer* player = _playerPool->get(room->playerIds[j]);
 			auto playerExt = Core::Player::getPlayerExt(*player);
+			auto playerData = Core::Player::getPlayerData(*player);
 			auto txd = std::dynamic_pointer_cast<TextDraws::DeathmatchTimer>(playerExt->getTextDrawManager()->get(TextDraws::DeathmatchTimer::NAME).value());
-			// TODO update player dm timer txd
 			txd->update(
 				fmt::sprintf(_("~w~Mode Deathmatch /DM %d", *player), i + 1),
-				0,
-				0,
+				playerData->tempData->deathmatch->kills.value(),
+				playerData->tempData->deathmatch->deaths.value(),
 				0.0,
-				0);
+				room->countdown);
 		}
 	}
 }
