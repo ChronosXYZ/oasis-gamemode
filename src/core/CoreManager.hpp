@@ -11,6 +11,8 @@
 
 #include <memory>
 #include <player.hpp>
+#include <string>
+#include <unordered_map>
 
 #define ACCENT_MAIN 0xFF0000FF // SERVER COLOR
 #define ACCENT_SECONDARY 0xFFFFFFFF // SERVER COLOR
@@ -54,6 +56,7 @@ public:
 
 	bool refreshPlayerData(IPlayer& player);
 	void selectMode(IPlayer& player, Modes::Mode mode);
+	void joinMode(IPlayer& player, Modes::Mode mode, std::unordered_map<std::string, Core::PrimitiveType> joinData);
 	void showModeSelectionDialog(IPlayer& player);
 
 	void onPlayerConnect(IPlayer& player) override;

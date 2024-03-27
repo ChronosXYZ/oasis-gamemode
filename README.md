@@ -68,3 +68,18 @@ Go to `server` folder and type:
 
 If you are in VSCode Dev Container environment, you can use `make run` in the workspace root folder to run the server.
 
+## Misc
+
+### Migration
+
+To run DB migrations, you can use `make` in root repo folder:
+
+```
+make migrate
+```
+
+You can customize database connection params by setting the parameter:
+
+```
+make migrate DB_CONNECTION_STRING=postgres://postgres:postgres@db:5432/samp?sslmode=disable
+```

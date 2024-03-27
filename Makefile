@@ -12,7 +12,12 @@ copy_output:
 
 run:
 	cd ${CURDIR}/server
-	./samp03svr
+	LD_PRELOAD=/lib/i386-linux-gnu/libSegFault.so ./samp03svr
 
 update_locales:
 	@./utils/update_translations.sh ./src ./server/locale ./server/locale/po messages en pt ru
+
+
+DB_CONNECTION_STRING := "postgres://postgres:postgres@db:5432/samp?sslmode=disable"
+migrate:
+	migrate -path ../migrations -database $(DB_CONNECTION_STRING) up

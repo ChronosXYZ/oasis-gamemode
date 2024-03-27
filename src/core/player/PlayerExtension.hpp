@@ -44,6 +44,7 @@ public:
 	const std::string getIP();
 	float getVehicleSpeed();
 	bool isInMode(Modes::Mode mode);
+	bool isInAnyMode();
 
 	void freeExtension() override;
 	void reset() override;

@@ -1,8 +1,5 @@
-
 #include "AuthController.hpp"
-#include "PlayerVars.hpp"
 #include "../CoreManager.hpp"
-#include "../PlayerVars.hpp"
 #include "../utils/Localization.hpp"
 #include "../SQLQueryManager.hpp"
 #include "../utils/QueryNames.hpp"
@@ -43,7 +40,7 @@ void AuthController::onPlayerConnect(IPlayer& player)
 	else
 	{
 		auto data = this->_coreManager.lock()->getPlayerData(player);
-		data->setTempData(PlayerVars::LOGIN_ATTEMPTS_KEY, 0);
+		data->tempData->auth->loginAttempts = 0;
 		showLoginDialog(player, false);
 	}
 	_timersComponent->create(new Impl::SimpleTimerHandler(
@@ -92,7 +89,7 @@ void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 	if (wrongPass)
 	{
 		auto data = this->_coreManager.lock()->getPlayerData(player);
-		loginAttempts = *data->getTempData<int>(PlayerVars::LOGIN_ATTEMPTS_KEY);
+		loginAttempts = data->tempData->auth->loginAttempts;
 	}
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
@@ -140,15 +137,12 @@ void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 			playerExt->sendInfoMessage(_("You have been logged in!", player));
 			playerData->lastLoginAt = Utils::SQL::get_current_timestamp();
 			playerData->lastIP = playerExt->getIP();
-			playerData->deleteTempData(PlayerVars::LOGIN_ATTEMPTS_KEY);
 			this->_coreManager.lock()->onPlayerLoggedIn(player);
-			playerData->deleteTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED);
 			return;
 		}
 	}
-
-	auto loginAttempts = *playerData->getTempData<int>(PlayerVars::LOGIN_ATTEMPTS_KEY);
-	playerData->setTempData(PlayerVars::LOGIN_ATTEMPTS_KEY, ++loginAttempts);
+	int loginAttempts = playerData->tempData->auth->loginAttempts;
+	playerData->tempData->auth->loginAttempts = ++loginAttempts;
 	if (loginAttempts > 3)
 	{
 		playerExt->sendErrorMessage(_("Too much login attempts!", player));
@@ -170,7 +164,7 @@ void AuthController::onPasswordSubmit(IPlayer& player, const std::string& passwo
 	auto pData = this->_coreManager.lock()->getPlayerData(player);
 	pData->passwordHash = hashedPassword;
 	this->showEmailDialog(player);
-	pData->setTempData(PlayerVars::PLAIN_TEXT_PASSWORD, password);
+	pData->tempData->auth->plainTextPassword = password;
 }
 
 void AuthController::onRegistrationSubmit(IPlayer& player)
@@ -201,7 +195,6 @@ void AuthController::onRegistrationSubmit(IPlayer& player)
 		return;
 	}
 	this->_coreManager.lock()->refreshPlayerData(player);
-	pData->deleteTempData(PlayerVars::IS_REQUEST_CLASS_ALREADY_CALLED);
 	this->showRegistrationInfoDialog(player);
 }
 
@@ -299,7 +292,7 @@ void AuthController::showRegistrationInfoDialog(IPlayer& player)
 						 player),
 			pData->name,
 			pData->userId,
-			*pData->getTempData<std::string>(PlayerVars::PLAIN_TEXT_PASSWORD),
+			pData->tempData->auth->plainTextPassword,
 			std::format("{:%Y-%m-%d}", pData->registrationDate)),
 		_("OK", player), "",
 		[&](DialogResponse resp, int listItem, StringView inputText)

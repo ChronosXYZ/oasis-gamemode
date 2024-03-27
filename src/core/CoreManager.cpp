@@ -1,6 +1,5 @@
 #include "CoreManager.hpp"
 #include "SQLQueryManager.hpp"
-#include "PlayerVars.hpp"
 #include "Server/Components/Vehicles/vehicles.hpp"
 #include "commands/CommandInfo.hpp"
 #include "commands/CommandManager.hpp"
@@ -155,7 +154,7 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 
 void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 {
-	if (!data->getTempData<bool>(PlayerVars::IS_LOGGED_IN))
+	if (!data->tempData->core->isLoggedIn)
 		return;
 
 	auto db = this->getDBConnection();
@@ -213,12 +212,12 @@ void CoreManager::initSkinSelection()
 bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 {
 	auto pData = this->getPlayerData(player);
-	if (!pData->getTempData<bool>(PlayerVars::IS_LOGGED_IN))
+	if (!pData->tempData->core->isLoggedIn)
 		return true;
-	if (!pData->getTempData<bool>(PlayerVars::SKIN_SELECTION_MODE))
+	if (!pData->tempData->core->skinSelectionMode)
 	{
 		// first player request class call
-		pData->setTempData(PlayerVars::SKIN_SELECTION_MODE, true);
+		pData->tempData->core->skinSelectionMode = true;
 
 		Vector4 classSelectionPoint = CLASS_SELECTION_POINTS[random() % CLASS_SELECTION_POINTS.size()];
 		player.setPosition(Vector3(classSelectionPoint));
@@ -241,7 +240,8 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 void CoreManager::onPlayerLoggedIn(IPlayer& player)
 {
 	auto pData = this->getPlayerData(player);
-	pData->setTempData(PlayerVars::IS_LOGGED_IN, true);
+	pData->tempData->auth.reset();
+	pData->tempData->core->isLoggedIn = true;
 
 	// hack to get class selection buttons appear again
 	player.setSpectating(false);
@@ -250,14 +250,14 @@ void CoreManager::onPlayerLoggedIn(IPlayer& player)
 bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 {
 	auto pData = this->getPlayerData(player);
-	if (!pData->getTempData<bool>(PlayerVars::IS_LOGGED_IN))
+	if (!pData->tempData->core->isLoggedIn)
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(_("You are not logged in yet!", player));
 		return false;
 	}
-	if (pData->getTempData<bool>(PlayerVars::SKIN_SELECTION_MODE))
+	if (pData->tempData->core->skinSelectionMode)
 	{
-		pData->deleteTempData(PlayerVars::SKIN_SELECTION_MODE);
+		pData->tempData->core->skinSelectionMode = false;
 	}
 	pData->lastSkinId = player.getSkin();
 
@@ -291,25 +291,16 @@ void CoreManager::showModeSelectionDialog(IPlayer& player)
 
 void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 {
-	this->removePlayerFromModes(player);
-	auto pData = this->getPlayerData(player);
 	switch (mode)
 	{
 	case Modes::Mode::Freeroam:
 	{
-		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Freeroam));
-		this->_modePlayerCount[mode].insert(player.getID());
-		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player);
-		player.spawn();
-		spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
+		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeSelect(player);
 		break;
 	}
 	case Modes::Mode::Deathmatch:
 	{
-		pData->setTempData(PlayerVars::CURRENT_MODE, static_cast<int>(Modes::Mode::Deathmatch));
-		this->_modePlayerCount[mode].insert(player.getID());
-		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeJoin(player);
-		spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
+		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeSelect(player);
 		break;
 	}
 	default:
@@ -321,10 +312,40 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	}
 }
 
+void CoreManager::joinMode(IPlayer& player, Modes::Mode mode, std::unordered_map<std::string, Core::PrimitiveType> joinData)
+{
+	this->removePlayerFromModes(player);
+	auto pData = this->getPlayerData(player);
+
+	pData->tempData->core->currentMode = mode;
+	this->_modePlayerCount[mode].insert(player.getID());
+
+	switch (mode)
+	{
+	case Modes::Mode::Freeroam:
+	{
+		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player, joinData);
+		break;
+	}
+	case Modes::Mode::Deathmatch:
+	{
+		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeJoin(player, joinData);
+		break;
+	}
+	default:
+	{
+		Player::getPlayerExt(player)->sendErrorMessage(_("Mode is not implemented yet!", player));
+		this->showModeSelectionDialog(player);
+		break;
+	}
+	}
+	spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
+}
+
 void CoreManager::removePlayerFromModes(IPlayer& player)
 {
 	auto pData = this->getPlayerData(player);
-	auto mode = PlayerVars::getPlayerMode(pData);
+	auto mode = pData->tempData->core->currentMode;
 	if (mode != Modes::Mode::None)
 	{
 		std::erase_if(_modePlayerCount[mode], [&](const auto& x)
