@@ -255,7 +255,7 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSel
 		body,
 		_("Select", player),
 		_("Close", player),
-		[&](DialogResponse response, int listItem, StringView input)
+		[modeSelection, this, &player](DialogResponse response, int listItem, StringView input)
 		{
 			if (response)
 			{
@@ -400,7 +400,7 @@ void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
 				{
 					IPlayer* player = this->_playerPool->get(playerId);
 					player->setControllable(false);
-					player->sendGameText(fmt::sprintf("~w~%d", i), Seconds(1), 9);
+					player->sendGameText(fmt::sprintf("~w~%d", i), Seconds(1), 6);
 				}
 				using namespace std::chrono_literals;
 				std::this_thread::sleep_for(1s);
@@ -408,7 +408,7 @@ void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
 			for (auto const& playerId : room->playerIds)
 			{
 				IPlayer* player = this->_playerPool->get(playerId);
-				player->sendGameText(_("~g~~h~~h~GO!", *player), Seconds(1), 9);
+				player->sendGameText(_("~g~~h~~h~GO!", *player), Seconds(1), 6);
 				player->setControllable(true);
 			}
 			room->cachedLastResult = {};
