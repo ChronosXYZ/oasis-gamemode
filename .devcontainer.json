@@ -11,7 +11,8 @@
                 "ms-vscode.makefile-tools",
                 "tdennis4496.cmantic",
                 "ms-vscode.cpptools",
-                "Gruntfuggly.todo-tree"
+                "Gruntfuggly.todo-tree",
+                "mhutchie.git-graph"
             ]
         }
     },

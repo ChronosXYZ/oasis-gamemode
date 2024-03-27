@@ -12,7 +12,7 @@ copy_output:
 
 run:
 	cd ${CURDIR}/server
-	./samp03svr
+	LD_PRELOAD=/lib/i386-linux-gnu/libSegFault.so ./samp03svr
 
 update_locales:
 	@./utils/update_translations.sh ./src ./server/locale ./server/locale/po messages en pt ru

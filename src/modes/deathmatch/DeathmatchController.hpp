@@ -2,8 +2,10 @@
 
 #include "../../modes/IMode.hpp"
 #include "../../core/CoreManager.hpp"
+#include "DeathmatchResult.hpp"
 #include "Room.hpp"
 #include "Server/Components/Timers/timers.hpp"
+#include "textdraws/DeathmatchTimer.hpp"
 
 #include <cstddef>
 #include <player.hpp>
@@ -27,17 +29,22 @@ class DeathmatchController : public Modes::IMode,
 	void initCommand();
 	void initRooms();
 	void showRoomSelectionDialog(IPlayer& player, bool modeSelection = true);
+	void showRoundResultDialog(IPlayer& player, std::shared_ptr<Room> room);
+	std::shared_ptr<TextDraws::DeathmatchTimer> createDeathmatchTimer(IPlayer& player);
+	std::optional<std::shared_ptr<TextDraws::DeathmatchTimer>> getDeathmatchTimer(IPlayer& player);
+	void updateDeathmatchTimer(IPlayer& player, std::size_t roomIndex, std::shared_ptr<Room> room);
 
 	void onRoomJoin(IPlayer& player, std::size_t roomId);
+	void onNewRound(std::shared_ptr<Room> room);
 	void onRoundEnd(std::shared_ptr<Room> room);
 
-	void setupSpawn(IPlayer& player, std::shared_ptr<Room> room);
+	void setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
 	void removePlayerFromRoom(IPlayer& player);
 	void onTick();
 
 	std::vector<std::shared_ptr<Room>> _rooms;
-	std::unordered_map<std::string, ITimer*> _freezeTimers;
+	std::unordered_map<std::string, ITimer*> _cbugFreezeTimers;
 
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
