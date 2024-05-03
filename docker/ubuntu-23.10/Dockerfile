@@ -1,8 +1,11 @@
 FROM ubuntu:23.10 as base_builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN \
     dpkg --add-architecture i386 && \
-    apt-get update && \
-    apt-get install -y \
+    apt update && \
+    apt install -y \
     cmake \
     ninja-build \
     g++-13 \
