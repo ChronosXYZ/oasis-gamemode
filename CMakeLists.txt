@@ -16,7 +16,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 include(cmake/conan.cmake)
 include(cmake/CMakeRC.cmake)
 
-# conan_cmake_configure(REQUIRES boost/1.83.0 
+#conan_cmake_configure(REQUIRES boost/1.83.0 
 #                       GENERATORS CMakeDeps
 #                       OPTIONS "boost:without_atomic=False"
 #                       OPTIONS "boost:without_chrono=False"
@@ -82,12 +82,17 @@ cmrc_add_resource_library(
     ${resources_list}
 )                    
 
-add_subdirectory(vendor/sdk)
-add_subdirectory(vendor/network)
+#add_subdirectory(vendor/sdk)
+# add_subdirectory(vendor/network)
 add_subdirectory(vendor/tinygettext)
 
 file(GLOB_RECURSE source_list CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.hpp")
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+
+find_package(OMP-SDK REQUIRED)
 find_package(libpqxx REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(argon2 REQUIRED CONFIG)
@@ -99,7 +104,7 @@ find_package(stduuid REQUIRED CONFIG)
 add_library(${PROJECT_NAME} SHARED ${source_list})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    OMP-SDK
+    OMP-SDK::OMP-SDK
     tinygettext
     libpqxx::pqxx
     spdlog::spdlog
