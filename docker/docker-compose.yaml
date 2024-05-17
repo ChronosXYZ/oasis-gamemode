@@ -23,7 +23,9 @@ services:
       PGDATA: /data/postgres
     volumes:
       - oasis-postgres:/data/postgres
-    network_mode: host
+    ports:
+      - 5432:5432
+    # network_mode: host
 
 volumes:
   oasis-postgres:
