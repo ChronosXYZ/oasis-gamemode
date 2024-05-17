@@ -382,27 +382,27 @@ void CoreManager::removePlayerFromModes(IPlayer& player)
 
 void CoreManager::sendPlayerLeftNotificationToAll(IPlayer& leavingPlayer)
 {
-	this->sendNotificationToAll(fmt::sprintf(
-		__("#LIME#>> #LIGHT_GRAY#%s has left the server (%d/%d)"),
-		leavingPlayer.getName().to_string(),
-		this->_playerPool->players().size(),
-		*this->_core->getConfig().getInt("max_players")));
+	for (const auto& player : this->_playerPool->players())
+	{
+		player->sendClientMessage(Colour::White(),
+			fmt::sprintf(
+				_("#LIME#>> #LIGHT_GRAY#%s has left the server (%d/%d)", *player),
+				leavingPlayer.getName().to_string(),
+				this->_playerPool->players().size(),
+				*this->_core->getConfig().getInt("max_players")));
+	}
 }
 
 void CoreManager::sendPlayerJoinedNotificationToAll(IPlayer& joinedPlayer)
 {
-	this->sendNotificationToAll(fmt::sprintf(
-		__("#LIME#>> #LIGHT_GRAY#%s has joined the server (%d/%d)"),
-		joinedPlayer.getName().to_string(),
-		this->_playerPool->players().size(),
-		*this->_core->getConfig().getInt("max_players")));
-}
-
-void CoreManager::sendNotificationToAll(std::string text)
-{
 	for (const auto& player : this->_playerPool->players())
 	{
-		player->sendClientMessage(Colour::White(), _(text, *player));
+		player->sendClientMessage(Colour::White(),
+			fmt::sprintf(
+				_("#LIME#>> #LIGHT_GRAY#%s has joined the server (%d/%d)", *player),
+				joinedPlayer.getName().to_string(),
+				this->_playerPool->players().size(),
+				*this->_core->getConfig().getInt("max_players")));
 	}
 }
 
