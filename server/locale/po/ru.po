@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-27 01:59+0000\n"
+"POT-Creation-Date: 2024-05-17 20:43+0000\n"
 "PO-Revision-Date: 2024-01-28 13:50+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -18,39 +18,21 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/core/CoreManager.cpp:255
-msgid "You are not logged in yet!"
-msgstr "Вы еще не вошли в аккаунт!"
+#: src/core/player/PlayerExtension.cpp:60
+msgid "#RED#[ERROR]#WHITE#"
+msgstr "#RED#[ОШИБКА]#WHITE#"
 
-#: src/core/CoreManager.cpp:271
-msgid "Modes"
-msgstr "Режимы"
+#: src/core/player/PlayerExtension.cpp:66
+msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
+msgstr "#BRIGHT_BLUE#[ИНФО]#WHITE#"
 
-#: src/core/CoreManager.cpp:272
-#, c-format
-msgid ""
-"Mode\tCommand\tPlayers\n"
-"Freeroam\t/fr\t%d\n"
-"Deathmatch\t/dm\t%d\n"
-"Protect the President\t/ptp\t%d\n"
-"Derby\t/derby\t%d\n"
-"Cops and Robbers\t/cnr\t%d"
+#: src/core/commands/CommandManager.cpp:68
+msgid "Failed to invoke command!"
+msgstr "Невозможно вызвать команду!"
+
+#: src/core/commands/CommandManager.cpp:105
+msgid "#GOLD_FUSION#[USAGE]#WHITE#"
 msgstr ""
-"Режим\tКоманда\tИгроки\n"
-"Свободный\t/fr\t%d\n"
-"Deathmatch\t/dm\t%d\n"
-"Защита президента\t/ptp\t%d\n"
-"Дерби\t/derby\t%d\n"
-"Полицейские и грабители\t/cnr\t%d"
-
-#: src/core/CoreManager.cpp:284
-#: src/modes/deathmatch/DeathmatchController.cpp:260
-msgid "Select"
-msgstr "Выбрать"
-
-#: src/core/CoreManager.cpp:308 src/core/CoreManager.cpp:337
-msgid "Mode is not implemented yet!"
-msgstr "Режим еще не реализован!"
 
 #: src/core/auth/AuthController.cpp:57
 #, c-format
@@ -187,21 +169,131 @@ msgstr "ОК"
 msgid "You have successfully registered!"
 msgstr "Вы успешно зарегистрировались"
 
-#: src/core/commands/CommandManager.cpp:68
-msgid "Failed to invoke command!"
-msgstr "Невозможно вызвать команду!"
+#: src/core/CoreManager.cpp:258
+msgid "You are not logged in yet!"
+msgstr "Вы еще не вошли в аккаунт!"
 
-#: src/core/commands/CommandManager.cpp:105
-msgid "#GOLD_FUSION#[USAGE]#WHITE#"
+#: src/core/CoreManager.cpp:274
+msgid "Modes"
+msgstr "Режимы"
+
+#: src/core/CoreManager.cpp:275
+#, c-format
+msgid ""
+"Mode\tCommand\tPlayers\n"
+"Freeroam\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Protect the President\t/ptp\t%d\n"
+"Derby\t/derby\t%d\n"
+"Cops and Robbers\t/cnr\t%d"
+msgstr ""
+"Режим\tКоманда\tИгроки\n"
+"Свободный\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Защита президента\t/ptp\t%d\n"
+"Дерби\t/derby\t%d\n"
+"Полицейские и грабители\t/cnr\t%d"
+
+#: src/core/CoreManager.cpp:287
+#: src/modes/deathmatch/DeathmatchController.cpp:256
+msgid "Select"
+msgstr "Выбрать"
+
+#: src/core/CoreManager.cpp:311 src/core/CoreManager.cpp:340
+msgid "Mode is not implemented yet!"
+msgstr "Режим еще не реализован!"
+
+#: src/core/CoreManager.cpp:386
+#, c-format
+msgid "#LIME#>> #LIGHT_GRAY#%s has left the server (%d/%d)"
 msgstr ""
 
-#: src/core/player/PlayerExtension.cpp:60
-msgid "#RED#[ERROR]#WHITE#"
-msgstr "#RED#[ОШИБКА]#WHITE#"
+#: src/core/CoreManager.cpp:395
+#, c-format
+msgid "#LIME#>> #LIGHT_GRAY#%s has joined the server (%d/%d)"
+msgstr ""
 
-#: src/core/player/PlayerExtension.cpp:66
-msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
-msgstr "#BRIGHT_BLUE#[ИНФО]#WHITE#"
+#: src/modes/deathmatch/WeaponSet.hpp:24
+msgid "Run"
+msgstr "Бег"
+
+#: src/modes/deathmatch/WeaponSet.hpp:26
+msgid "Walk"
+msgstr "Шаг"
+
+#: src/modes/deathmatch/WeaponSet.hpp:28
+msgid "DSS"
+msgstr ""
+
+#: src/modes/deathmatch/WeaponSet.hpp:30
+msgid "Custom"
+msgstr "Произвольный"
+
+#: src/modes/deathmatch/WeaponSet.hpp:32
+msgid "Team"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:141
+msgid "Don't use ~r~C-bug!"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:184
+msgid "Such room doesn't exist!"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:189
+msgid "room number"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:189
+msgid "Enter DM room"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:195
+msgid "Enter DM mode"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:236
+#, fuzzy
+msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
+msgstr "Карта\tОружие\tСоздатель\tИгроки\n"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:238
+#, fuzzy
+msgid "Create custom room"
+msgstr "Создать произвольную комнату\n"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:248
+msgid "Server"
+msgstr "Сервер"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:254
+#, c-format
+msgid "Select Deathmatch room"
+msgstr "Выбрать комнату Deathmatch"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:257
+#: src/modes/deathmatch/DeathmatchController.cpp:301
+msgid "Close"
+msgstr "Закрыть"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:295
+msgid "Player\tK : D\tRatio\n"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:299
+#, c-format
+msgid "Deathmatch statistics"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:340
+#, c-format
+msgid "~w~Mode Deathmatch /DM %d"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:411
+msgid "~g~~h~~h~GO!"
+msgstr ""
 
 #: src/modes/freeroam/FreeroamController.cpp:61
 msgid "Teleports player to the Freeroam mode"
@@ -269,88 +361,6 @@ msgstr "ID скина"
 #: src/modes/freeroam/FreeroamController.cpp:125
 msgid "Set player skin"
 msgstr "Установить скин игрока"
-
-#: src/modes/deathmatch/WeaponSet.hpp:24
-msgid "Run"
-msgstr "Бег"
-
-#: src/modes/deathmatch/WeaponSet.hpp:26
-msgid "Walk"
-msgstr "Шаг"
-
-#: src/modes/deathmatch/WeaponSet.hpp:28
-msgid "DSS"
-msgstr ""
-
-#: src/modes/deathmatch/WeaponSet.hpp:30
-msgid "Custom"
-msgstr "Произвольный"
-
-#: src/modes/deathmatch/WeaponSet.hpp:32
-msgid "Team"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:145
-msgid "Don't use ~r~C-bug!"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:188
-msgid "Such room doesn't exist!"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:193
-msgid "room number"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:193
-msgid "Enter DM room"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:199
-msgid "Enter DM mode"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:240
-#, fuzzy
-msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
-msgstr "Карта\tОружие\tСоздатель\tИгроки\n"
-
-#: src/modes/deathmatch/DeathmatchController.cpp:242
-#, fuzzy
-msgid "Create custom room"
-msgstr "Создать произвольную комнату\n"
-
-#: src/modes/deathmatch/DeathmatchController.cpp:252
-msgid "Server"
-msgstr "Сервер"
-
-#: src/modes/deathmatch/DeathmatchController.cpp:258
-#, c-format
-msgid "Select Deathmatch room"
-msgstr "Выбрать комнату Deathmatch"
-
-#: src/modes/deathmatch/DeathmatchController.cpp:261
-#: src/modes/deathmatch/DeathmatchController.cpp:300
-msgid "Close"
-msgstr "Закрыть"
-
-#: src/modes/deathmatch/DeathmatchController.cpp:294
-msgid "Player\tK : D\tRatio\n"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:298
-#, c-format
-msgid "Deathmatch statistics"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:339
-#, c-format
-msgid "~w~Mode Deathmatch /DM %d"
-msgstr ""
-
-#: src/modes/deathmatch/DeathmatchController.cpp:403
-msgid "~g~~h~~h~GO!"
-msgstr ""
 
 #~ msgid "Invalid command parameters!"
 #~ msgstr "Неверные параметры команды!"

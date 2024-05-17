@@ -79,6 +79,9 @@ private:
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
 	void removePlayerFromModes(IPlayer& player);
+	void sendPlayerLeftNotificationToAll(IPlayer& leavingPlayer);
+	void sendPlayerJoinedNotificationToAll(IPlayer& joinedPlayer);
+	void sendNotificationToAll(std::string text);
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;

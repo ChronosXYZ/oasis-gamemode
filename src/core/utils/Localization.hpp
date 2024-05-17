@@ -38,7 +38,7 @@ std::string _(const std::string& message, IPlayer& player);
 /**
 	Mark message for localization, but don't translate it right away.
 */
-inline const std::string& __(const std::string& message)
+inline const std::string __(const std::string message)
 {
 	return message;
 }

@@ -35,7 +35,7 @@
 
 #define CBUG_FREEZE_DELAY 1500
 #define ROOM_INDEX "roomIndex"
-#define DEFAULT_ROOM_ROUND_TIME_MIN 1
+#define DEFAULT_ROOM_ROUND_TIME_MIN 10
 
 namespace Modes::Deathmatch
 {
