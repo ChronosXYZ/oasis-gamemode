@@ -20,4 +20,4 @@ update_locales:
 
 DB_CONNECTION_STRING := "postgres://postgres:postgres@db:5432/samp?sslmode=disable"
 migrate:
-	migrate -path ../migrations -database $(DB_CONNECTION_STRING) up
+	migrate -path ./migrations -database $(DB_CONNECTION_STRING) up
