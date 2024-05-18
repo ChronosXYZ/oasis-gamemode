@@ -2,7 +2,7 @@
 
 #include <numbers>
 
-namespace Utils
+namespace Core::Utils
 {
 const inline double deg2Rad(const double& degrees)
 {

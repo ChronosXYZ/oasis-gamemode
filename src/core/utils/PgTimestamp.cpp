@@ -2,7 +2,7 @@
 #include <bits/chrono.h>
 #include <chrono>
 
-namespace Utils::SQL
+namespace Core::Utils::SQL
 {
 timestamp from_iso8601_str(const std::string& s)
 {

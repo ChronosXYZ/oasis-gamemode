@@ -5,7 +5,7 @@
 #include <vector>
 #include <sstream>
 
-namespace Utils
+namespace Core::Utils
 {
 namespace Strings
 {

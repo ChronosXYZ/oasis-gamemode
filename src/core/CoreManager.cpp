@@ -3,7 +3,9 @@
 #include "Server/Components/Vehicles/vehicles.hpp"
 #include "commands/CommandInfo.hpp"
 #include "commands/CommandManager.hpp"
+#include "controllers/PlayerOnFireController.hpp"
 #include "controllers/SpeedometerController.hpp"
+#include "eventbus/event_bus.hpp"
 #include "player/PlayerExtension.hpp"
 #include "textdraws/ITextDrawWrapper.hpp"
 #include "textdraws/ServerLogo.hpp"
@@ -33,6 +35,7 @@ CoreManager::CoreManager(IComponentList* components, ICore* core, IPlayerPool* p
 	, _classesComponent(components->queryComponent<IClassesComponent>())
 	, _playerControllers(std::make_unique<ServiceLocator>())
 	, _modes(std::make_unique<ServiceLocator>())
+	, bus(std::make_shared<dp::event_bus>())
 {
 	this->initSkinSelection();
 
@@ -122,15 +125,18 @@ void CoreManager::initHandlers()
 
 	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
 		weak_from_this(),
-		_playerPool));
+		_playerPool,
+		bus));
 	_modes->registerInstance(Modes::Deathmatch::DeathmatchController::create(
 		weak_from_this(),
 		_playerPool,
-		components->queryComponent<ITimersComponent>()));
+		components->queryComponent<ITimersComponent>(),
+		this->bus));
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool,
 		components->queryComponent<IVehiclesComponent>(),
 		components->queryComponent<ITimersComponent>()));
+	_playerControllers->registerInstance(new Controllers::PlayerOnFireController(this->_playerPool, this->bus));
 }
 
 std::shared_ptr<pqxx::connection> CoreManager::getDBConnection()
@@ -375,6 +381,7 @@ void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
 	if (modeBase.get() == nullptr)
 		return;
 	modeBase->onModeLeave(player);
+	this->_playerControllers->resolve<Controllers::PlayerOnFireController>()->onModeLeave(player, mode);
 }
 
 template <typename... T>

@@ -6,11 +6,13 @@
 #include "player/PlayerModel.hpp"
 #include "../modes/Modes.hpp"
 #include "utils/ServiceLocator.hpp"
+#include "./utils/Events.hpp"
 
 #include <Server/Components/Classes/classes.hpp>
+#include <player.hpp>
+#include <eventbus/event_bus.hpp>
 
 #include <memory>
-#include <player.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -85,6 +87,8 @@ private:
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;
 	IClassesComponent* const _classesComponent;
+
+	std::shared_ptr<dp::event_bus> bus;
 
 	std::shared_ptr<Commands::CommandManager> _commandManager;
 	std::shared_ptr<DialogManager> _dialogManager;

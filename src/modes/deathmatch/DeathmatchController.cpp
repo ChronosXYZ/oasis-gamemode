@@ -6,6 +6,7 @@
 #include "../../core/utils/Localization.hpp"
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/utils/Random.hpp"
+#include "../../core/utils/Events.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
 #include "DeathmatchResult.hpp"
 
@@ -42,8 +43,9 @@ namespace Modes::Deathmatch
 DeathmatchController::DeathmatchController(
 	std::weak_ptr<Core::CoreManager> coreManager,
 	IPlayerPool* playerPool,
-	ITimersComponent* timersComponent)
-	: super(Mode::Deathmatch)
+	ITimersComponent* timersComponent,
+	std::shared_ptr<dp::event_bus> bus)
+	: super(Mode::Deathmatch, bus)
 	, _coreManager(coreManager)
 	, _playerPool(playerPool)
 	, _timersComponent(timersComponent)
@@ -54,6 +56,10 @@ DeathmatchController::DeathmatchController(
 	_ticker = _timersComponent->create(new Impl::SimpleTimerHandler(
 										   std::bind(&DeathmatchController::onTick, this)),
 		Milliseconds(1000), true);
+
+	// re-register player on fire handler
+	this->bus->remove_handler(this->playerOnFireEventRegistration);
+	this->playerOnFireEventRegistration = this->bus->register_handler<Core::Utils::Events::PlayerOnFireEvent>(this, &DeathmatchController::onPlayerOnFire);
 }
 
 DeathmatchController::~DeathmatchController()
@@ -149,7 +155,7 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 				this->_cbugFreezeTimers.erase(oldTimerId.value());
 			}
 
-			auto timerId = uuids::to_string(Utils::getUuidGenerator()());
+			auto timerId = uuids::to_string(Core::Utils::getUuidGenerator()());
 			auto timerHandler = new Impl::SimpleTimerHandler([&player, playerData, this, timerId]()
 				{
 					player.setControllable(true);
@@ -164,12 +170,32 @@ void DeathmatchController::onPlayerKeyStateChange(IPlayer& player, uint32_t newK
 	}
 }
 
+void DeathmatchController::onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event)
+{
+	if (event.mode != this->mode)
+		return;
+	auto playerData = Core::Player::getPlayerData(event.player);
+	auto room = this->_rooms[playerData->tempData->deathmatch->roomId];
+
+	for (auto roomPlayer : room->players)
+	{
+		auto roomPlayerExt = Core::Player::getPlayerExt(*roomPlayer);
+		roomPlayerExt->sendTranslatedMessageFormatted(
+			__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on fire!"),
+			event.player.getName().to_string(),
+			event.player.getID(),
+			event.lastKillee.getName().to_string(),
+			event.lastKillee.getID());
+	}
+}
+
 DeathmatchController* DeathmatchController::create(
 	std::weak_ptr<Core::CoreManager> coreManager,
 	IPlayerPool* playerPool,
-	ITimersComponent* timersComponent)
+	ITimersComponent* timersComponent,
+	std::shared_ptr<dp::event_bus> bus)
 {
-	auto controller = new DeathmatchController(coreManager, playerPool, timersComponent);
+	auto controller = new DeathmatchController(coreManager, playerPool, timersComponent, bus);
 	controller->initRooms();
 	controller->initCommand();
 	return controller;
@@ -187,15 +213,7 @@ void DeathmatchController::initCommand()
 				playerExt->sendErrorMessage(_("Such room doesn't exist!", player));
 				return;
 			}
-			if (playerExt->isInMode(Modes::Mode::Deathmatch))
-			{
-				this->removePlayerFromRoom(player);
-				this->onRoomJoin(player, id - 1);
-			}
-			else
-			{
-				this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, std::size_t(id - 1) } });
-			}
+			this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, std::size_t(id - 1) } });
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") }, .description = __("Enter DM room"), .category = MODE_NAME });
 	this->_coreManager.lock()->getCommandManager()->addCommand(
@@ -283,15 +301,7 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSel
 					return;
 				}
 				auto roomIndex = std::size_t(listItem - 1);
-				if (Core::Player::getPlayerExt(player)->isInMode(Modes::Mode::Deathmatch))
-				{
-					this->removePlayerFromRoom(player);
-					this->onRoomJoin(player, roomIndex);
-				}
-				else
-				{
-					this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, roomIndex } });
-				}
+				this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, roomIndex } });
 			}
 			else
 			{
@@ -459,7 +469,7 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 	{
 		auto playerResult = resultArray.at(i);
 		lastResults += fmt::sprintf("%d. %s\t%d : %d\t%.2f\n",
-			i,
+			i + 1,
 			playerResult.playerName,
 			playerResult.kills,
 			playerResult.deaths,
@@ -482,6 +492,8 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 		new Impl::SimpleTimerHandler(std::bind(&DeathmatchController::onNewRound, this, room)),
 		Seconds(5),
 		false);
+
+	this->bus->fire_event(Core::Utils::Events::RoundEndEvent { .mode = this->mode, .players = room->players });
 }
 
 void DeathmatchController::setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room)

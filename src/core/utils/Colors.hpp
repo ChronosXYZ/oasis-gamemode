@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace Utils
+namespace Core::Utils
 {
 inline const static std::unordered_map<std::string, const std::string> COLORS {
 	{ "WHITE", "FFFFFF" },

@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Utils::SQL::Queries
+namespace Core::Utils::SQL::Queries
 {
 using namespace std::string_literals;
 

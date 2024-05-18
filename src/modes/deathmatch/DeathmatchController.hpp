@@ -5,6 +5,7 @@
 #include "DeathmatchResult.hpp"
 #include "Room.hpp"
 #include "Server/Components/Timers/timers.hpp"
+#include "eventbus/event_bus.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
 
 #include <cstddef>
@@ -24,7 +25,7 @@ class DeathmatchController : public Modes::ModeBase,
 							 public PlayerSpawnEventHandler,
 							 public PlayerChangeEventHandler
 {
-	DeathmatchController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, ITimersComponent* timersComponent);
+	DeathmatchController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus);
 
 	void initCommand();
 	void initRooms();
@@ -53,7 +54,7 @@ class DeathmatchController : public Modes::ModeBase,
 	ITimer* _ticker;
 
 public:
-	~DeathmatchController();
+	virtual ~DeathmatchController();
 	void onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData) override;
 	void onModeSelect(IPlayer& player) override;
 	void onModeLeave(IPlayer& player) override;
@@ -62,6 +63,8 @@ public:
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
 	void onPlayerKeyStateChange(IPlayer& player, uint32_t newKeys, uint32_t oldKeys) override;
 
-	static DeathmatchController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, ITimersComponent* timersComponent);
+	void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event) override;
+
+	static DeathmatchController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus);
 };
 }

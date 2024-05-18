@@ -24,12 +24,12 @@ std::string _(const std::string& message, IPlayer& player)
 			{
 				auto matchString = m.str();
 				auto colorName = matchString.substr(1, matchString.length() - 2);
-				if (!Utils::COLORS.contains(colorName))
+				if (!Core::Utils::COLORS.contains(colorName))
 				{
 					spdlog::error(fmt::sprintf("Color %s doesn't exist in COLORS map. The broken translation is:\n%s", colorName, translation));
 					continue;
 				}
-				auto colorExpansion = Utils::COLORS.at(colorName);
+				auto colorExpansion = Core::Utils::COLORS.at(colorName);
 				translation.replace(m.position(), m.length(), fmt::sprintf("{%s}", colorExpansion));
 			}
 			return translation;
