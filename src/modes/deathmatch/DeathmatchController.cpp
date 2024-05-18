@@ -35,7 +35,7 @@
 
 #define CBUG_FREEZE_DELAY 1500
 #define ROOM_INDEX "roomIndex"
-#define DEFAULT_ROOM_ROUND_TIME_MIN 10
+#define DEFAULT_ROOM_ROUND_TIME_MIN 2
 
 namespace Modes::Deathmatch
 {
@@ -43,7 +43,8 @@ DeathmatchController::DeathmatchController(
 	std::weak_ptr<Core::CoreManager> coreManager,
 	IPlayerPool* playerPool,
 	ITimersComponent* timersComponent)
-	: _coreManager(coreManager)
+	: super(Mode::Deathmatch)
+	, _coreManager(coreManager)
 	, _playerPool(playerPool)
 	, _timersComponent(timersComponent)
 {
@@ -65,6 +66,7 @@ DeathmatchController::~DeathmatchController()
 
 void DeathmatchController::onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
+	super::onModeJoin(player, joinData);
 	auto roomIndex = std::get<std::size_t>(joinData[ROOM_INDEX]);
 	this->onRoomJoin(player, roomIndex);
 }
@@ -78,6 +80,7 @@ void DeathmatchController::onModeSelect(IPlayer& player)
 void DeathmatchController::onModeLeave(IPlayer& player)
 {
 	this->removePlayerFromRoom(player);
+	super::onModeLeave(player);
 }
 
 void DeathmatchController::onPlayerSpawn(IPlayer& player)
@@ -184,7 +187,15 @@ void DeathmatchController::initCommand()
 				playerExt->sendErrorMessage(_("Such room doesn't exist!", player));
 				return;
 			}
-			this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, std::size_t(id - 1) } });
+			if (playerExt->isInMode(Modes::Mode::Deathmatch))
+			{
+				this->removePlayerFromRoom(player);
+				this->onRoomJoin(player, id - 1);
+			}
+			else
+			{
+				this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, std::size_t(id - 1) } });
+			}
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") }, .description = __("Enter DM room"), .category = MODE_NAME });
 	this->_coreManager.lock()->getCommandManager()->addCommand(
@@ -246,7 +257,7 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSel
 			room->map.name,
 			weaponSetToString(room->weaponSet, player),
 			room->host.value_or(_("Server", player)),
-			room->playerIds.size());
+			room->players.size());
 	}
 	this->_coreManager.lock()->getDialogManager()->createDialog(
 		player,
@@ -272,10 +283,15 @@ void DeathmatchController::showRoomSelectionDialog(IPlayer& player, bool modeSel
 					return;
 				}
 				auto roomIndex = std::size_t(listItem - 1);
-				auto joinData = std::unordered_map<std::string, Core::PrimitiveType> {
-					{ ROOM_INDEX, roomIndex }
-				};
-				this->_coreManager.lock()->joinMode(player, Modes::Mode::Deathmatch, joinData);
+				if (Core::Player::getPlayerExt(player)->isInMode(Modes::Mode::Deathmatch))
+				{
+					this->removePlayerFromRoom(player);
+					this->onRoomJoin(player, roomIndex);
+				}
+				else
+				{
+					this->_coreManager.lock()->joinMode(player, Mode::Deathmatch, { { ROOM_INDEX, roomIndex } });
+				}
 			}
 			else
 			{
@@ -351,7 +367,7 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 
 	playerData->tempData->deathmatch = std::make_unique<PlayerTempData>();
 	playerData->tempData->deathmatch->roomId = roomId;
-	room->playerIds.push_back(player.getID());
+	room->players.emplace(&player);
 	player.setHealth(100.0);
 	player.resetWeapons();
 
@@ -367,6 +383,11 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 		this->setRandomSpawnPoint(player, room);
 		player.spawn();
 	}
+
+	for (auto roomPlayer : room->players)
+	{
+		Core::Player::getPlayerExt(*roomPlayer)->sendTranslatedMessageFormatted(__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has joined the room (%d players)"), player.getName().to_string(), room->players.size());
+	}
 }
 
 void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
@@ -380,9 +401,8 @@ void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
 	room->isRestarting = false;
 	room->isStarting = true;
 
-	for (auto const& playerId : room->playerIds)
+	for (auto player : room->players)
 	{
-		IPlayer* player = this->_playerPool->get(playerId);
 		this->setRandomSpawnPoint(*player, room);
 		player->setSpectating(false);
 		auto playerData = Core::Player::getPlayerData(*player);
@@ -396,18 +416,16 @@ void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
 		{
 			for (int i = 3; i > 0; i--)
 			{
-				for (auto const& playerId : room->playerIds)
+				for (auto player : room->players)
 				{
-					IPlayer* player = this->_playerPool->get(playerId);
 					player->setControllable(false);
 					player->sendGameText(fmt::sprintf("~w~%d", i), Seconds(1), 6);
 				}
 				using namespace std::chrono_literals;
 				std::this_thread::sleep_for(1s);
 			}
-			for (auto const& playerId : room->playerIds)
+			for (auto player : room->players)
 			{
-				IPlayer* player = this->_playerPool->get(playerId);
 				player->sendGameText(_("~g~~h~~h~GO!", *player), Seconds(1), 6);
 				player->setControllable(true);
 			}
@@ -421,9 +439,8 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 {
 	room->isRestarting = true;
 	std::vector<DeathmatchResult> resultArray;
-	for (auto& playerId : room->playerIds)
+	for (auto& player : room->players)
 	{
-		auto player = this->_playerPool->get(playerId);
 		auto playerData = Core::Player::getPlayerData(*player);
 		resultArray.push_back(DeathmatchResult {
 			.playerName = player->getName().to_string(),
@@ -450,9 +467,8 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 	}
 	room->cachedLastResult = lastResults;
 
-	for (auto& playerId : room->playerIds)
+	for (auto& player : room->players)
 	{
-		auto player = this->_playerPool->get(playerId);
 		player->setControllable(false);
 		player->setSpectating(true);
 		this->showRoundResultDialog(*player, room);
@@ -502,15 +518,18 @@ void DeathmatchController::setupRoomForPlayer(IPlayer& player, std::shared_ptr<R
 void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 {
 	auto pData = Core::Player::getPlayerData(player);
-	std::erase_if(this->_rooms[pData->tempData->deathmatch->roomId]->playerIds, [&](const auto& x)
-		{
-			return x == player.getID();
-		});
+	auto room = this->_rooms[pData->tempData->deathmatch->roomId];
+	room->players.erase(&player);
 
 	pData->tempData->deathmatch.reset();
 
 	auto playerExt = Core::Player::getPlayerExt(player);
 	playerExt->getTextDrawManager()->destroy(TextDraws::DeathmatchTimer::NAME);
+
+	for (auto roomPlayer : room->players)
+	{
+		Core::Player::getPlayerExt(*roomPlayer)->sendTranslatedMessageFormatted(__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d players)"), player.getName().to_string(), room->players.size());
+	}
 }
 
 void DeathmatchController::onTick()
@@ -524,13 +543,12 @@ void DeathmatchController::onTick()
 		{
 			this->onRoundEnd(room);
 		}
-		if (!room->playerIds.empty() && room->countdown > std::chrono::seconds(0) && !room->isStarting)
+		if (!room->players.empty() && room->countdown > std::chrono::seconds(0) && !room->isStarting)
 		{
 			room->countdown--;
 		}
-		for (int j = 0; j < room->playerIds.size(); j++)
+		for (auto player : room->players)
 		{
-			IPlayer* player = _playerPool->get(room->playerIds[j]);
 			this->updateDeathmatchTimer(*player, i, room);
 		}
 	}

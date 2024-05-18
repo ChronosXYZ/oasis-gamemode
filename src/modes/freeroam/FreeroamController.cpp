@@ -3,6 +3,7 @@
 #include "../../core/player/PlayerExtension.hpp"
 
 #include <fmt/printf.h>
+#include <magic_enum/magic_enum.hpp>
 #include <player.hpp>
 #include <Server/Components/Vehicles/vehicles.hpp>
 
@@ -14,7 +15,8 @@ namespace Modes::Freeroam
 {
 
 FreeroamController::FreeroamController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
-	: _coreManager(coreManager)
+	: Modes::ModeBase(Mode::Freeroam)
+	, _coreManager(coreManager)
 	, _vehiclesComponent(coreManager.lock()->components->queryComponent<IVehiclesComponent>())
 	, _playerPool(playerPool)
 {
@@ -47,6 +49,7 @@ FreeroamController* FreeroamController::create(std::weak_ptr<Core::CoreManager> 
 
 void FreeroamController::onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
+	super::onModeJoin(player, joinData);
 	setupSpawn(player);
 	player.spawn();
 }
@@ -151,6 +154,7 @@ void FreeroamController::setupSpawn(IPlayer& player)
 
 void FreeroamController::onModeLeave(IPlayer& player)
 {
+	super::onModeLeave(player);
 	this->deleteLastSpawnedCar(player);
 }
 

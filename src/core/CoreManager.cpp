@@ -14,6 +14,7 @@
 #include "../modes/freeroam/FreeroamController.hpp"
 #include "../modes/deathmatch/DeathmatchController.hpp"
 
+#include <cstddef>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -98,14 +99,16 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 		"oasisfreeroam.xyz"));
 	txdManager->add(TextDraws::ServerLogo::NAME, logo);
 	logo->show();
+
+	_playerPool->sendDeathMessageToAll(NULL, player, 200);
 }
 
 void CoreManager::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
 {
 	this->savePlayer(player);
-	this->sendPlayerLeftNotificationToAll(player);
 	this->_playerData.erase(player.getID());
-	this->removePlayerFromModes(player);
+	this->removePlayerFromCurrentMode(player);
+	_playerPool->sendDeathMessageToAll(NULL, player, 201);
 }
 
 std::shared_ptr<DialogManager> CoreManager::getDialogManager()
@@ -232,7 +235,7 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 			classSelectionPoint.y + 5.0 * std::cos(-angleRad),
 			classSelectionPoint.z));
 		player.setSkin(pData->lastSkinId);
-		this->removePlayerFromModes(player);
+		this->removePlayerFromCurrentMode(player);
 	}
 
 	return true;
@@ -246,8 +249,6 @@ void CoreManager::onPlayerLoggedIn(IPlayer& player)
 
 	// hack to get class selection buttons appear again
 	player.setSpectating(false);
-
-	this->sendPlayerJoinedNotificationToAll(player);
 }
 
 bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
@@ -279,11 +280,11 @@ void CoreManager::showModeSelectionDialog(IPlayer& player)
 					   "Derby\t/derby\t%d\n"
 					   "Cops and Robbers\t/cnr\t%d",
 						 player),
-			_modePlayerCount[Modes::Mode::Freeroam].size(),
-			_modePlayerCount[Modes::Mode::Deathmatch].size(),
-			_modePlayerCount[Modes::Mode::PTP].size(),
-			_modePlayerCount[Modes::Mode::Derby].size(),
-			_modePlayerCount[Modes::Mode::CnR].size()),
+			_modes->resolve<Modes::Freeroam::FreeroamController>()->playerCount(),
+			_modes->resolve<Modes::Deathmatch::DeathmatchController>()->playerCount(),
+			0,
+			0,
+			0),
 		_("Select", player),
 		"",
 		[&](DialogResponse resp, int listItem, StringView inputText)
@@ -317,22 +318,23 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 
 void CoreManager::joinMode(IPlayer& player, Modes::Mode mode, std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
-	this->removePlayerFromModes(player);
+	this->removePlayerFromCurrentMode(player);
 	auto pData = this->getPlayerData(player);
 
+	pData->tempData->core->lastMode = pData->tempData->core->currentMode;
 	pData->tempData->core->currentMode = mode;
-	this->_modePlayerCount[mode].insert(player.getID());
 
+	std::shared_ptr<Modes::ModeBase> modeBase;
 	switch (mode)
 	{
 	case Modes::Mode::Freeroam:
 	{
-		this->_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeJoin(player, joinData);
+		modeBase = static_pointer_cast<Modes::ModeBase>(this->_modes->resolve<Modes::Freeroam::FreeroamController>());
 		break;
 	}
 	case Modes::Mode::Deathmatch:
 	{
-		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeJoin(player, joinData);
+		modeBase = static_pointer_cast<Modes::ModeBase>(this->_modes->resolve<Modes::Deathmatch::DeathmatchController>());
 		break;
 	}
 	default:
@@ -342,67 +344,45 @@ void CoreManager::joinMode(IPlayer& player, Modes::Mode mode, std::unordered_map
 		break;
 	}
 	}
-	spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
+	if (modeBase.get() == nullptr)
+		return;
+	modeBase->onModeJoin(player, joinData);
 }
 
-void CoreManager::removePlayerFromModes(IPlayer& player)
+void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
 {
-	auto pData = this->getPlayerData(player);
-	auto mode = pData->tempData->core->currentMode;
-	if (mode != Modes::Mode::None)
+	auto mode = Player::getPlayerExt(player)->getMode();
+	if (mode == Modes::Mode::None)
+		return;
+	std::shared_ptr<Modes::ModeBase> modeBase;
+	switch (mode)
 	{
-		std::erase_if(_modePlayerCount[mode], [&](const auto& x)
-			{
-				if (player.getID() == x)
-				{
-					switch (mode)
-					{
-					case Modes::Mode::Freeroam:
-					{
-						_modes->resolve<Modes::Freeroam::FreeroamController>()->onModeLeave(player);
-						break;
-					}
-					case Modes::Mode::Deathmatch:
-					{
-						_modes->resolve<Modes::Deathmatch::DeathmatchController>()->onModeLeave(player);
-						break;
-					}
-					default:
-					{
-						break;
-					}
-					}
-					spdlog::info("Player {} has left mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
-					return true;
-				}
-				return false;
-			});
+	case Modes::Mode::Freeroam:
+	{
+		modeBase = static_pointer_cast<Modes::ModeBase>(this->_modes->resolve<Modes::Freeroam::FreeroamController>());
+		break;
 	}
+	case Modes::Mode::Deathmatch:
+	{
+		modeBase = static_pointer_cast<Modes::ModeBase>(this->_modes->resolve<Modes::Deathmatch::DeathmatchController>());
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+	if (modeBase.get() == nullptr)
+		return;
+	modeBase->onModeLeave(player);
 }
 
-void CoreManager::sendPlayerLeftNotificationToAll(IPlayer& leavingPlayer)
+template <typename... T>
+void CoreManager::sendNotificationToAllFormatted(const std::string& message, const T&... args)
 {
 	for (const auto& player : this->_playerPool->players())
 	{
-		player->sendClientMessage(Colour::White(),
-			fmt::sprintf(
-				_("#LIME#>> #LIGHT_GRAY#%s has left the server (%d/%d)", *player),
-				leavingPlayer.getName().to_string(),
-				this->_playerPool->players().size(),
-				*this->_core->getConfig().getInt("max_players")));
-	}
-}
-
-void CoreManager::sendPlayerJoinedNotificationToAll(IPlayer& joinedPlayer)
-{
-	for (const auto& player : this->_playerPool->players())
-	{
-		player->sendClientMessage(Colour::White(),
-			fmt::sprintf(
-				_("#LIME#>> #LIGHT_GRAY#%s has joined the server (%d/%d)", *player),
-				joinedPlayer.getName().to_string(),
-				this->_playerPool->players().size(),
-				*this->_core->getConfig().getInt("max_players")));
+		Player::getPlayerExt(*player)->sendTranslatedMessageFormatted(message, args...);
 	}
 }
 

@@ -78,9 +78,9 @@ private:
 	void savePlayer(IPlayer& player);
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
-	void removePlayerFromModes(IPlayer& player);
-	void sendPlayerLeftNotificationToAll(IPlayer& leavingPlayer);
-	void sendPlayerJoinedNotificationToAll(IPlayer& joinedPlayer);
+	void removePlayerFromCurrentMode(IPlayer& player);
+	template <typename... T>
+	void sendNotificationToAllFormatted(const std::string& message, const T&... args);
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;
@@ -90,13 +90,6 @@ private:
 	std::shared_ptr<DialogManager> _dialogManager;
 	std::shared_ptr<pqxx::connection> _dbConnection;
 	std::map<unsigned int, std::shared_ptr<PlayerModel>> _playerData;
-	std::map<Modes::Mode, std::set<unsigned int>> _modePlayerCount {
-		{ Modes::Mode::Freeroam, {} },
-		{ Modes::Mode::Deathmatch, {} },
-		{ Modes::Mode::Derby, {} },
-		{ Modes::Mode::PTP, {} },
-		{ Modes::Mode::CnR, {} }
-	};
 
 	// Controllers
 	std::unique_ptr<Auth::AuthController> _authController;

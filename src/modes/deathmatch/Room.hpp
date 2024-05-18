@@ -12,6 +12,7 @@
 
 #include <ratio>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace Modes::Deathmatch
@@ -27,8 +28,8 @@ struct Room
 	/// Type of room
 	WeaponSet weaponSet;
 
-	/// Basically list of player IDs which joined the room.
-	std::vector<int> playerIds;
+	/// A list of players which joined the room.
+	std::unordered_set<IPlayer*> players;
 
 	/// Room host is a player who created the room. Set to 'Server' if this is server-created room.
 	std::optional<std::string> host;

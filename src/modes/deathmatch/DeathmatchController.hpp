@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../modes/IMode.hpp"
+#include "../../modes/ModeBase.hpp"
 #include "../../core/CoreManager.hpp"
 #include "DeathmatchResult.hpp"
 #include "Room.hpp"
@@ -19,7 +19,7 @@ namespace Modes::Deathmatch
 inline const unsigned int VIRTUAL_WORLD_PREFIX = 100;
 inline const std::string MODE_NAME = "deathmatch";
 
-class DeathmatchController : public Modes::IMode,
+class DeathmatchController : public Modes::ModeBase,
 							 public PlayerDamageEventHandler,
 							 public PlayerSpawnEventHandler,
 							 public PlayerChangeEventHandler

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-17 20:43+0000\n"
+"POT-Creation-Date: 2024-05-18 14:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/core/player/PlayerExtension.cpp:60
-msgid "#RED#[ERROR]#WHITE#"
+#: src/core/CoreManager.cpp:255
+msgid "You are not logged in yet!"
 msgstr ""
 
-#: src/core/player/PlayerExtension.cpp:66
-msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
+#: src/core/CoreManager.cpp:271
+msgid "Modes"
 msgstr ""
 
-#: src/core/commands/CommandManager.cpp:68
-msgid "Failed to invoke command!"
+#: src/core/CoreManager.cpp:272
+#, c-format
+msgid ""
+"Mode\tCommand\tPlayers\n"
+"Freeroam\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Protect the President\t/ptp\t%d\n"
+"Derby\t/derby\t%d\n"
+"Cops and Robbers\t/cnr\t%d"
 msgstr ""
 
-#: src/core/commands/CommandManager.cpp:105
-msgid "#GOLD_FUSION#[USAGE]#WHITE#"
+#: src/core/CoreManager.cpp:284
+#: src/modes/deathmatch/DeathmatchController.cpp:267
+msgid "Select"
+msgstr ""
+
+#: src/core/CoreManager.cpp:308 src/core/CoreManager.cpp:338
+msgid "Mode is not implemented yet!"
 msgstr ""
 
 #: src/core/auth/AuthController.cpp:57
@@ -159,42 +171,95 @@ msgstr ""
 msgid "You have successfully registered!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:258
-msgid "You are not logged in yet!"
+#: src/core/commands/CommandManager.cpp:68
+msgid "Failed to invoke command!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:274
-msgid "Modes"
+#: src/core/commands/CommandManager.cpp:105
+msgid "#GOLD_FUSION#[USAGE]#WHITE#"
 msgstr ""
 
-#: src/core/CoreManager.cpp:275
+#: src/core/player/PlayerExtension.cpp:61
+msgid "#RED#[ERROR]#WHITE#"
+msgstr ""
+
+#: src/core/player/PlayerExtension.cpp:67
+msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:64
+msgid "Teleports player to the Freeroam mode"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:72
+msgid "You can spawn vehicles only in Freeroam mode!"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:77
+msgid "Invalid car model ID!"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:82
+msgid "Invalid color ID!"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:96
+msgid "You have sucessfully spawned the vehicle!"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:99
+msgid "vehicle model id"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:99
+msgid "color 1"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:99
+msgid "color 2"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:99
+msgid "Spawns a vehicle"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:105
+msgid "You have killed yourself!"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:109
+msgid "Kill yourself"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:118
+msgid "Invalid skin ID!"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:124
+#, c-format
+msgid "You have changed your skin to ID: %d!"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:127
+msgid "skin ID"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:128
+msgid "Set player skin"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:170
 #, c-format
 msgid ""
-"Mode\tCommand\tPlayers\n"
-"Freeroam\t/fr\t%d\n"
-"Deathmatch\t/dm\t%d\n"
-"Protect the President\t/ptp\t%d\n"
-"Derby\t/derby\t%d\n"
-"Cops and Robbers\t/cnr\t%d"
+"#LIME#>> #DEEP_SAFFRON#%s#LIGHT_GRAY#: Player %s has joined the mode (%d "
+"players)"
 msgstr ""
 
-#: src/core/CoreManager.cpp:287
-#: src/modes/deathmatch/DeathmatchController.cpp:256
-msgid "Select"
-msgstr ""
-
-#: src/core/CoreManager.cpp:311 src/core/CoreManager.cpp:340
-msgid "Mode is not implemented yet!"
-msgstr ""
-
-#: src/core/CoreManager.cpp:386
+#: src/modes/freeroam/FreeroamController.cpp:178
 #, c-format
-msgid "#LIME#>> #LIGHT_GRAY#%s has left the server (%d/%d)"
-msgstr ""
-
-#: src/core/CoreManager.cpp:395
-#, c-format
-msgid "#LIME#>> #LIGHT_GRAY#%s has joined the server (%d/%d)"
+msgid ""
+"#LIME#>> #DEEP_SAFFRON#%s#LIGHT_GRAY#: Player %s has left the mode (%d "
+"players)"
 msgstr ""
 
 #: src/modes/deathmatch/WeaponSet.hpp:24
@@ -217,123 +282,76 @@ msgstr ""
 msgid "Team"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:141
+#: src/modes/deathmatch/DeathmatchController.cpp:144
 msgid "Don't use ~r~C-bug!"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:184
+#: src/modes/deathmatch/DeathmatchController.cpp:187
 msgid "Such room doesn't exist!"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:189
+#: src/modes/deathmatch/DeathmatchController.cpp:200
 msgid "room number"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:189
+#: src/modes/deathmatch/DeathmatchController.cpp:200
 msgid "Enter DM room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:195
+#: src/modes/deathmatch/DeathmatchController.cpp:206
 msgid "Enter DM mode"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:236
+#: src/modes/deathmatch/DeathmatchController.cpp:247
 msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:238
+#: src/modes/deathmatch/DeathmatchController.cpp:249
 msgid "Create custom room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:248
+#: src/modes/deathmatch/DeathmatchController.cpp:259
 msgid "Server"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:254
+#: src/modes/deathmatch/DeathmatchController.cpp:265
 #, c-format
 msgid "Select Deathmatch room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:257
-#: src/modes/deathmatch/DeathmatchController.cpp:301
+#: src/modes/deathmatch/DeathmatchController.cpp:268
+#: src/modes/deathmatch/DeathmatchController.cpp:317
 msgid "Close"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:295
+#: src/modes/deathmatch/DeathmatchController.cpp:311
 msgid "Player\tK : D\tRatio\n"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:299
+#: src/modes/deathmatch/DeathmatchController.cpp:315
 #, c-format
 msgid "Deathmatch statistics"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:340
+#: src/modes/deathmatch/DeathmatchController.cpp:356
 #, c-format
 msgid "~w~Mode Deathmatch /DM %d"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:411
+#: src/modes/deathmatch/DeathmatchController.cpp:389
+#, c-format
+msgid ""
+"#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has joined the room (%d "
+"players)"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:429
 msgid "~g~~h~~h~GO!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:61
-msgid "Teleports player to the Freeroam mode"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:69
-msgid "You can spawn vehicles only in Freeroam mode!"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:74
-msgid "Invalid car model ID!"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:79
-msgid "Invalid color ID!"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:93
-msgid "You have sucessfully spawned the vehicle!"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:96
-msgid "vehicle model id"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:96
-msgid "color 1"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:96
-msgid "color 2"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:96
-msgid "Spawns a vehicle"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:102
-msgid "You have killed yourself!"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:106
-msgid "Kill yourself"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:115
-msgid "Invalid skin ID!"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:121
+#: src/modes/deathmatch/DeathmatchController.cpp:531
 #, c-format
-msgid "You have changed your skin to ID: %d!"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:124
-msgid "skin ID"
-msgstr ""
-
-#: src/modes/freeroam/FreeroamController.cpp:125
-msgid "Set player skin"
+msgid ""
+"#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d "
+"players)"
 msgstr ""

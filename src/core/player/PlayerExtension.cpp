@@ -2,6 +2,7 @@
 #include "../utils/Localization.hpp"
 #include "TextDrawManager.hpp"
 
+#include <fmt/printf.h>
 #include <player.hpp>
 #include <component.hpp>
 #include <Server/Components/Timers/timers.hpp>
@@ -66,6 +67,11 @@ void OasisPlayerExt::sendInfoMessage(const std::string& message)
 		fmt::format("{} {}", _("#BRIGHT_BLUE#[INFO]#WHITE#", _player), message));
 }
 
+void OasisPlayerExt::sendTranslatedMessage(const std::string& message)
+{
+	_player.sendClientMessage(Colour::White(), _(message, _player));
+}
+
 const std::string OasisPlayerExt::getIP()
 {
 	PeerAddress::AddressString ipString;
@@ -94,6 +100,11 @@ float OasisPlayerExt::getVehicleSpeed()
 bool OasisPlayerExt::isInMode(Modes::Mode mode)
 {
 	return this->_playerData->tempData->core->currentMode == mode;
+}
+
+const Modes::Mode& OasisPlayerExt::getMode()
+{
+	return this->_playerData->tempData->core->currentMode;
 }
 
 bool OasisPlayerExt::isInAnyMode()
