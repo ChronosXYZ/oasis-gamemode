@@ -17,6 +17,46 @@
 
 namespace Modes::Deathmatch
 {
+class PrivacyMode
+{
+public:
+	enum class Value
+	{
+		Everyone,
+		OnlyFriends,
+		OnlyGroup
+	};
+	PrivacyMode() = default;
+	constexpr PrivacyMode(Value privacyMode)
+		: value(privacyMode)
+	{
+	}
+
+	constexpr operator Value() const { return value; }
+	explicit operator bool() const = delete;
+
+	constexpr bool operator==(PrivacyMode a) const { return value == a.value; }
+	constexpr bool operator!=(PrivacyMode a) const { return value != a.value; }
+
+	std::string toString(IPlayer& player)
+	{
+		switch (value)
+		{
+		case Value::Everyone:
+			return _("Everyone", player);
+		case Value::OnlyFriends:
+			return _("Only friends", player);
+		case Value::OnlyGroup:
+			return _("Only group members", player);
+		default:
+			return "";
+		}
+	}
+
+private:
+	Value value;
+};
+
 struct Room
 {
 	/// Room map
@@ -31,7 +71,8 @@ struct Room
 	/// A list of players which joined the room.
 	std::unordered_set<IPlayer*> players;
 
-	/// Room host is a player who created the room. Set to 'Server' if this is server-created room.
+	/// Room host is a player who created the room. Set to 'Server' if this is
+	/// server-created room.
 	std::optional<std::string> host;
 
 	/// Room virtual world
@@ -54,5 +95,7 @@ struct Room
 
 	/// Last round results in form of string
 	std::optional<std::string> cachedLastResult;
+
+	PrivacyMode privacyMode = PrivacyMode(PrivacyMode::Value::Everyone);
 };
 }

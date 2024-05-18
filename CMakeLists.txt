@@ -85,6 +85,7 @@ cmrc_add_resource_library(
 add_subdirectory(vendor/sdk)
 add_subdirectory(vendor/network)
 add_subdirectory(vendor/tinygettext)
+set(EVENTBUS_BUILD_TESTS FALSE)
 add_subdirectory(vendor/eventbus)
 
 file(GLOB_RECURSE source_list CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.hpp")

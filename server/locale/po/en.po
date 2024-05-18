@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-18 16:44+0000\n"
-"PO-Revision-Date: 2024-05-18 16:44+0000\n"
+"POT-Creation-Date: 2024-05-21 09:31+0000\n"
+"PO-Revision-Date: 2024-05-21 09:31+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -17,21 +17,43 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/core/player/PlayerExtension.cpp:61
-msgid "#RED#[ERROR]#WHITE#"
-msgstr "#RED#[ERROR]#WHITE#"
+#: src/core/CoreManager.cpp:265
+msgid "You are not logged in yet!"
+msgstr "You are not logged in yet!"
 
-#: src/core/player/PlayerExtension.cpp:67
-msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
-msgstr "#BRIGHT_BLUE#[INFO]#WHITE#"
+#: src/core/CoreManager.cpp:281
+msgid "Modes"
+msgstr "Modes"
 
-#: src/core/commands/CommandManager.cpp:68
-msgid "Failed to invoke command!"
-msgstr "Failed to invoke command!"
+#: src/core/CoreManager.cpp:282
+#, c-format
+msgid ""
+"Mode\tCommand\tPlayers\n"
+"Freeroam\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Protect the President\t/ptp\t%d\n"
+"Derby\t/derby\t%d\n"
+"Cops and Robbers\t/cnr\t%d"
+msgstr ""
+"Mode\tCommand\tPlayers\n"
+"Freeroam\t/fr\t%d\n"
+"Deathmatch\t/dm\t%d\n"
+"Protect the President\t/ptp\t%d\n"
+"Derby\t/derby\t%d\n"
+"Cops and Robbers\t/cnr\t%d"
 
-#: src/core/commands/CommandManager.cpp:105
-msgid "#GOLD_FUSION#[USAGE]#WHITE#"
-msgstr "#GOLD_FUSION#[USAGE]#WHITE#"
+#: src/core/CoreManager.cpp:294
+#: src/modes/deathmatch/DeathmatchController.cpp:306
+#: src/modes/deathmatch/DeathmatchController.cpp:394
+#: src/modes/deathmatch/DeathmatchController.cpp:493
+#: src/modes/deathmatch/DeathmatchController.cpp:534
+#: src/modes/deathmatch/DeathmatchController.cpp:568
+msgid "Select"
+msgstr "Select"
+
+#: src/core/CoreManager.cpp:318 src/core/CoreManager.cpp:348
+msgid "Mode is not implemented yet!"
+msgstr "Mode is not implemented yet!"
 
 #: src/core/auth/AuthController.cpp:57
 #, c-format
@@ -66,6 +88,7 @@ msgstr ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 
 #: src/core/auth/AuthController.cpp:66 src/core/auth/AuthController.cpp:245
+#: src/modes/deathmatch/DeathmatchController.cpp:613
 msgid "Enter"
 msgstr "Enter"
 
@@ -201,65 +224,123 @@ msgstr "OK"
 msgid "You have successfully registered!"
 msgstr "You have successfully registered!"
 
-#: src/core/CoreManager.cpp:264
-msgid "You are not logged in yet!"
-msgstr "You are not logged in yet!"
+#: src/core/commands/CommandManager.cpp:68
+msgid "Failed to invoke command!"
+msgstr "Failed to invoke command!"
 
-#: src/core/CoreManager.cpp:280
-msgid "Modes"
-msgstr "Modes"
+#: src/core/commands/CommandManager.cpp:105
+msgid "#GOLD_FUSION#[USAGE]#WHITE#"
+msgstr "#GOLD_FUSION#[USAGE]#WHITE#"
 
-#: src/core/CoreManager.cpp:281
+#: src/core/player/PlayerExtension.cpp:61
+msgid "#RED#[ERROR]#WHITE#"
+msgstr "#RED#[ERROR]#WHITE#"
+
+#: src/core/player/PlayerExtension.cpp:67
+msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
+msgstr "#BRIGHT_BLUE#[INFO]#WHITE#"
+
+#: src/modes/freeroam/FreeroamController.cpp:65
+msgid "Teleports player to the Freeroam mode"
+msgstr "Teleports player to the Freeroam mode"
+
+#: src/modes/freeroam/FreeroamController.cpp:73
+msgid "You can spawn vehicles only in Freeroam mode!"
+msgstr "You can spawn vehicles only in Freeroam mode!"
+
+#: src/modes/freeroam/FreeroamController.cpp:78
+msgid "Invalid car model ID!"
+msgstr "Invalid car model ID!"
+
+#: src/modes/freeroam/FreeroamController.cpp:83
+msgid "Invalid color ID!"
+msgstr "Invalid color ID!"
+
+#: src/modes/freeroam/FreeroamController.cpp:97
+msgid "You have sucessfully spawned the vehicle!"
+msgstr "You have sucessfully spawned the vehicle!"
+
+#: src/modes/freeroam/FreeroamController.cpp:100
+msgid "vehicle model id"
+msgstr "vehicle model id"
+
+#: src/modes/freeroam/FreeroamController.cpp:100
+msgid "color 1"
+msgstr "color 1"
+
+#: src/modes/freeroam/FreeroamController.cpp:100
+msgid "color 2"
+msgstr "color 2"
+
+#: src/modes/freeroam/FreeroamController.cpp:100
+msgid "Spawns a vehicle"
+msgstr "Spawns a vehicle"
+
+#: src/modes/freeroam/FreeroamController.cpp:106
+msgid "You have killed yourself!"
+msgstr "You have killed yourself!"
+
+#: src/modes/freeroam/FreeroamController.cpp:110
+msgid "Kill yourself"
+msgstr "Kill yourself"
+
+#: src/modes/freeroam/FreeroamController.cpp:119
+msgid "Invalid skin ID!"
+msgstr "Invalid skin ID!"
+
+#: src/modes/freeroam/FreeroamController.cpp:125
 #, c-format
-msgid ""
-"Mode\tCommand\tPlayers\n"
-"Freeroam\t/fr\t%d\n"
-"Deathmatch\t/dm\t%d\n"
-"Protect the President\t/ptp\t%d\n"
-"Derby\t/derby\t%d\n"
-"Cops and Robbers\t/cnr\t%d"
-msgstr ""
-"Mode\tCommand\tPlayers\n"
-"Freeroam\t/fr\t%d\n"
-"Deathmatch\t/dm\t%d\n"
-"Protect the President\t/ptp\t%d\n"
-"Derby\t/derby\t%d\n"
-"Cops and Robbers\t/cnr\t%d"
+msgid "You have changed your skin to ID: %d!"
+msgstr "You have changed your skin to ID: %d!"
 
-#: src/core/CoreManager.cpp:293
-#: src/modes/deathmatch/DeathmatchController.cpp:293
-msgid "Select"
-msgstr "Select"
+#: src/modes/freeroam/FreeroamController.cpp:128
+msgid "skin ID"
+msgstr "skin ID"
 
-#: src/core/CoreManager.cpp:317 src/core/CoreManager.cpp:347
-msgid "Mode is not implemented yet!"
-msgstr "Mode is not implemented yet!"
+#: src/modes/freeroam/FreeroamController.cpp:129
+msgid "Set player skin"
+msgstr "Set player skin"
 
-#: src/modes/deathmatch/WeaponSet.hpp:24
+#: src/modes/deathmatch/WeaponSet.hpp:60
+#: src/modes/deathmatch/DeathmatchController.cpp:486
 msgid "Run"
 msgstr "Run"
 
-#: src/modes/deathmatch/WeaponSet.hpp:26
+#: src/modes/deathmatch/WeaponSet.hpp:62
+#: src/modes/deathmatch/DeathmatchController.cpp:487
 msgid "Walk"
 msgstr "Walk"
 
-#: src/modes/deathmatch/WeaponSet.hpp:28
+#: src/modes/deathmatch/WeaponSet.hpp:64
+#: src/modes/deathmatch/DeathmatchController.cpp:488
 msgid "DSS"
 msgstr "DSS"
 
-#: src/modes/deathmatch/WeaponSet.hpp:30
+#: src/modes/deathmatch/WeaponSet.hpp:66
 msgid "Custom"
 msgstr "Custom"
 
-#: src/modes/deathmatch/WeaponSet.hpp:32
+#: src/modes/deathmatch/WeaponSet.hpp:68
 msgid "Team"
 msgstr "Team"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:150
+#: src/modes/deathmatch/Room.hpp:46
+msgid "Everyone"
+msgstr "Everyone"
+
+#: src/modes/deathmatch/Room.hpp:48
+msgid "Only friends"
+msgstr "Only friends"
+
+#: src/modes/deathmatch/Room.hpp:50
+msgid "Only group members"
+msgstr "Only group members"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:158
 msgid "Don't use ~r~C-bug!"
 msgstr "Don't use ~r~C-bug!"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:184 src/modes/ModeBase.cpp:44
+#: src/modes/deathmatch/DeathmatchController.cpp:196 src/modes/ModeBase.cpp:44
 #, c-format
 msgid ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on "
@@ -268,59 +349,132 @@ msgstr ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on "
 "fire!"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:213
+#: src/modes/deathmatch/DeathmatchController.cpp:225
 msgid "Such room doesn't exist!"
 msgstr "Such room doesn't exist!"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:226
+#: src/modes/deathmatch/DeathmatchController.cpp:231
 msgid "room number"
 msgstr "room number"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:226
+#: src/modes/deathmatch/DeathmatchController.cpp:232
 msgid "Enter DM room"
 msgstr "Enter DM room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:232
+#: src/modes/deathmatch/DeathmatchController.cpp:241
 msgid "Enter DM mode"
 msgstr "Enter DM mode"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:273
+#: src/modes/deathmatch/DeathmatchController.cpp:288
 msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
 msgstr "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:275
+#: src/modes/deathmatch/DeathmatchController.cpp:292
 msgid "Create custom room"
 msgstr "Create custom room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:285
+#: src/modes/deathmatch/DeathmatchController.cpp:301
 msgid "Server"
 msgstr "Server"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:291
+#: src/modes/deathmatch/DeathmatchController.cpp:305
 #, c-format
 msgid "Select Deathmatch room"
 msgstr "Select Deathmatch room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:294
-#: src/modes/deathmatch/DeathmatchController.cpp:343
+#: src/modes/deathmatch/DeathmatchController.cpp:306
+#: src/modes/deathmatch/DeathmatchController.cpp:348
 msgid "Close"
 msgstr "Close"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:337
+#: src/modes/deathmatch/DeathmatchController.cpp:344
 msgid "Player\tK : D\tRatio\n"
 msgstr "Player\tK : D\tRatio\n"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:341
+#: src/modes/deathmatch/DeathmatchController.cpp:347
 #, c-format
 msgid "Deathmatch statistics"
 msgstr "Deathmatch statistics"
 
 #: src/modes/deathmatch/DeathmatchController.cpp:382
 #, c-format
+msgid ""
+"Map\t%s\n"
+"Weapon set\t%s\n"
+"Privacy mode\t%s\n"
+"Is C-bug enabled?\t%s\n"
+"Round time\t%d minutes\n"
+"Play!"
+msgstr ""
+"Map\t%s\n"
+"Weapon set\t%s\n"
+"Privacy mode\t%s\n"
+"Is C-bug enabled?\t%s\n"
+"Round time\t%d minutes\n"
+"Play!"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:387
+#: src/modes/deathmatch/DeathmatchController.cpp:562
+msgid "Yes"
+msgstr "Yes"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:387
+#: src/modes/deathmatch/DeathmatchController.cpp:562
+msgid "No"
+msgstr "No"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:393
+#, c-format
+msgid "Create new deathmatch room"
+msgstr "Create new deathmatch room"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:394
+#: src/modes/deathmatch/DeathmatchController.cpp:493
+#: src/modes/deathmatch/DeathmatchController.cpp:534
+#: src/modes/deathmatch/DeathmatchController.cpp:568
+#: src/modes/deathmatch/DeathmatchController.cpp:613
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:460
+#, c-format
+msgid "Map selection"
+msgstr "Map selection"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:492
+#, c-format
+msgid "Weapon set selection"
+msgstr "Weapon set selection"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:533
+#, c-format
+msgid "Privacy mode selection"
+msgstr "Privacy mode selection"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:567
+#, c-format
+msgid "Should C-bug be enabled?"
+msgstr "Should C-bug be enabled?"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:608
+msgid "Enter the round time in minutes"
+msgstr "Enter the round time in minutes"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:612
+#, c-format
+msgid "Round time"
+msgstr "Round time"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:639
+msgid "Invalid number of minutes! (available values are 1-60)"
+msgstr "Invalid number of minutes! (available values are 1-60)"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:713
+#, c-format
 msgid "~w~Mode Deathmatch /DM %d"
 msgstr "~w~Mode Deathmatch /DM %d"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:415
+#: src/modes/deathmatch/DeathmatchController.cpp:746
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has joined the room (%d "
@@ -329,11 +483,11 @@ msgstr ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has joined the room (%d "
 "players)"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:455
+#: src/modes/deathmatch/DeathmatchController.cpp:790
 msgid "~g~~h~~h~GO!"
 msgstr "~g~~h~~h~GO!"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:557
+#: src/modes/deathmatch/DeathmatchController.cpp:896
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d "
