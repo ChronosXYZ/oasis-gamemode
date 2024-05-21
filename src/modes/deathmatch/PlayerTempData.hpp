@@ -38,6 +38,7 @@ struct PlayerTempData
 		this->kills = 0;
 		this->deaths = 0;
 		this->ratio = 0.0;
+		this->damageInflicted = 0.0;
 	}
 
 	inline void updateRatio()
