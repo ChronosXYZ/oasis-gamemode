@@ -964,7 +964,8 @@ void DeathmatchController::updateDeathmatchTimer(
 	deathmatchTimerTxd.value()->update(
 		fmt::sprintf(_("~w~Mode Deathmatch /DM %d", player), roomIndex + 1),
 		playerData->tempData->deathmatch->kills,
-		playerData->tempData->deathmatch->deaths, 0.0, room->countdown);
+		playerData->tempData->deathmatch->deaths,
+		playerData->tempData->deathmatch->damageInflicted, room->countdown);
 }
 
 void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
