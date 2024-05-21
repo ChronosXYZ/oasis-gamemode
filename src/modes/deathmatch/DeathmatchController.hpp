@@ -40,8 +40,12 @@ class DeathmatchController : public Modes::ModeBase,
 	void showRoomMapSelectionDialog(IPlayer& player);
 	void showRoomWeaponSetSelectionDialog(IPlayer& player);
 	void showRoomPrivacyModeSelectionDialog(IPlayer& player);
-	void showRoomCbugEnabledSelectionDialog(IPlayer& player);
+	void showRoomSetCbugEnabledDialog(IPlayer& player);
 	void showRoomSetRoundTimeDialog(IPlayer& player);
+	void showRoomSetHealthDialog(IPlayer& player);
+	void showRoomSetArmorDialog(IPlayer& player);
+	void showRoomSetRefillHealthDialog(IPlayer& player);
+	void showRoomSetRandomMapDialog(IPlayer& player);
 	void createRoom(IPlayer& player);
 
 	std::shared_ptr<TextDraws::DeathmatchTimer> createDeathmatchTimer(
@@ -80,6 +84,8 @@ public:
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
 	void onPlayerKeyStateChange(
 		IPlayer& player, uint32_t newKeys, uint32_t oldKeys) override;
+	void onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
+		unsigned int weapon, BodyPart part) override;
 
 	void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event) override;
 

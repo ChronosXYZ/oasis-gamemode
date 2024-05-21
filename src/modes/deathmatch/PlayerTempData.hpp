@@ -19,6 +19,7 @@ struct PlayerTempData
 	unsigned int kills = 0;
 	unsigned int deaths = 0;
 	float ratio = 0.0;
+	float damageInflicted = 0.0;
 
 	inline void increaseKills()
 	{

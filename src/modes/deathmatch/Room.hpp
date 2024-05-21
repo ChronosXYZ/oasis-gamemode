@@ -87,6 +87,14 @@ struct Room
 	/// Default round time
 	std::chrono::seconds defaultTime;
 
+	unsigned int defaultHealth = 100.0;
+
+	unsigned int defaultArmor = 0.0;
+
+	bool refillHealth = true;
+
+	bool randomMap = true;
+
 	/// Set to true on round end
 	bool isRestarting;
 

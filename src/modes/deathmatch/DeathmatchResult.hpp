@@ -10,5 +10,6 @@ struct DeathmatchResult
 	unsigned int kills;
 	unsigned int deaths;
 	float ratio;
+	float damageInflicted;
 };
 }
