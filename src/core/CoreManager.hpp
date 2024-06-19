@@ -6,7 +6,6 @@
 #include "player/PlayerModel.hpp"
 #include "../modes/Modes.hpp"
 #include "utils/ServiceLocator.hpp"
-#include "./utils/Events.hpp"
 
 #include <Server/Components/Classes/classes.hpp>
 #include <player.hpp>
@@ -48,7 +47,8 @@ class CoreManager : public PlayerConnectEventHandler,
 public:
 	IComponentList* const components;
 
-	static std::shared_ptr<CoreManager> create(IComponentList* components, ICore* core, IPlayerPool* playerPool);
+	static std::shared_ptr<CoreManager> create(
+		IComponentList* components, ICore* core, IPlayerPool* playerPool);
 	~CoreManager();
 
 	std::shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
@@ -58,11 +58,13 @@ public:
 
 	bool refreshPlayerData(IPlayer& player);
 	void selectMode(IPlayer& player, Modes::Mode mode);
-	void joinMode(IPlayer& player, Modes::Mode mode, std::unordered_map<std::string, Core::PrimitiveType> joinData);
+	void joinMode(IPlayer& player, Modes::Mode mode,
+		std::unordered_map<std::string, Core::PrimitiveType> joinData);
 	void showModeSelectionDialog(IPlayer& player);
 
 	void onPlayerConnect(IPlayer& player) override;
-	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
+	void onPlayerDisconnect(
+		IPlayer& player, PeerDisconnectReason reason) override;
 	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 	bool onPlayerRequestSpawn(IPlayer& player) override;
 	bool onPlayerText(IPlayer& player, StringView message) override;
@@ -73,7 +75,8 @@ public:
 	void onFree(IComponent* component);
 
 private:
-	CoreManager(IComponentList* components, ICore* core, IPlayerPool* playerPool);
+	CoreManager(
+		IComponentList* components, ICore* core, IPlayerPool* playerPool);
 
 	void initHandlers();
 	void initSkinSelection();
@@ -82,7 +85,8 @@ private:
 	void saveAllPlayers();
 	void removePlayerFromCurrentMode(IPlayer& player);
 	template <typename... T>
-	void sendNotificationToAllFormatted(const std::string& message, const T&... args);
+	void sendNotificationToAllFormatted(
+		const std::string& message, const T&... args);
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DeathmatchResult.hpp"
 #include "Maps.hpp"
+#include "Server/Components/Timers/timers.hpp"
 #include "WeaponSet.hpp"
 #include "values.hpp"
 
@@ -105,5 +105,8 @@ struct Room
 	std::optional<std::string> cachedLastResult;
 
 	PrivacyMode privacyMode = PrivacyMode(PrivacyMode::Value::Everyone);
+
+	std::optional<ITimer*> roundStartTimer;
+	unsigned int roundStartTimerCount;
 };
 }

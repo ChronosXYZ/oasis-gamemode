@@ -7,16 +7,11 @@
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/utils/Random.hpp"
 #include "../../core/utils/Events.hpp"
-#include "../../core/utils/Events.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
 #include "DeathmatchResult.hpp"
 
-#include <algorithm>
-#include <array>
 #include <chrono>
-#include <cstdlib>
 #include <fmt/printf.h>
-#include <iterator>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -30,7 +25,6 @@
 #include <uuid.h>
 #include <eventbus/event_bus.hpp>
 
-#include <cstddef>
 #include <optional>
 #include <vector>
 
@@ -39,7 +33,7 @@
 
 #define CBUG_FREEZE_DELAY 1500
 #define ROOM_INDEX "roomIndex"
-#define DEFAULT_ROOM_ROUND_TIME_MIN 2
+#define DEFAULT_ROOM_ROUND_TIME_MIN 1
 
 namespace Modes::Deathmatch
 {
@@ -991,6 +985,10 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 		timer->show();
 		this->setRandomSpawnPoint(player, room);
 		player.spawn();
+		if (room->isStarting)
+		{
+			player.setControllable(false);
+		}
 	}
 
 	for (auto roomPlayer : room->players)
@@ -1024,32 +1022,36 @@ void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
 		playerData->tempData->deathmatch->resetKD();
 		if (auto timer = this->getDeathmatchTimer(*player))
 			timer.value()->show();
+		player->setControllable(false);
 	}
 
-	// TODO replace thread with coroutine
-	std::thread(
-		[room, this]()
-		{
-			for (int i = 3; i > 0; i--)
+	room->roundStartTimerCount = 3;
+	room->roundStartTimer = this->_timersComponent->create(
+		new Impl::SimpleTimerHandler(
+			[this, room]()
 			{
 				for (auto player : room->players)
 				{
-					player->setControllable(false);
 					player->sendGameText(
-						fmt::sprintf("~w~%d", i), Seconds(1), 6);
+						fmt::sprintf("~w~%d", room->roundStartTimerCount),
+						Seconds(1), 6);
 				}
-				using namespace std::chrono_literals;
-				std::this_thread::sleep_for(1s);
-			}
-			for (auto player : room->players)
-			{
-				player->sendGameText(_("~g~~h~~h~GO!", *player), Seconds(1), 6);
-				player->setControllable(true);
-			}
-			room->cachedLastResult = {};
-			room->isStarting = false;
-		})
-		.detach();
+				if (room->roundStartTimerCount-- == 0)
+				{
+					room->roundStartTimer.value()->kill();
+					room->roundStartTimer.reset();
+					for (auto player : room->players)
+					{
+						player->sendGameText(
+							_("~g~~h~~h~GO!", *player), Seconds(1), 6);
+						player->setControllable(true);
+					}
+					room->cachedLastResult = {};
+					room->isStarting = false;
+				}
+			}),
+		Seconds(1), true);
+	room->roundStartTimer.value()->trigger();
 }
 
 void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)

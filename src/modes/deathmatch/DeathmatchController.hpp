@@ -2,7 +2,6 @@
 
 #include "../../modes/ModeBase.hpp"
 #include "../../core/CoreManager.hpp"
-#include "DeathmatchResult.hpp"
 #include "Room.hpp"
 #include "Server/Components/Timers/timers.hpp"
 #include "WeaponSet.hpp"

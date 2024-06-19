@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../core/utils/Localization.hpp"
 #include "WeaponSet.hpp"
 
 #include <player.hpp>
