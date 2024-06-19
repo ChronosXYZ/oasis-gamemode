@@ -137,7 +137,8 @@ void CoreManager::initHandlers()
 		_playerPool, components->queryComponent<IVehiclesComponent>(),
 		components->queryComponent<ITimersComponent>()));
 	_playerControllers->registerInstance(
-		new Controllers::PlayerOnFireController(this->_playerPool, this->bus));
+		new Controllers::PlayerOnFireController(this->_playerPool, this->bus,
+			this->_commandManager, this->_dialogManager));
 }
 
 std::shared_ptr<pqxx::connection> CoreManager::getDBConnection()
