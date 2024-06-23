@@ -87,8 +87,8 @@ void PlayerOnFireController::onPlayerDeath(
 			Utils::Events::PlayerOnFireEvent { .player = *killer,
 				.lastKillee = player,
 				.mode = killerExt->getMode() });
+		this->playersOnFire[killerExt->getMode()].emplace(killer);
 	}
-	this->playersOnFire[killerExt->getMode()].emplace(killer);
 }
 
 void PlayerOnFireController::onPlayerDisconnect(
