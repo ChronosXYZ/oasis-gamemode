@@ -115,8 +115,11 @@ void DeathmatchController::onPlayerDeath(
 	{
 		auto killerData = Core::Player::getPlayerData(*killer);
 		killerData->tempData->deathmatch->increaseKills();
-		if (room->refillHealth)
+		if (room->refillEnabled)
+		{
 			killer->setHealth(room->defaultHealth);
+			killer->setArmour(room->defaultArmor);
+		}
 		// TODO add score to player stats
 	}
 
@@ -265,6 +268,7 @@ void DeathmatchController::initRooms()
 			.cbugEnabled = true,
 			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+			.defaultArmor = 100.0,
 		}),
 		std::shared_ptr<Room>(new Room {
 			.map = randomlySelectMap(walkWeaponSet),
@@ -275,6 +279,7 @@ void DeathmatchController::initRooms()
 			.cbugEnabled = true,
 			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+			.defaultArmor = 100.0,
 		}),
 		std::shared_ptr<Room>(new Room {
 			.map = randomlySelectMap(dssWeaponSet),
@@ -285,6 +290,7 @@ void DeathmatchController::initRooms()
 			.cbugEnabled = false,
 			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+			.defaultArmor = 100.0,
 		}),
 	};
 }
@@ -398,7 +404,7 @@ void DeathmatchController::showRoomCreationDialog(IPlayer& player)
 				.count(),
 			static_cast<unsigned int>(room->defaultHealth),
 			static_cast<unsigned int>(room->defaultArmor),
-			room->refillHealth ? _("Yes", player) : _("No", player),
+			room->refillEnabled ? _("Yes", player) : _("No", player),
 			room->randomMap ? _("Yes", player) : _("No", player));
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle::DialogStyle_TABLIST,
@@ -823,32 +829,31 @@ void DeathmatchController::showRoomSetRefillHealthDialog(IPlayer& player)
 
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle::DialogStyle_LIST,
-		fmt::sprintf(DIALOG_HEADER_TITLE,
-			_("Should player health be refilled when they kill someone?",
-				player)),
+		fmt::sprintf(
+			DIALOG_HEADER_TITLE, _("Should refill be enabled?", player)),
 		body, _("Select", player), _("Cancel", player),
 		[this, &player, playerData](
 			DialogResponse response, int listitem, StringView inputText)
 		{
 			if (response)
 			{
-				bool refillHealth = true;
+				bool refillEnabled = true;
 				switch (listitem)
 				{
 				case 0:
 				{
-					refillHealth = true;
+					refillEnabled = true;
 					break;
 				}
 				case 1:
 				{
-					refillHealth = false;
+					refillEnabled = false;
 					break;
 				}
 				}
 				playerData->tempData->deathmatch->temporaryRoomSettings
-					->refillHealth
-					= refillHealth;
+					->refillEnabled
+					= refillEnabled;
 				this->showRoomCreationDialog(player);
 			}
 			else
