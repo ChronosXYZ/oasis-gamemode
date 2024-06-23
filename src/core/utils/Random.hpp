@@ -2,7 +2,7 @@
 
 #include <uuid.h>
 
-namespace Utils
+namespace Core::Utils
 {
 inline uuids::uuid_random_generator getUuidGenerator()
 {

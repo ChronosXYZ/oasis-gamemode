@@ -8,21 +8,12 @@
 #include "utils/ServiceLocator.hpp"
 
 #include <Server/Components/Classes/classes.hpp>
+#include <player.hpp>
+#include <eventbus/event_bus.hpp>
 
 #include <memory>
-#include <player.hpp>
 #include <string>
 #include <unordered_map>
-
-#define ACCENT_MAIN 0xFF0000FF // SERVER COLOR
-#define ACCENT_SECONDARY 0xFFFFFFFF // SERVER COLOR
-#define ACCENT_MAIN_E "{FF0000}" // SERVER COLOR Embedded
-#define ACCENT_SECONDARY_E "{FFFFFF}" // SERVER COLOR Embedded
-
-#define DIALOG_HEADER_TITLE "" ACCENT_MAIN_E "Oasis " ACCENT_SECONDARY_E " | %s"
-#define DIALOG_TABLIST_TITLE_COLOR ACCENT_MAIN_E // Embedded
-#define DIALOG_HEADER DIALOG_HEADER_TITLE // embedded
-#define DIALOG_TABLIST DIALOG_TABLIST_TITLE_COLOR
 
 namespace Core
 {
@@ -46,7 +37,8 @@ class CoreManager : public PlayerConnectEventHandler,
 public:
 	IComponentList* const components;
 
-	static std::shared_ptr<CoreManager> create(IComponentList* components, ICore* core, IPlayerPool* playerPool);
+	static std::shared_ptr<CoreManager> create(
+		IComponentList* components, ICore* core, IPlayerPool* playerPool);
 	~CoreManager();
 
 	std::shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
@@ -56,11 +48,13 @@ public:
 
 	bool refreshPlayerData(IPlayer& player);
 	void selectMode(IPlayer& player, Modes::Mode mode);
-	void joinMode(IPlayer& player, Modes::Mode mode, std::unordered_map<std::string, Core::PrimitiveType> joinData);
+	void joinMode(IPlayer& player, Modes::Mode mode,
+		std::unordered_map<std::string, Core::PrimitiveType> joinData);
 	void showModeSelectionDialog(IPlayer& player);
 
 	void onPlayerConnect(IPlayer& player) override;
-	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
+	void onPlayerDisconnect(
+		IPlayer& player, PeerDisconnectReason reason) override;
 	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 	bool onPlayerRequestSpawn(IPlayer& player) override;
 	bool onPlayerText(IPlayer& player, StringView message) override;
@@ -71,30 +65,29 @@ public:
 	void onFree(IComponent* component);
 
 private:
-	CoreManager(IComponentList* components, ICore* core, IPlayerPool* playerPool);
+	CoreManager(
+		IComponentList* components, ICore* core, IPlayerPool* playerPool);
 
 	void initHandlers();
 	void initSkinSelection();
 	void savePlayer(IPlayer& player);
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
-	void removePlayerFromModes(IPlayer& player);
+	void removePlayerFromCurrentMode(IPlayer& player);
+	template <typename... T>
+	void sendNotificationToAllFormatted(
+		const std::string& message, const T&... args);
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;
 	IClassesComponent* const _classesComponent;
 
+	std::shared_ptr<dp::event_bus> bus;
+
 	std::shared_ptr<Commands::CommandManager> _commandManager;
 	std::shared_ptr<DialogManager> _dialogManager;
 	std::shared_ptr<pqxx::connection> _dbConnection;
 	std::map<unsigned int, std::shared_ptr<PlayerModel>> _playerData;
-	std::map<Modes::Mode, std::set<unsigned int>> _modePlayerCount {
-		{ Modes::Mode::Freeroam, {} },
-		{ Modes::Mode::Deathmatch, {} },
-		{ Modes::Mode::Derby, {} },
-		{ Modes::Mode::PTP, {} },
-		{ Modes::Mode::CnR, {} }
-	};
 
 	// Controllers
 	std::unique_ptr<Auth::AuthController> _authController;

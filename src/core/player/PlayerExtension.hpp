@@ -7,7 +7,7 @@
 #include <types.hpp>
 #include <Server/Components/Timers/timers.hpp>
 
-#include <fmt/core.h>
+#include <fmt/printf.h>
 #include <player.hpp>
 #include <component.hpp>
 #include <sdk.hpp>
@@ -41,10 +41,18 @@ public:
 	void setFacingAngle(float angle);
 	void sendErrorMessage(const std::string& message);
 	void sendInfoMessage(const std::string& message);
+	void sendTranslatedMessage(const std::string& message);
+	template <typename... T>
+	inline void sendTranslatedMessageFormatted(const std::string& message, const T&... args)
+	{
+		_player.sendClientMessage(Colour::White(), fmt::sprintf(_(message, _player), args...));
+	}
+
 	const std::string getIP();
 	float getVehicleSpeed();
 	bool isInMode(Modes::Mode mode);
 	bool isInAnyMode();
+	const Modes::Mode& getMode();
 
 	void freeExtension() override;
 	void reset() override;

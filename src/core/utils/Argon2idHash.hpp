@@ -16,7 +16,7 @@
 #define M_COST 1 << 16 // 64 mebibytes memory usage
 #define PARALLELISM 1 // number of threads and lanes
 
-namespace Utils
+namespace Core::Utils
 {
 using random_bytes_engine = std::independent_bits_engine<
 	std::default_random_engine, CHAR_BIT, unsigned char>;

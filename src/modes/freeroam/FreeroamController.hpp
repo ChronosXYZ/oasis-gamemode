@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../core/CoreManager.hpp"
-#include "../IMode.hpp"
+#include "../ModeBase.hpp"
 
 #include <types.hpp>
 #include <Server/Components/Vehicles/vehicle_components.hpp>
@@ -19,11 +19,11 @@ inline const unsigned int VIRTUAL_WORLD_ID = 0;
 inline const auto SPAWN_LOCATION = Vector3(2037.4828, -1193.1844, 22.7924);
 inline const auto SPAWN_ANGLE = 99.7903;
 
-class FreeroamController : public Modes::IMode,
+class FreeroamController : public Modes::ModeBase,
 						   public PlayerSpawnEventHandler,
 						   public PlayerDamageEventHandler
 {
-	FreeroamController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
+	FreeroamController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus);
 
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
@@ -34,9 +34,9 @@ class FreeroamController : public Modes::IMode,
 	void deleteLastSpawnedCar(IPlayer& player);
 
 public:
-	~FreeroamController();
+	virtual ~FreeroamController();
 
-	static FreeroamController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool);
+	static FreeroamController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus);
 
 	void onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData) override;
 	void onModeLeave(IPlayer& player) override;

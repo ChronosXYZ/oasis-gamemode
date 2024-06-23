@@ -1,8 +1,10 @@
 #include "FreeroamController.hpp"
 #include "../../core/CoreManager.hpp"
 #include "../../core/player/PlayerExtension.hpp"
+#include "eventbus/event_bus.hpp"
 
 #include <fmt/printf.h>
+#include <magic_enum/magic_enum.hpp>
 #include <player.hpp>
 #include <Server/Components/Vehicles/vehicles.hpp>
 
@@ -13,8 +15,9 @@
 namespace Modes::Freeroam
 {
 
-FreeroamController::FreeroamController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
-	: _coreManager(coreManager)
+FreeroamController::FreeroamController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus)
+	: super(Mode::Freeroam, bus)
+	, _coreManager(coreManager)
 	, _vehiclesComponent(coreManager.lock()->components->queryComponent<IVehiclesComponent>())
 	, _playerPool(playerPool)
 {
@@ -38,15 +41,16 @@ void FreeroamController::onPlayerSpawn(IPlayer& player)
 	}
 }
 
-FreeroamController* FreeroamController::create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool)
+FreeroamController* FreeroamController::create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus)
 {
-	auto handler = new FreeroamController(coreManager, playerPool);
+	auto handler = new FreeroamController(coreManager, playerPool, bus);
 	handler->initCommands();
 	return handler;
 }
 
 void FreeroamController::onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
+	super::onModeJoin(player, joinData);
 	setupSpawn(player);
 	player.spawn();
 }
@@ -151,6 +155,7 @@ void FreeroamController::setupSpawn(IPlayer& player)
 
 void FreeroamController::onModeLeave(IPlayer& player)
 {
+	super::onModeLeave(player);
 	this->deleteLastSpawnedCar(player);
 }
 
