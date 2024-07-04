@@ -30,7 +30,7 @@ CREATE TABLE freeroam_player_stats (
     account_id SERIAL4,
     score INTEGER NOT NULL,
     kills INTEGER NOT NULL,
-    on_fire_players_kills INTEGER NOT NULL,
+    on_fire_player_kills INTEGER NOT NULL,
     times_on_fire INTEGER NOT NULL,
 	CONSTRAINT freeroam_player_stats_account_id_fk 
         FOREIGN KEY (account_id) REFERENCES public.players(id)
@@ -53,13 +53,13 @@ CREATE TABLE derby_player_stats (
 CREATE TABLE cnr_player_stats (
     account_id SERIAL4,
     score INTEGER NOT NULL,
-    places_robbed INTEGER NOT NULL,
+    total_places_robbed INTEGER NOT NULL,
     heists INTEGER NOT NULL,
     kills INTEGER NOT NULL,
     deaths INTEGER NOT NULL,
     arrests INTEGER NOT NULL,
-    cops_killed INTEGER NOT NULL,
-    criminals_killed INTEGER NOT NULL,
+    cop_kills INTEGER NOT NULL,
+    criminal_kills INTEGER NOT NULL,
     biggest_robbery_amount INTEGER NOT NULL,
 	CONSTRAINT cnr_player_stats_account_id_fk 
         FOREIGN KEY (account_id) REFERENCES public.players(id)
