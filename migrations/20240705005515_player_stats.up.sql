@@ -21,7 +21,7 @@ CREATE TABLE dm_player_stats (
     smg_kills INTEGER NOT NULL DEFAULT 0,
     assault_rifles_kills INTEGER NOT NULL DEFAULT 0,
     rifles_kills INTEGER NOT NULL DEFAULT 0,
-    heavy_weapons_kills INTEGER NOT NULL DEFAULT 0,
+    heavy_weapon_kills INTEGER NOT NULL DEFAULT 0,
     explosives_kills INTEGER NOT NULL DEFAULT 0,
 	CONSTRAINT dm_player_stats_account_id_fk 
         FOREIGN KEY (account_id) REFERENCES public.players(id)
