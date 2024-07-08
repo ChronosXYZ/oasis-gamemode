@@ -1,0 +1,1 @@
+SELECT * FROM dm_player_stats WHERE account_id = $1;

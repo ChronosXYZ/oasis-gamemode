@@ -5,6 +5,7 @@
 #include "../utils/PgTimestamp.hpp"
 #include "../utils/Localization.hpp"
 #include "PlayerTempData.hpp"
+#include "../../modes/deathmatch/DeathmatchStats.hpp"
 
 #include <Server/Components/Timers/timers.hpp>
 
@@ -20,7 +21,8 @@
 
 namespace Core
 {
-typedef std::variant<int, float, std::string, bool, std::size_t, std::time_t> PrimitiveType;
+typedef std::variant<int, float, std::string, bool, std::size_t, std::time_t>
+	PrimitiveType;
 struct PlayerModel
 {
 	unsigned long userId;
@@ -35,7 +37,10 @@ struct PlayerModel
 
 	std::unique_ptr<Ban> ban;
 	std::unique_ptr<AdminData> adminData;
-	std::unique_ptr<Player::PlayerTempData> tempData = std::make_unique<Player::PlayerTempData>();
+	std::unique_ptr<Modes::Deathmatch::DeathmatchStats> dmStats
+		= std::make_unique<Modes::Deathmatch::DeathmatchStats>();
+	std::unique_ptr<Player::PlayerTempData> tempData
+		= std::make_unique<Player::PlayerTempData>();
 
 	PlayerModel() = default;
 

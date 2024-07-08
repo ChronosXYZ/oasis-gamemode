@@ -12,5 +12,6 @@ struct PlayerTempData
 	bool skinSelectionMode = false;
 
 	unsigned int subsequentKills = 0;
+	bool lastPlayerOnFireState = false;
 };
 }

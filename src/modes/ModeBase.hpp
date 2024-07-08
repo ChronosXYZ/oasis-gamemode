@@ -21,8 +21,11 @@ struct ModeBase
 	virtual ~ModeBase();
 
 	virtual void onModeSelect(IPlayer& player) = 0;
-	virtual void onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData);
+	virtual void onModeJoin(IPlayer& player,
+		std::unordered_map<std::string, Core::PrimitiveType> joinData);
 	virtual void onModeLeave(IPlayer& player);
+	virtual void onPlayerSave(IPlayer& player, pqxx::work& txn);
+	virtual void onPlayerLoad(IPlayer& player, pqxx::work& txn);
 	virtual void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event);
 	unsigned int playerCount();
 	const Mode& getModeType();

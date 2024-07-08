@@ -71,7 +71,6 @@ private:
 	void initHandlers();
 	void initSkinSelection();
 	void savePlayer(IPlayer& player);
-	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void saveAllPlayers();
 	void removePlayerFromCurrentMode(IPlayer& player);
 	template <typename... T>

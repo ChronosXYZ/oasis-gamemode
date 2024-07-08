@@ -7,6 +7,9 @@
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/utils/Random.hpp"
 #include "../../core/utils/Events.hpp"
+#include "../../core/utils/Common.hpp"
+#include "../../core/utils/QueryNames.hpp"
+#include "../../core/SQLQueryManager.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
 #include "DeathmatchResult.hpp"
 
@@ -38,12 +41,18 @@
 namespace Modes::Deathmatch
 {
 DeathmatchController::DeathmatchController(
-	std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool,
-	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
+	std::weak_ptr<Core::CoreManager> coreManager,
+	std::shared_ptr<Core::Commands::CommandManager> commandManager,
+	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
+	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus,
+	std::shared_ptr<pqxx::connection> dbConnection)
 	: super(Mode::Deathmatch, bus)
-	, _coreManager(coreManager)
+	, coreManager(coreManager)
+	, commandManager(commandManager)
+	, dialogManager(dialogManager)
 	, _playerPool(playerPool)
 	, _timersComponent(timersComponent)
+	, dbConnection(dbConnection)
 {
 	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
@@ -88,6 +97,34 @@ void DeathmatchController::onModeLeave(IPlayer& player)
 	super::onModeLeave(player);
 }
 
+void DeathmatchController::onPlayerSave(IPlayer& player, pqxx::work& txn)
+{
+	auto data = Core::Player::getPlayerData(player);
+	txn.exec_params(
+		Core::SQLQueryManager::Get()
+			->getQueryByName(Core::Utils::SQL::Queries::UPDATE_DM_STATS)
+			.value(),
+		data->dmStats->score, data->dmStats->highestKillStreak,
+		data->dmStats->kills, data->dmStats->deaths, data->dmStats->handKills,
+		data->dmStats->handheldWeaponKills, data->dmStats->meleeKills,
+		data->dmStats->handgunKills, data->dmStats->shotgunKills,
+		data->dmStats->smgKills, data->dmStats->assaultRiflesKills,
+		data->dmStats->riflesKills, data->dmStats->heavyWeaponKills,
+		data->dmStats->explosivesKills, data->userId);
+}
+
+void DeathmatchController::onPlayerLoad(IPlayer& player, pqxx::work& txn)
+{
+	auto data = Core::Player::getPlayerData(player);
+	auto result = txn.exec_params(
+		Core::SQLQueryManager::Get()
+			->getQueryByName(
+				Core::Utils::SQL::Queries::LOAD_DM_STATS_FOR_PLAYER)
+			.value(),
+		data->userId);
+	data->dmStats->updateFromRow(result[0]);
+}
+
 void DeathmatchController::onPlayerSpawn(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
@@ -108,6 +145,14 @@ void DeathmatchController::onPlayerDeath(
 		return;
 
 	playerData->tempData->deathmatch->increaseDeaths();
+	playerData->dmStats->deaths += 1;
+	if (playerData->tempData->deathmatch->subsequentKills
+		> playerData->dmStats->highestKillStreak)
+	{
+		playerData->dmStats->highestKillStreak
+			= playerData->tempData->deathmatch->subsequentKills;
+	}
+	playerData->tempData->deathmatch->subsequentKills = 0;
 
 	auto roomId = playerData->tempData->deathmatch->roomId;
 	auto room = this->_rooms[roomId];
@@ -115,12 +160,77 @@ void DeathmatchController::onPlayerDeath(
 	{
 		auto killerData = Core::Player::getPlayerData(*killer);
 		killerData->tempData->deathmatch->increaseKills();
+		killerData->tempData->deathmatch->subsequentKills++;
 		if (room->refillEnabled)
 		{
 			killer->setHealth(room->defaultHealth);
 			killer->setArmour(room->defaultArmor);
 		}
-		// TODO add score to player stats
+		killerData->dmStats->kills += 1;
+		if (playerData->tempData->core->lastPlayerOnFireState)
+		{
+			killerData->dmStats->score += 6;
+		}
+		else
+		{
+			killerData->dmStats->score += 1;
+		}
+		switch (Core::Utils::getWeaponType(reason))
+		{
+		case Core::Utils::WeaponType::Hand:
+		{
+			killerData->dmStats->handKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::HandheldItems:
+		{
+			killerData->dmStats->handheldWeaponKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::Melee:
+		{
+			killerData->dmStats->meleeKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::Handguns:
+		{
+			killerData->dmStats->handgunKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::Shotguns:
+		{
+			killerData->dmStats->shotgunKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::SMG:
+		{
+			killerData->dmStats->smgKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::AssaultRifles:
+		{
+			killerData->dmStats->assaultRiflesKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::Rifles:
+		{
+			killerData->dmStats->riflesKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::HeavyWeapons:
+		{
+			killerData->dmStats->heavyWeaponKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::Explosives:
+		{
+			killerData->dmStats->explosivesKills++;
+			break;
+		}
+		case Core::Utils::WeaponType::Unknown:
+			break;
+		}
+		killerData->dmStats->kills += 1;
 	}
 
 	this->setRandomSpawnPoint(player, room);
@@ -203,7 +313,8 @@ void DeathmatchController::onPlayerOnFire(
 	{
 		auto roomPlayerExt = Core::Player::getPlayerExt(*roomPlayer);
 		roomPlayerExt->sendTranslatedMessageFormatted(
-			__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) "
+			__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
+			   "killed %s(%d) "
 			   "and is now on fire!"),
 			event.player.getName().to_string(), event.player.getID(),
 			event.lastKillee.getName().to_string(), event.lastKillee.getID());
@@ -211,11 +322,14 @@ void DeathmatchController::onPlayerOnFire(
 }
 
 DeathmatchController* DeathmatchController::create(
-	std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool,
-	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
+	std::weak_ptr<Core::CoreManager> coreManager,
+	std::shared_ptr<Core::Commands::CommandManager> commandManager,
+	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
+	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus,
+	std::shared_ptr<pqxx::connection> dbConnection)
 {
-	auto controller = new DeathmatchController(
-		coreManager, playerPool, timersComponent, bus);
+	auto controller = new DeathmatchController(coreManager, commandManager,
+		dialogManager, playerPool, timersComponent, bus, dbConnection);
 	controller->initRooms();
 	controller->initCommand();
 	return controller;
@@ -223,7 +337,7 @@ DeathmatchController* DeathmatchController::create(
 
 void DeathmatchController::initCommand()
 {
-	this->_coreManager.lock()->getCommandManager()->addCommand(
+	this->commandManager->addCommand(
 		"dm",
 		[&](std::reference_wrapper<IPlayer> player, int id)
 		{
@@ -235,17 +349,17 @@ void DeathmatchController::initCommand()
 					_("Such room doesn't exist!", player));
 				return;
 			}
-			this->_coreManager.lock()->joinMode(player, Mode::Deathmatch,
+			this->coreManager.lock()->joinMode(player, Mode::Deathmatch,
 				{ { ROOM_INDEX, std::size_t(id - 1) } });
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") },
 			.description = __("Enter DM room"),
 			.category = MODE_NAME });
-	this->_coreManager.lock()->getCommandManager()->addCommand(
+	this->commandManager->addCommand(
 		"dm",
 		[&](std::reference_wrapper<IPlayer> player)
 		{
-			this->_coreManager.lock()->selectMode(player, Mode::Deathmatch);
+			this->coreManager.lock()->selectMode(player, Mode::Deathmatch);
 		},
 		Core::Commands::CommandInfo { .args = {},
 			.description = __("Enter DM mode"),
@@ -308,13 +422,12 @@ void DeathmatchController::showRoomSelectionDialog(
 	{
 		auto room = _rooms[i];
 
-		body += fmt::sprintf(
-			"{999999}%d. {00FF00}%s\t{00FF00}%s\t{00FF00}%s\t{00FF00}%d\n",
+		body += fmt::sprintf("{999999}%d. "
+							 "{00FF00}%s\t{00FF00}%s\t{00FF00}%s\t{00FF00}%d\n",
 			i + 1, room->map.name, room->weaponSet.toString(player),
 			room->host.value_or(_("Server", player)), room->players.size());
 	}
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle_TABLIST_HEADERS,
+	this->dialogManager->createDialog(player, DialogStyle_TABLIST_HEADERS,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Select Deathmatch room", player)),
 		body, _("Select", player), _("Close", player),
 		[modeSelection, this, &player](
@@ -329,19 +442,19 @@ void DeathmatchController::showRoomSelectionDialog(
 				}
 				if (listItem > this->_rooms.size())
 				{
-					// when player selected a room and this room has been
-					// evicted
+					// when player selected a room and this room has
+					// been evicted
 					this->showRoomSelectionDialog(player);
 					return;
 				}
 				auto roomIndex = std::size_t(listItem - 1);
-				this->_coreManager.lock()->joinMode(
+				this->coreManager.lock()->joinMode(
 					player, Mode::Deathmatch, { { ROOM_INDEX, roomIndex } });
 			}
 			else
 			{
 				if (modeSelection)
-					this->_coreManager.lock()->showModeSelectionDialog(player);
+					this->coreManager.lock()->showModeSelectionDialog(player);
 			}
 		});
 }
@@ -355,8 +468,7 @@ void DeathmatchController::showRoundResultDialog(
 		return;
 	}
 	std::string header = _("Player\tK : D\tRatio\tDamage inflicted\n", player);
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle_TABLIST_HEADERS,
+	this->dialogManager->createDialog(player, DialogStyle_TABLIST_HEADERS,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Deathmatch statistics", player)),
 		header + room->cachedLastResult.value(), _("Close", player), "",
 		[this, &player, room](
@@ -406,8 +518,7 @@ void DeathmatchController::showRoomCreationDialog(IPlayer& player)
 			static_cast<unsigned int>(room->defaultArmor),
 			room->refillEnabled ? _("Yes", player) : _("No", player),
 			room->randomMap ? _("Yes", player) : _("No", player));
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_TABLIST,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_TABLIST,
 		fmt::sprintf(
 			DIALOG_HEADER_TITLE, _("Create new deathmatch room", player)),
 		dialogBody, _("Select", player), _("Cancel", player),
@@ -494,8 +605,7 @@ void DeathmatchController::showRoomMapSelectionDialog(IPlayer& player)
 		body += map.name + "\n";
 	}
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_LIST,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Map selection", player)), body,
 		"Select", "Cancel",
 		[this, &player, playerData](
@@ -526,8 +636,7 @@ void DeathmatchController::showRoomWeaponSetSelectionDialog(IPlayer& player)
 	body += _("Walk", player) + "\n";
 	body += _("DSS", player);
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_LIST,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Weapon set selection", player)),
 		body, _("Select", player), _("Cancel", player),
 		[this, &player, playerData](
@@ -567,8 +676,7 @@ void DeathmatchController::showRoomPrivacyModeSelectionDialog(IPlayer& player)
 		body += PrivacyMode(mode).toString(player) + "\n";
 	}
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_LIST,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Privacy mode selection", player)),
 		body, _("Select", player), _("Cancel", player),
 		[this, &player, playerData](
@@ -600,8 +708,7 @@ void DeathmatchController::showRoomSetCbugEnabledDialog(IPlayer& player)
 
 	std::string body = _("Yes", player) + "\n" + _("No", player) + "\n";
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_LIST,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
 		fmt::sprintf(
 			DIALOG_HEADER_TITLE, _("Should C-bug be enabled?", player)),
 		body, _("Select", player), _("Cancel", player),
@@ -646,8 +753,7 @@ void DeathmatchController::showRoomSetRoundTimeDialog(IPlayer& player)
 
 	std::string body = _("Enter the round time in minutes (1-60):", player);
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_INPUT,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_INPUT,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Round time", player)), body,
 		_("Enter", player), _("Cancel", player),
 		[this, &player, playerData](
@@ -708,8 +814,7 @@ void DeathmatchController::showRoomSetHealthDialog(IPlayer& player)
 	std::string body
 		= _("Enter the default HP for players in the room (1-100):", player);
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_INPUT,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_INPUT,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Default room HP", player)), body,
 		_("Enter", player), _("Cancel", player),
 		[this, &player, playerData](
@@ -768,8 +873,7 @@ void DeathmatchController::showRoomSetArmorDialog(IPlayer& player)
 	std::string body
 		= _("Enter the default armor for players in the room (1-100):", player);
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_INPUT,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_INPUT,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Default room armor", player)),
 		body, _("Enter", player), _("Cancel", player),
 		[this, &player, playerData](
@@ -827,8 +931,7 @@ void DeathmatchController::showRoomSetRefillHealthDialog(IPlayer& player)
 
 	std::string body = _("Yes", player) + "\n" + _("No", player) + "\n";
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_LIST,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
 		fmt::sprintf(
 			DIALOG_HEADER_TITLE, _("Should refill be enabled?", player)),
 		body, _("Select", player), _("Cancel", player),
@@ -873,8 +976,7 @@ void DeathmatchController::showRoomSetRandomMapDialog(IPlayer& player)
 
 	std::string body = _("Yes", player) + "\n" + _("No", player) + "\n";
 
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_LIST,
+	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
 		fmt::sprintf(DIALOG_HEADER_TITLE,
 			_("Change map to random one after round ends?", player)),
 		body, _("Select", player), _("Cancel", player),
@@ -921,7 +1023,7 @@ void DeathmatchController::createRoom(IPlayer& player)
 	room->virtualWorld = VIRTUAL_WORLD_PREFIX + this->_rooms.size();
 	auto roomId = this->_rooms.size();
 	this->_rooms.push_back(std::make_shared<Room>(*room));
-	this->_coreManager.lock()->joinMode(
+	this->coreManager.lock()->joinMode(
 		player, Mode::Deathmatch, { { ROOM_INDEX, roomId } });
 }
 
@@ -944,7 +1046,8 @@ DeathmatchController::getDeathmatchTimer(IPlayer& player)
 		TextDraws::DeathmatchTimer::NAME);
 	if (!deathmatchTimerTxdAbstract.has_value())
 	{
-		spdlog::warn("player {} doesn't have deathmatch timer textdraw, but he "
+		spdlog::warn("player {} doesn't have deathmatch timer "
+					 "textdraw, but he "
 					 "is in dm room",
 			player.getName().to_string());
 		return {};
@@ -1000,7 +1103,8 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 	{
 		Core::Player::getPlayerExt(*roomPlayer)
 			->sendTranslatedMessageFormatted(
-				__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has "
+				__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player "
+				   "%s has "
 				   "joined the room (%d players)"),
 				player.getName().to_string(), room->players.size());
 	}
@@ -1158,7 +1262,8 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 	{
 		Core::Player::getPlayerExt(*roomPlayer)
 			->sendTranslatedMessageFormatted(
-				__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left "
+				__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player "
+				   "%s has left "
 				   "the room (%d players)"),
 				player.getName().to_string(), room->players.size());
 	}

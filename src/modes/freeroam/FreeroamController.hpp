@@ -23,7 +23,8 @@ class FreeroamController : public Modes::ModeBase,
 						   public PlayerSpawnEventHandler,
 						   public PlayerDamageEventHandler
 {
-	FreeroamController(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus);
+	FreeroamController(std::weak_ptr<Core::CoreManager> coreManager,
+		IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus);
 
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
@@ -36,11 +37,17 @@ class FreeroamController : public Modes::ModeBase,
 public:
 	virtual ~FreeroamController();
 
-	static FreeroamController* create(std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus);
+	static FreeroamController* create(
+		std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool,
+		std::shared_ptr<dp::event_bus> bus);
 
-	void onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData) override;
+	void onModeJoin(IPlayer& player,
+		std::unordered_map<std::string, Core::PrimitiveType> joinData) override;
 	void onModeLeave(IPlayer& player) override;
 	void onModeSelect(IPlayer& player) override;
+
+	void onPlayerSave(IPlayer& player, pqxx::work& txn) override;
+	void onPlayerLoad(IPlayer& player, pqxx::work& txn) override;
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;

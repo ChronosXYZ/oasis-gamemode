@@ -131,8 +131,9 @@ void CoreManager::initHandlers()
 	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
 		weak_from_this(), _playerPool, bus));
 	_modes->registerInstance(Modes::Deathmatch::DeathmatchController::create(
-		weak_from_this(), _playerPool,
-		components->queryComponent<ITimersComponent>(), this->bus));
+		weak_from_this(), _commandManager, _dialogManager, _playerPool,
+		components->queryComponent<ITimersComponent>(), this->bus,
+		_dbConnection));
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool, components->queryComponent<IVehiclesComponent>(),
 		components->queryComponent<ITimersComponent>()));
@@ -165,40 +166,44 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 
 	auto row = res[0];
 	this->getPlayerData(player)->updateFromRow(row);
+
+	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
+		->onPlayerLoad(player, txn);
 	txn.commit();
 	return true;
 }
 
-void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
-{
-	if (!data->tempData->core->isLoggedIn)
-		return;
-
-	auto db = this->getDBConnection();
-	pqxx::work txn(*db);
-
-	txn.exec_params(SQLQueryManager::Get()
-						->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER)
-						.value(),
-		data->language, data->lastSkinId, data->lastIP, data->lastLoginAt,
-		data->userId);
-
-	txn.commit();
-	spdlog::info("Player {} has been successfully saved", data->name);
-}
-
 void CoreManager::saveAllPlayers()
 {
-	for (const auto& [id, playerData] : this->_playerData)
+	for (const auto& player : this->_playerPool->players())
 	{
-		this->savePlayer(playerData);
+		this->savePlayer(*player);
 	}
 	spdlog::info("Saved all player data!");
 }
 
 void CoreManager::savePlayer(IPlayer& player)
 {
-	savePlayer(this->_playerData[player.getID()]);
+	auto data = Player::getPlayerData(player);
+	if (!data->tempData->core->isLoggedIn)
+		return;
+
+	auto db = this->getDBConnection();
+	pqxx::work txn(*db);
+
+	// save general player info
+	txn.exec_params(SQLQueryManager::Get()
+						->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER)
+						.value(),
+		data->language, data->lastSkinId, data->lastIP, data->lastLoginAt,
+		data->userId);
+
+	// save DM info
+	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
+		->onPlayerSave(player, txn);
+
+	txn.commit();
+	spdlog::info("Player {} has been successfully saved", data->name);
 }
 
 void CoreManager::onFree(IComponent* component)
