@@ -8,27 +8,27 @@
 
 namespace Core::Commands
 {
-using CommandCallbackValue = std::variant<std::reference_wrapper<IPlayer>, std::string, int, double>;
+using CommandCallbackValue
+	= std::variant<std::reference_wrapper<IPlayer>, std::string, int, double>;
 using CommandCallbackValues = std::vector<CommandCallbackValue>;
 
 // Helper concept to check if a type is one of the allowed types
 template <typename T, typename... AllowedTypes>
-concept AllowedType
-	= (std::is_same_v<AllowedTypes, T> || ...);
+concept AllowedType = (std::is_same_v<AllowedTypes, T> || ...);
 
-template <typename... Allowed>
-struct CommandCallbackFunctionTraitHelper
+template <typename... Allowed> struct CommandCallbackFunctionTraitHelper
 {
 	template <typename R, AllowedType<Allowed...>... Args>
 	auto operator()(std::function<R(Args...)> t) -> void;
 };
 
 template <typename T, typename... Allowed>
-concept CommandCallbackFunction = requires(T t, CommandCallbackFunctionTraitHelper<Allowed...> h) {
-	{
-		h(std::function(t))
-	} -> std::same_as<void>;
-};
+concept CommandCallbackFunction
+	= requires(T t, CommandCallbackFunctionTraitHelper<Allowed...> h) {
+		  {
+			  h(std::function(t))
+		  } -> std::same_as<void>;
+	  };
 
 struct CommandCallbackWrapper
 {
@@ -45,8 +45,7 @@ private:
 	call fn_;
 
 	////////////////////
-	template <typename... Args>
-	using Callable = std::function<void(Args...)>;
+	template <typename... Args> using Callable = std::function<void(Args...)>;
 
 	template <typename... Args, std::size_t... Is>
 	static call to_call_(Callable<Args...> fn, std::index_sequence<Is...>)
@@ -56,9 +55,9 @@ private:
 			if (!(vv.size() == sizeof...(Is)))
 			{
 				throw std::invalid_argument(
-					fmt::format("argument vector length doesn't match callback signature argument count: {}, expected {}",
-						vv.size(),
-						sizeof...(Is)));
+					fmt::format("argument vector length doesn't match callback "
+								"signature argument count: {}, expected {}",
+						vv.size(), sizeof...(Is)));
 			}
 			try
 			{
@@ -66,18 +65,17 @@ private:
 			}
 			catch (const std::bad_variant_access)
 			{
-				throw std::invalid_argument("invalid type of argument when tried to call the callback");
+				throw std::invalid_argument(
+					"invalid type of argument when tried to call the callback");
 			}
 		};
 	}
 
-	template <typename C, typename = void>
-	struct Adaptor
+	template <typename C, typename = void> struct Adaptor
 	{
 	};
 
-	template <typename... Args>
-	struct Adaptor<Callable<Args...>>
+	template <typename... Args> struct Adaptor<Callable<Args...>>
 	{
 		static auto to_call(Callable<Args...> fn)
 		{
@@ -97,12 +95,14 @@ private:
 	};
 
 	template <typename C, typename... Args>
-	struct Adaptor<void (C::*)(Args...) const> : public Adaptor<void (C::*)(Args...)>
+	struct Adaptor<void (C::*)(Args...) const>
+		: public Adaptor<void (C::*)(Args...)>
 	{
 	};
 
 	template <typename C>
-	struct Adaptor<C, std::void_t<decltype(&C::operator())>> : public Adaptor<decltype(&C::operator())>
+	struct Adaptor<C, std::void_t<decltype(&C::operator())>>
+		: public Adaptor<decltype(&C::operator())>
 	{
 	};
 };

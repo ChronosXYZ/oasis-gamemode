@@ -5,6 +5,7 @@
 #include "controllers/PlayerOnFireController.hpp"
 #include "controllers/SpeedometerController.hpp"
 #include "eventbus/event_bus.hpp"
+#include "player.hpp"
 #include "player/PlayerExtension.hpp"
 #include "textdraws/ITextDrawWrapper.hpp"
 #include "textdraws/ServerLogo.hpp"
@@ -15,13 +16,16 @@
 #include "../modes/freeroam/FreeroamController.hpp"
 #include "../modes/deathmatch/DeathmatchController.hpp"
 
+#include <chrono>
 #include <cstddef>
+#include <future>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <fmt/printf.h>
 #include <Server/Components/Timers/timers.hpp>
 #include <stdexcept>
+#include <thread>
 
 namespace Core
 {
@@ -56,6 +60,9 @@ CoreManager::CoreManager(
 	}
 	this->_dbConnection
 		= std::make_shared<pqxx::connection>(dbConnectionString);
+	this->saveThread = std::thread(&CoreManager::runSaveThread, this,
+		std::move(this->saveThreadExitSignal.get_future()));
+	this->saveThread.detach();
 }
 
 std::shared_ptr<CoreManager> CoreManager::create(
@@ -69,6 +76,7 @@ std::shared_ptr<CoreManager> CoreManager::create(
 
 CoreManager::~CoreManager()
 {
+	this->saveThreadExitSignal.set_value();
 	saveAllPlayers();
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
@@ -131,8 +139,9 @@ void CoreManager::initHandlers()
 	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
 		weak_from_this(), _playerPool, bus));
 	_modes->registerInstance(Modes::Deathmatch::DeathmatchController::create(
-		weak_from_this(), _playerPool,
-		components->queryComponent<ITimersComponent>(), this->bus));
+		weak_from_this(), _commandManager, _dialogManager, _playerPool,
+		components->queryComponent<ITimersComponent>(), this->bus,
+		_dbConnection));
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool, components->queryComponent<IVehiclesComponent>(),
 		components->queryComponent<ITimersComponent>()));
@@ -164,9 +173,22 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 		"Found player data for " + player.getName().to_string() + " in DB");
 
 	auto row = res[0];
-	this->getPlayerData(player)->updateFromRow(row);
+	auto data = Player::getPlayerData(player);
+	data->updateFromRow(row);
+
+	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
+		->onPlayerLoad(data, txn);
 	txn.commit();
 	return true;
+}
+
+void CoreManager::saveAllPlayers()
+{
+	for (const auto [id, data] : this->_playerData)
+	{
+		this->savePlayer(data);
+	}
+	spdlog::info("Saved all player data!");
 }
 
 void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
@@ -177,28 +199,24 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 	auto db = this->getDBConnection();
 	pqxx::work txn(*db);
 
+	// save general player info
 	txn.exec_params(SQLQueryManager::Get()
 						->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER)
 						.value(),
 		data->language, data->lastSkinId, data->lastIP, data->lastLoginAt,
 		data->userId);
 
+	// save DM info
+	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
+		->onPlayerSave(data, txn);
+
 	txn.commit();
 	spdlog::info("Player {} has been successfully saved", data->name);
 }
 
-void CoreManager::saveAllPlayers()
-{
-	for (const auto& [id, playerData] : this->_playerData)
-	{
-		this->savePlayer(playerData);
-	}
-	spdlog::info("Saved all player data!");
-}
-
 void CoreManager::savePlayer(IPlayer& player)
 {
-	savePlayer(this->_playerData[player.getID()]);
+	this->savePlayer(this->_playerData[player.getID()]);
 }
 
 void CoreManager::onFree(IComponent* component)
@@ -408,6 +426,16 @@ void CoreManager::sendNotificationToAllFormatted(
 	{
 		Player::getPlayerExt(*player)->sendTranslatedMessageFormatted(
 			message, args...);
+	}
+}
+
+void CoreManager::runSaveThread(std::future<void> exitSignal)
+{
+	while (exitSignal.wait_for(std::chrono::minutes(3))
+		== std::future_status::timeout)
+	{
+		spdlog::info("Saving player data...");
+		this->saveAllPlayers();
 	}
 }
 

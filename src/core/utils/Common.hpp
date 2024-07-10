@@ -1,9 +1,26 @@
 #pragma once
 
+#include <player.hpp>
+
 #include <numbers>
 
 namespace Core::Utils
 {
+enum class WeaponType
+{
+	Hand,
+	Melee,
+	Handguns,
+	Shotguns,
+	SMG,
+	AssaultRifles,
+	Rifles,
+	HeavyWeapons,
+	Explosives,
+	HandheldItems,
+	Unknown
+};
+
 const inline double deg2Rad(const double& degrees)
 {
 	return degrees * std::numbers::pi / 180;
@@ -13,5 +30,52 @@ template <typename E>
 constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept
 {
 	return static_cast<typename std::underlying_type<E>::type>(e);
+}
+
+inline const WeaponType getWeaponType(int weaponId)
+{
+
+	switch (weaponId)
+	{
+	case PlayerWeapon_Fist:
+	case PlayerWeapon_BrassKnuckle:
+		return WeaponType::Hand;
+	case PlayerWeapon_Knife:
+	case PlayerWeapon_GolfClub:
+	case PlayerWeapon_Shovel:
+	case PlayerWeapon_PoolStick:
+	case PlayerWeapon_NiteStick:
+	case PlayerWeapon_Bat:
+	case PlayerWeapon_Katana:
+	case PlayerWeapon_Chainsaw:
+	case PlayerWeapon_Flower:
+	case PlayerWeapon_Cane:
+	case PlayerWeapon_Dildo:
+		return WeaponType::HandheldItems;
+	case PlayerWeapon_Deagle:
+	case PlayerWeapon_Silenced:
+	case PlayerWeapon_Colt45:
+		return WeaponType::Handguns;
+	case PlayerWeapon_Sawedoff:
+	case PlayerWeapon_Shotgun:
+	case PlayerWeapon_Shotgspa:
+		return WeaponType::Shotguns;
+	case PlayerWeapon_TEC9:
+	case PlayerWeapon_UZI:
+	case PlayerWeapon_MP5:
+		return WeaponType::SMG;
+	case PlayerWeapon_AK47:
+	case PlayerWeapon_M4:
+		return WeaponType::AssaultRifles;
+	case PlayerWeapon_Sniper:
+	case PlayerWeapon_Rifle:
+		return WeaponType::Rifles;
+	case PlayerWeapon_FlameThrower:
+	case PlayerWeapon_RocketLauncher:
+	case PlayerWeapon_HeatSeeker:
+	case PlayerWeapon_Minigun:
+		return WeaponType::HeavyWeapons;
+	}
+	return WeaponType::Unknown;
 }
 }

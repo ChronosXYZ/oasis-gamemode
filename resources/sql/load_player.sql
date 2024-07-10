@@ -1,6 +1,6 @@
 SELECT id, 
 name,
-users.password_hash,
+players.password_hash,
 "language",
 email,
 last_skin_id,
@@ -12,9 +12,9 @@ bans.by as "banned_by",
 bans.expires_at as "ban_expires_at",
 admins."level" as "admin_level",
 admins.password_hash as "admin_pass_hash"
-FROM users
+FROM players
 LEFT JOIN bans
-ON users.id = bans.user_id
+ON players.id = bans.account_id
 LEFT JOIN admins
-ON users.id = admins.user_id
+ON players.id = admins.account_id
 WHERE name=$1

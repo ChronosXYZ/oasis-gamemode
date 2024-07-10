@@ -15,7 +15,8 @@
 
 namespace Core::Player
 {
-OasisPlayerExt::OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player, ITimersComponent* timerManager)
+OasisPlayerExt::OasisPlayerExt(std::shared_ptr<PlayerModel> data,
+	IPlayer& player, ITimersComponent* timerManager)
 	: _player(player)
 	, _playerData(data)
 	, _timerManager(timerManager)
@@ -30,10 +31,8 @@ std::shared_ptr<PlayerModel> OasisPlayerExt::getPlayerData()
 
 void OasisPlayerExt::delayedKick()
 {
-	_timerManager->create(new Impl::SimpleTimerHandler(
-							  std::bind(
-								  &IPlayer::kick,
-								  std::reference_wrapper<IPlayer>(_player))),
+	_timerManager->create(new Impl::SimpleTimerHandler(std::bind(&IPlayer::kick,
+							  std::reference_wrapper<IPlayer>(_player))),
 		Milliseconds(DELAYED_KICK_INTERVAL_MS), false);
 }
 
@@ -64,7 +63,8 @@ void OasisPlayerExt::sendErrorMessage(const std::string& message)
 void OasisPlayerExt::sendInfoMessage(const std::string& message)
 {
 	_player.sendClientMessage(Colour::White(),
-		fmt::format("{} {}", _("#BRIGHT_BLUE#[INFO]#WHITE#", _player), message));
+		fmt::sprintf(
+			"%s %s", _("#LIME#>>#WHITE#", _player), _(message, _player)));
 }
 
 void OasisPlayerExt::sendTranslatedMessage(const std::string& message)
@@ -92,7 +92,8 @@ float OasisPlayerExt::getVehicleSpeed()
 	if (vehicle)
 	{
 		auto velocity = vehicle->getVelocity();
-		return std::sqrt(std::pow(velocity.x, 2) + std::pow(velocity.y, 2)) * 100.0 * 1.6;
+		return std::sqrt(std::pow(velocity.x, 2) + std::pow(velocity.y, 2))
+			* 100.0 * 1.6;
 	}
 	return 0.0;
 }

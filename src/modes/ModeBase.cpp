@@ -12,7 +12,9 @@ namespace Modes
 ModeBase::ModeBase(Mode mode, std::shared_ptr<dp::event_bus> bus)
 	: mode(mode)
 	, bus(bus)
-	, playerOnFireEventRegistration(bus->register_handler<Core::Utils::Events::PlayerOnFireEvent>(this, &ModeBase::onPlayerOnFire))
+	, playerOnFireEventRegistration(
+		  bus->register_handler<Core::Utils::Events::PlayerOnFireEvent>(
+			  this, &ModeBase::onPlayerOnFire))
 {
 }
 
@@ -21,16 +23,19 @@ ModeBase::~ModeBase()
 	this->bus->remove_handler(this->playerOnFireEventRegistration);
 }
 
-void ModeBase::onModeJoin(IPlayer& player, std::unordered_map<std::string, Core::PrimitiveType> joinData)
+void ModeBase::onModeJoin(IPlayer& player,
+	std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
-	spdlog::info("Player {} has joined mode {}", player.getName().to_string(), magic_enum::enum_name(mode));
+	spdlog::info("Player {} has joined mode {}", player.getName().to_string(),
+		magic_enum::enum_name(mode));
 	this->players.emplace(&player);
 }
 
 void ModeBase::onModeLeave(IPlayer& player)
 {
 	this->players.erase(&player);
-	spdlog::info("Player {} has left mode {}", player.getName().to_string(), magic_enum::enum_name(this->mode));
+	spdlog::info("Player {} has left mode {}", player.getName().to_string(),
+		magic_enum::enum_name(this->mode));
 }
 
 void ModeBase::onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event)
@@ -41,21 +46,14 @@ void ModeBase::onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event)
 	{
 		auto playerExt = Core::Player::getPlayerExt(*player);
 		playerExt->sendTranslatedMessageFormatted(
-			__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on fire!"),
-			event.player.getName().to_string(),
-			event.player.getID(),
-			event.lastKillee.getName().to_string(),
-			event.lastKillee.getID());
+			__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) "
+			   "and is now on fire!"),
+			event.player.getName().to_string(), event.player.getID(),
+			event.lastKillee.getName().to_string(), event.lastKillee.getID());
 	}
 }
 
-unsigned int ModeBase::playerCount()
-{
-	return this->players.size();
-}
+unsigned int ModeBase::playerCount() { return this->players.size(); }
 
-const Mode& ModeBase::getModeType()
-{
-	return this->mode;
-}
+const Mode& ModeBase::getModeType() { return this->mode; }
 }

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-19 22:19+0000\n"
+"POT-Creation-Date: 2024-07-10 14:22+0000\n"
 "PO-Revision-Date: 2024-05-21 09:31+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -18,12 +18,13 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/core/player/PlayerExtension.cpp:61
+#: src/core/player/PlayerExtension.cpp:60
 msgid "#RED#[ERROR]#WHITE#"
 msgstr ""
 
 #: src/core/player/PlayerExtension.cpp:67
-msgid "#BRIGHT_BLUE#[INFO]#WHITE#"
+#, c-format
+msgid "#LIME#>>#WHITE#"
 msgstr ""
 
 #: src/core/commands/CommandManager.cpp:68
@@ -34,12 +35,12 @@ msgstr ""
 msgid "#GOLD_FUSION#[USAGE]#WHITE#"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:57
+#: src/core/auth/AuthController.cpp:59
 #, c-format
 msgid "Registration"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:58
+#: src/core/auth/AuthController.cpp:60
 #, c-format
 msgid ""
 "{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n"
@@ -55,23 +56,23 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:66 src/core/auth/AuthController.cpp:245
-#: src/modes/deathmatch/DeathmatchController.cpp:646
-#: src/modes/deathmatch/DeathmatchController.cpp:708
-#: src/modes/deathmatch/DeathmatchController.cpp:768
+#: src/core/auth/AuthController.cpp:71 src/core/auth/AuthController.cpp:262
+#: src/modes/deathmatch/DeathmatchController.cpp:824
+#: src/modes/deathmatch/DeathmatchController.cpp:885
+#: src/modes/deathmatch/DeathmatchController.cpp:944
 msgid "Enter"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:67 src/core/auth/AuthController.cpp:110
+#: src/core/auth/AuthController.cpp:71 src/core/auth/AuthController.cpp:121
 msgid "Quit"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:96 src/core/auth/AuthController.cpp:109
+#: src/core/auth/AuthController.cpp:100 src/core/auth/AuthController.cpp:121
 #, c-format
 msgid "Login"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:97
+#: src/core/auth/AuthController.cpp:103
 #, c-format
 msgid ""
 "#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
@@ -83,7 +84,7 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:103
+#: src/core/auth/AuthController.cpp:112
 #, c-format
 msgid ""
 "#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n"
@@ -96,28 +97,28 @@ msgid ""
 "#DEEP_SAFFRON#oasisfreeroam.xyz"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:137
+#: src/core/auth/AuthController.cpp:148
 msgid "You have been logged in!"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:148
+#: src/core/auth/AuthController.cpp:159
 msgid "Too much login attempts!"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:159
+#: src/core/auth/AuthController.cpp:172
 msgid "Password length must be between 6-48"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:193
+#: src/core/auth/AuthController.cpp:208
 msgid "Something went wrong when trying to create user!"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:238
+#: src/core/auth/AuthController.cpp:251
 #, c-format
 msgid "Enter your email"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:239
+#: src/core/auth/AuthController.cpp:253
 msgid ""
 "#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n"
 "\n"
@@ -127,20 +128,20 @@ msgid ""
 "#WHITE#/verify#LIGHT_GRAY# later"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:246
+#: src/core/auth/AuthController.cpp:262
 msgid "Skip"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:271
+#: src/core/auth/AuthController.cpp:288
 msgid "Invalid email!"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:285
+#: src/core/auth/AuthController.cpp:302
 #, c-format
 msgid "Registration info"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:286
+#: src/core/auth/AuthController.cpp:303
 #, c-format
 msgid ""
 "#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and "
@@ -155,23 +156,24 @@ msgid ""
 "password."
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:297
+#: src/core/auth/AuthController.cpp:315
+#: src/modes/deathmatch/DeathmatchController.cpp:544
 msgid "OK"
 msgstr ""
 
-#: src/core/auth/AuthController.cpp:300
+#: src/core/auth/AuthController.cpp:319
 msgid "You have successfully registered!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:271
+#: src/core/CoreManager.cpp:282
 msgid "You are not logged in yet!"
 msgstr ""
 
-#: src/core/CoreManager.cpp:288
+#: src/core/CoreManager.cpp:299
 msgid "Modes"
 msgstr ""
 
-#: src/core/CoreManager.cpp:289
+#: src/core/CoreManager.cpp:300
 #, c-format
 msgid ""
 "Mode\tCommand\tPlayers\n"
@@ -182,18 +184,18 @@ msgid ""
 "Cops and Robbers\t/cnr\t%d"
 msgstr ""
 
-#: src/core/CoreManager.cpp:301
-#: src/modes/deathmatch/DeathmatchController.cpp:313
-#: src/modes/deathmatch/DeathmatchController.cpp:407
-#: src/modes/deathmatch/DeathmatchController.cpp:526
-#: src/modes/deathmatch/DeathmatchController.cpp:567
-#: src/modes/deathmatch/DeathmatchController.cpp:601
-#: src/modes/deathmatch/DeathmatchController.cpp:829
-#: src/modes/deathmatch/DeathmatchController.cpp:875
+#: src/core/CoreManager.cpp:312
+#: src/modes/deathmatch/DeathmatchController.cpp:457
+#: src/modes/deathmatch/DeathmatchController.cpp:590
+#: src/modes/deathmatch/DeathmatchController.cpp:707
+#: src/modes/deathmatch/DeathmatchController.cpp:747
+#: src/modes/deathmatch/DeathmatchController.cpp:780
+#: src/modes/deathmatch/DeathmatchController.cpp:1003
+#: src/modes/deathmatch/DeathmatchController.cpp:1048
 msgid "Select"
 msgstr ""
 
-#: src/core/CoreManager.cpp:327 src/core/CoreManager.cpp:361
+#: src/core/CoreManager.cpp:338 src/core/CoreManager.cpp:372
 msgid "Mode is not implemented yet!"
 msgstr ""
 
@@ -215,17 +217,17 @@ msgid "Show all players on fire"
 msgstr ""
 
 #: src/modes/deathmatch/WeaponSet.hpp:60
-#: src/modes/deathmatch/DeathmatchController.cpp:519
+#: src/modes/deathmatch/DeathmatchController.cpp:701
 msgid "Run"
 msgstr ""
 
 #: src/modes/deathmatch/WeaponSet.hpp:62
-#: src/modes/deathmatch/DeathmatchController.cpp:520
+#: src/modes/deathmatch/DeathmatchController.cpp:702
 msgid "Walk"
 msgstr ""
 
 #: src/modes/deathmatch/WeaponSet.hpp:64
-#: src/modes/deathmatch/DeathmatchController.cpp:521
+#: src/modes/deathmatch/DeathmatchController.cpp:703
 msgid "DSS"
 msgstr ""
 
@@ -249,65 +251,103 @@ msgstr ""
 msgid "Only group members"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:155
+#: src/modes/deathmatch/DeathmatchController.cpp:265
 msgid "Don't use ~r~C-bug!"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:203 src/modes/ModeBase.cpp:44
+#: src/modes/deathmatch/DeathmatchController.cpp:314 src/modes/ModeBase.cpp:49
 #, c-format
 msgid ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on "
 "fire!"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:232
+#: src/modes/deathmatch/DeathmatchController.cpp:331
+msgid "You have killed player on fire and got 4 additional score!"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:359
 msgid "Such room doesn't exist!"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:238
+#: src/modes/deathmatch/DeathmatchController.cpp:365
 msgid "room number"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:239
+#: src/modes/deathmatch/DeathmatchController.cpp:366
 msgid "Enter DM room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:248
+#: src/modes/deathmatch/DeathmatchController.cpp:375
 msgid "Enter DM mode"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:295
+#: src/modes/deathmatch/DeathmatchController.cpp:384
+msgid "Invalid player ID"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:390
+msgid "Show DM stats"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:440
 msgid "#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_BRULEE#Host\t#CREAM_BRULEE#Players"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:299
+#: src/modes/deathmatch/DeathmatchController.cpp:444
 msgid "Create custom room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:308
+#: src/modes/deathmatch/DeathmatchController.cpp:453
 msgid "Server"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:312
+#: src/modes/deathmatch/DeathmatchController.cpp:456
 #, c-format
 msgid "Select Deathmatch room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:313
-#: src/modes/deathmatch/DeathmatchController.cpp:355
+#: src/modes/deathmatch/DeathmatchController.cpp:457
+#: src/modes/deathmatch/DeathmatchController.cpp:498
 msgid "Close"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:351
+#: src/modes/deathmatch/DeathmatchController.cpp:495
 msgid "Player\tK : D\tRatio\tDamage inflicted\n"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:354
+#: src/modes/deathmatch/DeathmatchController.cpp:497
 #, c-format
 msgid "Deathmatch statistics"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:389
+#: src/modes/deathmatch/DeathmatchController.cpp:514
+#, c-format
+msgid ""
+"#WHITE#- Player:\t\t\t\t\t%s (%d)\n"
+"- Score:\t\t\t\t\t\t%d\n"
+"- Highest kill streak:\t\t\t\t%d\n"
+"- Total kills:\t\t\t\t\t%d\n"
+"- Total deaths:\t\t\t\t\t%d\n"
+"- Ratio:\t\t\t\t\t\t%.2f\n"
+"- Hand kills:\t\t\t\t\t%d\n"
+"- Handheld weapon kills:\t\t\t%d\n"
+"- Melee kills:\t\t\t\t\t%d\n"
+"- Handgun kills:\t\t\t\t\t%d\n"
+"- Shotgun kills:\t\t\t\t\t%d\n"
+"- SMG kills:\t\t\t\t\t%d\n"
+"- Assault rifles kills:\t\t\t\t%d\n"
+"- Rifles kills:\t\t\t\t\t%d\n"
+"- Heavy weapon kills:\t\t\t\t%d\n"
+"- Explosives kills:\t\t\t\t%d"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:543
+#, c-format
+msgid "DM stats"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:573
 #, c-format
 msgid ""
 "Map\t%s\n"
@@ -322,190 +362,190 @@ msgid ""
 "#YELLOW#Start"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:396
-#: src/modes/deathmatch/DeathmatchController.cpp:401
-#: src/modes/deathmatch/DeathmatchController.cpp:402
-#: src/modes/deathmatch/DeathmatchController.cpp:595
-#: src/modes/deathmatch/DeathmatchController.cpp:822
-#: src/modes/deathmatch/DeathmatchController.cpp:869
+#: src/modes/deathmatch/DeathmatchController.cpp:580
+#: src/modes/deathmatch/DeathmatchController.cpp:585
+#: src/modes/deathmatch/DeathmatchController.cpp:586
+#: src/modes/deathmatch/DeathmatchController.cpp:775
+#: src/modes/deathmatch/DeathmatchController.cpp:998
+#: src/modes/deathmatch/DeathmatchController.cpp:1043
 msgid "Yes"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:396
-#: src/modes/deathmatch/DeathmatchController.cpp:401
-#: src/modes/deathmatch/DeathmatchController.cpp:402
-#: src/modes/deathmatch/DeathmatchController.cpp:595
-#: src/modes/deathmatch/DeathmatchController.cpp:822
-#: src/modes/deathmatch/DeathmatchController.cpp:869
+#: src/modes/deathmatch/DeathmatchController.cpp:580
+#: src/modes/deathmatch/DeathmatchController.cpp:585
+#: src/modes/deathmatch/DeathmatchController.cpp:586
+#: src/modes/deathmatch/DeathmatchController.cpp:775
+#: src/modes/deathmatch/DeathmatchController.cpp:998
+#: src/modes/deathmatch/DeathmatchController.cpp:1043
 msgid "No"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:406
+#: src/modes/deathmatch/DeathmatchController.cpp:589
 #, c-format
 msgid "Create new deathmatch room"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:407
-#: src/modes/deathmatch/DeathmatchController.cpp:526
-#: src/modes/deathmatch/DeathmatchController.cpp:567
-#: src/modes/deathmatch/DeathmatchController.cpp:601
-#: src/modes/deathmatch/DeathmatchController.cpp:646
-#: src/modes/deathmatch/DeathmatchController.cpp:708
-#: src/modes/deathmatch/DeathmatchController.cpp:768
-#: src/modes/deathmatch/DeathmatchController.cpp:829
-#: src/modes/deathmatch/DeathmatchController.cpp:875
+#: src/modes/deathmatch/DeathmatchController.cpp:590
+#: src/modes/deathmatch/DeathmatchController.cpp:707
+#: src/modes/deathmatch/DeathmatchController.cpp:747
+#: src/modes/deathmatch/DeathmatchController.cpp:780
+#: src/modes/deathmatch/DeathmatchController.cpp:824
+#: src/modes/deathmatch/DeathmatchController.cpp:885
+#: src/modes/deathmatch/DeathmatchController.cpp:944
+#: src/modes/deathmatch/DeathmatchController.cpp:1003
+#: src/modes/deathmatch/DeathmatchController.cpp:1048
 msgid "Cancel"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:493
+#: src/modes/deathmatch/DeathmatchController.cpp:675
 #, c-format
 msgid "Map selection"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:525
+#: src/modes/deathmatch/DeathmatchController.cpp:706
 #, c-format
 msgid "Weapon set selection"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:566
+#: src/modes/deathmatch/DeathmatchController.cpp:746
 #, c-format
 msgid "Privacy mode selection"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:600
+#: src/modes/deathmatch/DeathmatchController.cpp:779
 #, c-format
 msgid "Should C-bug be enabled?"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:641
+#: src/modes/deathmatch/DeathmatchController.cpp:820
 msgid "Enter the round time in minutes (1-60):"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:645
+#: src/modes/deathmatch/DeathmatchController.cpp:823
 #, c-format
 msgid "Round time"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:672
+#: src/modes/deathmatch/DeathmatchController.cpp:850
 msgid "Invalid number of minutes! (available values are 1-60)"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:703
+#: src/modes/deathmatch/DeathmatchController.cpp:881
 msgid "Enter the default HP for players in the room (1-100):"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:707
+#: src/modes/deathmatch/DeathmatchController.cpp:884
 #, c-format
 msgid "Default room HP"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:735
+#: src/modes/deathmatch/DeathmatchController.cpp:912
 msgid "Invalid HP value! (available values are 1-100)"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:763
+#: src/modes/deathmatch/DeathmatchController.cpp:940
 msgid "Enter the default armor for players in the room (1-100):"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:767
+#: src/modes/deathmatch/DeathmatchController.cpp:943
 #, c-format
 msgid "Default room armor"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:795
+#: src/modes/deathmatch/DeathmatchController.cpp:971
 msgid "Invalid armor value! (available values are 1-100)"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:827
+#: src/modes/deathmatch/DeathmatchController.cpp:1002
 #, c-format
-msgid "Should player health be refilled when they kill someone?"
+msgid "Should refill be enabled?"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:874
+#: src/modes/deathmatch/DeathmatchController.cpp:1047
 #, c-format
 msgid "Change map to random one after round ends?"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:959
+#: src/modes/deathmatch/DeathmatchController.cpp:1133
 #, c-format
 msgid "~w~Mode Deathmatch /DM %d"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:998
+#: src/modes/deathmatch/DeathmatchController.cpp:1172
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has joined the room (%d "
 "players)"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:1046
+#: src/modes/deathmatch/DeathmatchController.cpp:1221
 msgid "~g~~h~~h~GO!"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:1156
+#: src/modes/deathmatch/DeathmatchController.cpp:1331
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d "
 "players)"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:65
+#: src/modes/freeroam/FreeroamController.cpp:73
 msgid "Teleports player to the Freeroam mode"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:73
+#: src/modes/freeroam/FreeroamController.cpp:85
 msgid "You can spawn vehicles only in Freeroam mode!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:78
+#: src/modes/freeroam/FreeroamController.cpp:90
 msgid "Invalid car model ID!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:83
+#: src/modes/freeroam/FreeroamController.cpp:95
 msgid "Invalid color ID!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:97
+#: src/modes/freeroam/FreeroamController.cpp:110
 msgid "You have sucessfully spawned the vehicle!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:100
+#: src/modes/freeroam/FreeroamController.cpp:115
 msgid "vehicle model id"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:100
+#: src/modes/freeroam/FreeroamController.cpp:115
 msgid "color 1"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:100
+#: src/modes/freeroam/FreeroamController.cpp:115
 msgid "color 2"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:100
+#: src/modes/freeroam/FreeroamController.cpp:116
 msgid "Spawns a vehicle"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:106
+#: src/modes/freeroam/FreeroamController.cpp:125
 msgid "You have killed yourself!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:110
+#: src/modes/freeroam/FreeroamController.cpp:129
 msgid "Kill yourself"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:119
+#: src/modes/freeroam/FreeroamController.cpp:139
 msgid "Invalid skin ID!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:125
+#: src/modes/freeroam/FreeroamController.cpp:146
 #, c-format
 msgid "You have changed your skin to ID: %d!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:128
+#: src/modes/freeroam/FreeroamController.cpp:149
 msgid "skin ID"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:129
+#: src/modes/freeroam/FreeroamController.cpp:150
 msgid "Set player skin"
 msgstr ""

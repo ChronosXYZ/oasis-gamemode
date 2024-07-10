@@ -71,6 +71,11 @@ void PlayerOnFireController::onPlayerDeath(
 {
 	auto killeeData = Player::getPlayerData(player);
 	auto killeeExt = Player::getPlayerExt(player);
+	if (this->playersOnFire[killeeExt->getMode()].contains(&player))
+		this->bus->fire_event(
+			Utils::Events::PlayerOnFireBeenKilled { .player = player,
+				.killer = *killer,
+				.mode = killeeExt->getMode() });
 	killeeData->tempData->core->subsequentKills = 0;
 	player.setWantedLevel(0);
 	this->playersOnFire[killeeExt->getMode()].erase(&player);
