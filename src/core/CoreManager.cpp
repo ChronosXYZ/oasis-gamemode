@@ -5,6 +5,7 @@
 #include "controllers/PlayerOnFireController.hpp"
 #include "controllers/SpeedometerController.hpp"
 #include "eventbus/event_bus.hpp"
+#include "player.hpp"
 #include "player/PlayerExtension.hpp"
 #include "textdraws/ITextDrawWrapper.hpp"
 #include "textdraws/ServerLogo.hpp"
@@ -165,26 +166,26 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 		"Found player data for " + player.getName().to_string() + " in DB");
 
 	auto row = res[0];
-	this->getPlayerData(player)->updateFromRow(row);
+	auto data = Player::getPlayerData(player);
+	data->updateFromRow(row);
 
 	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
-		->onPlayerLoad(player, txn);
+		->onPlayerLoad(data, txn);
 	txn.commit();
 	return true;
 }
 
 void CoreManager::saveAllPlayers()
 {
-	for (const auto& player : this->_playerPool->players())
+	for (const auto [id, data] : this->_playerData)
 	{
-		this->savePlayer(*player);
+		this->savePlayer(data);
 	}
 	spdlog::info("Saved all player data!");
 }
 
-void CoreManager::savePlayer(IPlayer& player)
+void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 {
-	auto data = Player::getPlayerData(player);
 	if (!data->tempData->core->isLoggedIn)
 		return;
 
@@ -200,10 +201,15 @@ void CoreManager::savePlayer(IPlayer& player)
 
 	// save DM info
 	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
-		->onPlayerSave(player, txn);
+		->onPlayerSave(data, txn);
 
 	txn.commit();
 	spdlog::info("Player {} has been successfully saved", data->name);
+}
+
+void CoreManager::savePlayer(IPlayer& player)
+{
+	this->savePlayer(this->_playerData[player.getID()]);
 }
 
 void CoreManager::onFree(IComponent* component)

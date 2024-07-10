@@ -122,7 +122,7 @@ void FreeroamController::initCommands()
 		{
 			player.get().setHealth(0.0);
 			Core::Player::getPlayerExt(player.get())
-				->sendInfoMessage(_("You have killed yourself!", player));
+				->sendInfoMessage(__("You have killed yourself!"));
 		},
 		Core::Commands::CommandInfo {
 			.args = {},
@@ -184,13 +184,15 @@ void FreeroamController::onModeSelect(IPlayer& player)
 	this->_coreManager.lock()->joinMode(player, Modes::Mode::Freeroam, {});
 }
 
-void FreeroamController::onPlayerLoad(IPlayer& player, pqxx::work& txn)
-{ // TODO
-}
-
-void FreeroamController::onPlayerSave(IPlayer& player, pqxx::work& txn)
+void FreeroamController::onPlayerSave(
+	std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn)
 {
 	// TODO
+}
+
+void FreeroamController::onPlayerLoad(
+	std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn)
+{ // TODO
 }
 
 void FreeroamController::deleteLastSpawnedCar(IPlayer& player)
@@ -203,4 +205,5 @@ void FreeroamController::deleteLastSpawnedCar(IPlayer& player)
 		playerData->tempData->freeroam->lastVehicleId.reset();
 	}
 }
+
 }

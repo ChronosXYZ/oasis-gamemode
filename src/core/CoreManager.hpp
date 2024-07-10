@@ -70,6 +70,7 @@ private:
 
 	void initHandlers();
 	void initSkinSelection();
+	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void savePlayer(IPlayer& player);
 	void saveAllPlayers();
 	void removePlayerFromCurrentMode(IPlayer& player);

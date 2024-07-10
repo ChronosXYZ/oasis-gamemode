@@ -14,6 +14,14 @@ struct PlayerOnFireEvent
 	IPlayer& lastKillee;
 	Modes::Mode mode;
 };
+
+struct PlayerOnFireBeenKilled
+{
+	IPlayer& player;
+	IPlayer& killer;
+	Modes::Mode mode;
+};
+
 struct RoundEndEvent
 {
 	Modes::Mode mode;

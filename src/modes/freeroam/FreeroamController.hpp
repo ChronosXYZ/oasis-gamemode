@@ -46,8 +46,10 @@ public:
 	void onModeLeave(IPlayer& player) override;
 	void onModeSelect(IPlayer& player) override;
 
-	void onPlayerSave(IPlayer& player, pqxx::work& txn) override;
-	void onPlayerLoad(IPlayer& player, pqxx::work& txn) override;
+	void onPlayerSave(
+		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn) override;
+	void onPlayerLoad(
+		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn) override;
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;

@@ -15,11 +15,14 @@
 namespace Core::Auth
 {
 
-AuthController::AuthController(IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager)
+AuthController::AuthController(
+	IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager)
 	: _coreManager(coreManager)
 	, _playerPool(playerPool)
-	, _classesComponent(coreManager.lock()->components->queryComponent<IClassesComponent>())
-	, _timersComponent(coreManager.lock()->components->queryComponent<ITimersComponent>())
+	, _classesComponent(
+		  coreManager.lock()->components->queryComponent<IClassesComponent>())
+	, _timersComponent(
+		  coreManager.lock()->components->queryComponent<ITimersComponent>())
 {
 	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 }
@@ -43,10 +46,9 @@ void AuthController::onPlayerConnect(IPlayer& player)
 		data->tempData->auth->loginAttempts = 0;
 		showLoginDialog(player, false);
 	}
-	_timersComponent->create(new Impl::SimpleTimerHandler(
-								 std::bind(&AuthController::interpolatePlayerCamera,
-									 this,
-									 std::reference_wrapper<IPlayer>(player))),
+	_timersComponent->create(new Impl::SimpleTimerHandler(std::bind(
+								 &AuthController::interpolatePlayerCamera, this,
+								 std::reference_wrapper<IPlayer>(player))),
 		Milliseconds(100), false);
 }
 
@@ -55,16 +57,18 @@ void AuthController::showRegistrationDialog(IPlayer& player)
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Registration", player)),
-		fmt::sprintf(_("{999999}Welcome to #RED#Oasis #WHITE#Freeroam, #DEEP_SAFFRON#%s\n\n\n"
+		fmt::sprintf(_("{999999}Welcome to #RED#Oasis #WHITE#Freeroam, "
+					   "#DEEP_SAFFRON#%s\n\n\n"
 					   "#LIGHT_GRAY#> This name is not registered\n"
 					   "#LIGHT_GRAY#> Please register with a valid password\n"
-					   "#LIGHT_GRAY#> Acceptable passwords are at least 6 characters long\n\n\n"
-					   "#LIGHT_GRAY#> If you have any trouble, please visit our discord server or contact any staff member:\n"
+					   "#LIGHT_GRAY#> Acceptable passwords are at least 6 "
+					   "characters long\n\n\n"
+					   "#LIGHT_GRAY#> If you have any trouble, please visit "
+					   "our discord server or contact any staff member:\n"
 					   "#DEEP_SAFFRON#oasisfreeroam.xyz",
 						 player),
 			player.getName().to_string()),
-		_("Enter", player),
-		_("Quit", player),
+		_("Enter", player), _("Quit", player),
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
 			switch (resp)
@@ -94,20 +98,27 @@ void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_PASSWORD,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Login", player)),
-		wrongPass ? fmt::sprintf(_("#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
-								   "#LIGHT_GRAY#Please re-write the correct password in the field below to login.\n\n"
-								   "#LIGHT_GRAY#- If you have forgotten your password, request a password recovery at our discord server:\n"
-								   "#DEEP_SAFFRON#oasisfreeroam.xyz",
-									 player),
-			player.getName().to_string(), loginAttempts)
-				  : fmt::sprintf(_("#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam #DEEP_SAFFRON#%s\n\n"
-								   "#LIGHT_GRAY#- Your name is registered in our database\n"
-								   "#LIGHT_GRAY#- Login by entering your password\n\n"
-								   "#LIGHT_GRAY#- If you have forgotten your password, request a password recovery at our discord server:\n#DEEP_SAFFRON#oasisfreeroam.xyz",
-									 player),
-					  player.getName().to_string()),
-		_("Login", player),
-		_("Quit", player),
+		wrongPass
+			? fmt::sprintf(
+				_("#RED#Wrong Password #LIGHT_GRAY#entered for %s #RED#[%d/3]\n"
+				  "#LIGHT_GRAY#Please re-write the correct password in the "
+				  "field below to login.\n\n"
+				  "#LIGHT_GRAY#- If you have forgotten your password, request "
+				  "a password recovery at our discord server:\n"
+				  "#DEEP_SAFFRON#oasisfreeroam.xyz",
+					player),
+				player.getName().to_string(), loginAttempts)
+			: fmt::sprintf(
+				_("#LIGHT_GRAY#Welcome back to #RED#Oasis #WHITE#Freeroam "
+				  "#DEEP_SAFFRON#%s\n\n"
+				  "#LIGHT_GRAY#- Your name is registered in our database\n"
+				  "#LIGHT_GRAY#- Login by entering your password\n\n"
+				  "#LIGHT_GRAY#- If you have forgotten your password, request "
+				  "a password recovery at our discord "
+				  "server:\n#DEEP_SAFFRON#oasisfreeroam.xyz",
+					player),
+				player.getName().to_string()),
+		_("Login", player), _("Quit", player),
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
 			switch (resp)
@@ -134,7 +145,7 @@ void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 	{
 		if (Utils::argon2VerifyEncodedHash(playerData->passwordHash, password))
 		{
-			playerExt->sendInfoMessage(_("You have been logged in!", player));
+			playerExt->sendInfoMessage(__("You have been logged in!"));
 			playerData->lastLoginAt = Utils::SQL::get_current_timestamp();
 			playerData->lastIP = playerExt->getIP();
 			this->_coreManager.lock()->onPlayerLoggedIn(player);
@@ -152,11 +163,13 @@ void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 	this->showLoginDialog(player, true);
 }
 
-void AuthController::onPasswordSubmit(IPlayer& player, const std::string& password)
+void AuthController::onPasswordSubmit(
+	IPlayer& player, const std::string& password)
 {
 	if (password.length() <= 5 || password.length() > 48)
 	{
-		Player::getPlayerExt(player)->sendErrorMessage(_("Password length must be between 6-48", player));
+		Player::getPlayerExt(player)->sendErrorMessage(
+			_("Password length must be between 6-48", player));
 		this->showRegistrationDialog(player);
 		return;
 	}
@@ -177,20 +190,22 @@ void AuthController::onRegistrationSubmit(IPlayer& player)
 	auto pData = this->_coreManager.lock()->getPlayerData(player);
 	try
 	{
-		pqxx::result res = txn.exec_params(SQLQueryManager::Get()->getQueryByName(Utils::SQL::Queries::CREATE_PLAYER).value(),
-			player.getName().to_string(),
-			pData->passwordHash,
-			pData->language,
-			pData->email,
-			1,
-			playerExt->getIP());
+		pqxx::result res = txn.exec_params(
+			SQLQueryManager::Get()
+				->getQueryByName(Utils::SQL::Queries::CREATE_PLAYER)
+				.value(),
+			player.getName().to_string(), pData->passwordHash, pData->language,
+			pData->email, 1, playerExt->getIP());
 		txn.commit();
 	}
 	catch (const std::exception& e)
 	{
 		txn.abort();
-		spdlog::error(std::format("Error occurred when trying to create new user entry in DB. Error: {}", e.what()));
-		playerExt->sendInfoMessage(_("Something went wrong when trying to create user!", player));
+		spdlog::error(std::format("Error occurred when trying to create new "
+								  "user entry in DB. Error: {}",
+			e.what()));
+		playerExt->sendInfoMessage(
+			_("Something went wrong when trying to create user!", player));
 		playerExt->delayedKick();
 		return;
 	}
@@ -206,11 +221,8 @@ void AuthController::showLanguageDialog(IPlayer& player)
 		languagesList.append(fmt::sprintf("%s\n", lang));
 	}
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle_LIST,
-		fmt::sprintf(DIALOG_HEADER_TITLE, "Select language"),
-		languagesList,
-		"Select",
-		"Quit",
+		DialogStyle_LIST, fmt::sprintf(DIALOG_HEADER_TITLE, "Select language"),
+		languagesList, "Select", "Quit",
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
 			switch (resp)
@@ -218,7 +230,8 @@ void AuthController::showLanguageDialog(IPlayer& player)
 			case DialogResponse_Left:
 			{
 				auto pData = this->_coreManager.lock()->getPlayerData(player);
-				pData->language = Localization::LANGUAGE_CODE_NAMES.at(listItem);
+				pData->language
+					= Localization::LANGUAGE_CODE_NAMES.at(listItem);
 				showRegistrationDialog(player);
 				break;
 			}
@@ -236,14 +249,17 @@ void AuthController::showEmailDialog(IPlayer& player)
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle_INPUT,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Enter your email", player)),
-		fmt::sprintf(_("#LIGHT_GRAY#Please enter your #WHITE#Email address#LIGHT_GRAY#.\n\n"
-					   "Use a correct email address as it can be used for password recovery\n"
-					   "to restore your account incase you forget your password\n"
-					   "You can skip entering email, but account features will be limited! Use #WHITE#/verify#LIGHT_GRAY# later",
-						 player),
+		fmt::sprintf(
+			_("#LIGHT_GRAY#Please enter your #WHITE#Email "
+			  "address#LIGHT_GRAY#.\n\n"
+			  "Use a correct email address as it can be used for password "
+			  "recovery\n"
+			  "to restore your account incase you forget your password\n"
+			  "You can skip entering email, but account features will be "
+			  "limited! Use #WHITE#/verify#LIGHT_GRAY# later",
+				player),
 			player.getName().to_string()),
-		_("Enter", player),
-		_("Skip", player),
+		_("Enter", player), _("Skip", player),
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
 			switch (resp)
@@ -268,7 +284,8 @@ void AuthController::onEmailSubmit(IPlayer& player, const std::string& email)
 	if (!std::regex_match(email, m, EMAIL_REGEX))
 	{
 		this->showEmailDialog(player);
-		Player::getPlayerExt(player)->sendErrorMessage(_("Invalid email!", player));
+		Player::getPlayerExt(player)->sendErrorMessage(
+			_("Invalid email!", player));
 		return;
 	}
 
@@ -283,21 +300,23 @@ void AuthController::showRegistrationInfoDialog(IPlayer& player)
 	this->_coreManager.lock()->getDialogManager()->createDialog(player,
 		DialogStyle::DialogStyle_MSGBOX,
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Registration info", player)),
-		fmt::sprintf(_("#DRY_HIGHLIGHTER_GREEN#Your account has been successfully registered and logged in.\n\n"
+		fmt::sprintf(_("#DRY_HIGHLIGHTER_GREEN#Your account has been "
+					   "successfully registered and logged in.\n\n"
 					   "#MILLION_GREY#Username: #WHITE#%s\n"
 					   "#MILLION_GREY#Account ID: #WHITE#%d\n"
 					   "#MILLION_GREY#Password: #WHITE#%s\n"
 					   "#MILLION_GREY#Registration date: #WHITE#%s\n\n"
-					   "#MILLION_GREY#Use '#RED#F8#MILLION_GREY#' to take screenshot and save the password.",
+					   "#MILLION_GREY#Use '#RED#F8#MILLION_GREY#' to take "
+					   "screenshot and save the password.",
 						 player),
-			pData->name,
-			pData->userId,
+			pData->name, pData->userId,
 			pData->tempData->auth->plainTextPassword,
 			std::format("{:%Y-%m-%d}", pData->registrationDate)),
 		_("OK", player), "",
 		[&](DialogResponse resp, int listItem, StringView inputText)
 		{
-			Player::getPlayerExt(player)->sendInfoMessage(_("You have successfully registered!", player));
+			Player::getPlayerExt(player)->sendInfoMessage(
+				_("You have successfully registered!", player));
 			this->_coreManager.lock()->onPlayerLoggedIn(player);
 		});
 }
@@ -305,12 +324,9 @@ void AuthController::showRegistrationInfoDialog(IPlayer& player)
 void AuthController::interpolatePlayerCamera(IPlayer& player)
 {
 	player.interpolateCameraPosition(Vector3(1093.0, -2036.0, 90.0),
-		Vector3(21.1088, -1806.9847, 79.4125),
-		15000,
-		PlayerCameraCutType_Move);
+		Vector3(21.1088, -1806.9847, 79.4125), 15000, PlayerCameraCutType_Move);
 	player.interpolateCameraLookAt(Vector3(384.0, -1557.0, 20.0),
-		Vector3(455.1533, -1868.1967, 31.9840),
-		15000,
+		Vector3(455.1533, -1868.1967, 31.9840), 15000,
 		PlayerCameraCutType_Move);
 }
 }

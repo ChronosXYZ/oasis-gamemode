@@ -14,7 +14,7 @@ admins."level" as "admin_level",
 admins.password_hash as "admin_pass_hash"
 FROM players
 LEFT JOIN bans
-ON players.id = bans.user_id
+ON players.id = bans.account_id
 LEFT JOIN admins
-ON players.id = admins.user_id
+ON players.id = admins.account_id
 WHERE name=$1

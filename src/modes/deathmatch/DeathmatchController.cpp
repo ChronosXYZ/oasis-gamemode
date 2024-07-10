@@ -53,6 +53,10 @@ DeathmatchController::DeathmatchController(
 	, _playerPool(playerPool)
 	, _timersComponent(timersComponent)
 	, dbConnection(dbConnection)
+	, playerOnFireBeenKilledRegistration(
+		  this->bus
+			  ->register_handler<Core::Utils::Events::PlayerOnFireBeenKilled>(
+				  this, &DeathmatchController::onPlayerOnFireBeenKilled))
 {
 	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
@@ -97,9 +101,9 @@ void DeathmatchController::onModeLeave(IPlayer& player)
 	super::onModeLeave(player);
 }
 
-void DeathmatchController::onPlayerSave(IPlayer& player, pqxx::work& txn)
+void DeathmatchController::onPlayerSave(
+	std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn)
 {
-	auto data = Core::Player::getPlayerData(player);
 	txn.exec_params(
 		Core::SQLQueryManager::Get()
 			->getQueryByName(Core::Utils::SQL::Queries::UPDATE_DM_STATS)
@@ -113,9 +117,9 @@ void DeathmatchController::onPlayerSave(IPlayer& player, pqxx::work& txn)
 		data->dmStats->explosivesKills, data->userId);
 }
 
-void DeathmatchController::onPlayerLoad(IPlayer& player, pqxx::work& txn)
+void DeathmatchController::onPlayerLoad(
+	std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn)
 {
-	auto data = Core::Player::getPlayerData(player);
 	auto result = txn.exec_params(
 		Core::SQLQueryManager::Get()
 			->getQueryByName(
@@ -167,14 +171,8 @@ void DeathmatchController::onPlayerDeath(
 			killer->setArmour(room->defaultArmor);
 		}
 		killerData->dmStats->kills += 1;
-		if (playerData->tempData->core->lastPlayerOnFireState)
-		{
-			killerData->dmStats->score += 6;
-		}
-		else
-		{
-			killerData->dmStats->score += 1;
-		}
+		killerData->dmStats->score += 1;
+
 		switch (Core::Utils::getWeaponType(reason))
 		{
 		case Core::Utils::WeaponType::Hand:
@@ -230,7 +228,6 @@ void DeathmatchController::onPlayerDeath(
 		case Core::Utils::WeaponType::Unknown:
 			break;
 		}
-		killerData->dmStats->kills += 1;
 	}
 
 	this->setRandomSpawnPoint(player, room);
@@ -307,6 +304,7 @@ void DeathmatchController::onPlayerOnFire(
 	if (event.mode != this->mode)
 		return;
 	auto playerData = Core::Player::getPlayerData(event.player);
+	playerData->dmStats->score += 4;
 	auto room = this->_rooms[playerData->tempData->deathmatch->roomId];
 
 	for (auto roomPlayer : room->players)
@@ -319,6 +317,18 @@ void DeathmatchController::onPlayerOnFire(
 			event.player.getName().to_string(), event.player.getID(),
 			event.lastKillee.getName().to_string(), event.lastKillee.getID());
 	}
+}
+
+void DeathmatchController::onPlayerOnFireBeenKilled(
+	Core::Utils::Events::PlayerOnFireBeenKilled event)
+{
+	if (event.mode != this->mode)
+		return;
+	auto killerData = Core::Player::getPlayerData(event.killer);
+	killerData->dmStats->score += 4;
+	auto killerExt = Core::Player::getPlayerExt(event.killer);
+	killerExt->sendInfoMessage(
+		__("You have killed player on fire and got 4 additional score!"));
 }
 
 DeathmatchController* DeathmatchController::create(
@@ -363,6 +373,21 @@ void DeathmatchController::initCommand()
 		},
 		Core::Commands::CommandInfo { .args = {},
 			.description = __("Enter DM mode"),
+			.category = MODE_NAME });
+	this->commandManager->addCommand(
+		"dmstats",
+		[this](std::reference_wrapper<IPlayer> player, int id)
+		{
+			if (id < 0 || id >= this->_playerPool->players().size())
+			{
+				Core::Player::getPlayerExt(player)->sendErrorMessage(
+					_("Invalid player ID", player));
+				return;
+			}
+			this->showDeathmatchStatsDialog(player, id);
+		},
+		Core::Commands::CommandInfo { .args = { "player id" },
+			.description = __("Show DM stats"),
 			.category = MODE_NAME });
 }
 
@@ -478,6 +503,47 @@ void DeathmatchController::showRoundResultDialog(
 			{
 				this->showRoundResultDialog(player, room);
 			}
+		});
+}
+
+void DeathmatchController::showDeathmatchStatsDialog(
+	IPlayer& player, unsigned int id)
+{
+	auto anotherPlayer = this->_playerPool->get(id);
+	auto playerData = Core::Player::getPlayerData(*anotherPlayer);
+	auto body = __("#WHITE#- Player:\t\t\t\t\t%s (%d)\n"
+				   "- Score:\t\t\t\t\t\t%d\n"
+				   "- Highest kill streak:\t\t\t\t%d\n"
+				   "- Total kills:\t\t\t\t\t%d\n"
+				   "- Total deaths:\t\t\t\t\t%d\n"
+				   "- Ratio:\t\t\t\t\t\t%.2f\n"
+				   "- Hand kills:\t\t\t\t\t%d\n"
+				   "- Handheld weapon kills:\t\t\t%d\n"
+				   "- Melee kills:\t\t\t\t\t%d\n"
+				   "- Handgun kills:\t\t\t\t\t%d\n"
+				   "- Shotgun kills:\t\t\t\t\t%d\n"
+				   "- SMG kills:\t\t\t\t\t%d\n"
+				   "- Assault rifles kills:\t\t\t\t%d\n"
+				   "- Rifles kills:\t\t\t\t\t%d\n"
+				   "- Heavy weapon kills:\t\t\t\t%d\n"
+				   "- Explosives kills:\t\t\t\t%d");
+	auto formattedBody = fmt::sprintf(_(body, player),
+		anotherPlayer->getName().to_string(), anotherPlayer->getID(),
+		playerData->dmStats->score, playerData->dmStats->highestKillStreak,
+		playerData->dmStats->kills, playerData->dmStats->deaths,
+		float(playerData->dmStats->kills) / float(playerData->dmStats->deaths),
+		playerData->dmStats->handKills,
+		playerData->dmStats->handheldWeaponKills,
+		playerData->dmStats->meleeKills, playerData->dmStats->handgunKills,
+		playerData->dmStats->shotgunKills, playerData->dmStats->smgKills,
+		playerData->dmStats->assaultRiflesKills,
+		playerData->dmStats->riflesKills, playerData->dmStats->heavyWeaponKills,
+		playerData->dmStats->explosivesKills);
+	this->dialogManager->createDialog(player, DialogStyle_MSGBOX,
+		fmt::sprintf(DIALOG_HEADER_TITLE, _("DM stats", player)), formattedBody,
+		_("OK", player), "",
+		[](DialogResponse response, int listItem, StringView input)
+		{
 		});
 }
 
