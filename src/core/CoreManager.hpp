@@ -8,11 +8,13 @@
 #include "utils/ServiceLocator.hpp"
 
 #include <Server/Components/Classes/classes.hpp>
+#include <future>
 #include <player.hpp>
 #include <eventbus/event_bus.hpp>
 
 #include <memory>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
 namespace Core
@@ -77,6 +79,7 @@ private:
 	template <typename... T>
 	void sendNotificationToAllFormatted(
 		const std::string& message, const T&... args);
+	void runSaveThread(std::future<void> exitSignal);
 
 	IPlayerPool* const _playerPool = nullptr;
 	ICore* const _core = nullptr;
@@ -88,6 +91,8 @@ private:
 	std::shared_ptr<DialogManager> _dialogManager;
 	std::shared_ptr<pqxx::connection> _dbConnection;
 	std::map<unsigned int, std::shared_ptr<PlayerModel>> _playerData;
+	std::thread saveThread;
+	std::promise<void> saveThreadExitSignal;
 
 	// Controllers
 	std::unique_ptr<Auth::AuthController> _authController;

@@ -16,13 +16,16 @@
 #include "../modes/freeroam/FreeroamController.hpp"
 #include "../modes/deathmatch/DeathmatchController.hpp"
 
+#include <chrono>
 #include <cstddef>
+#include <future>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <fmt/printf.h>
 #include <Server/Components/Timers/timers.hpp>
 #include <stdexcept>
+#include <thread>
 
 namespace Core
 {
@@ -57,6 +60,9 @@ CoreManager::CoreManager(
 	}
 	this->_dbConnection
 		= std::make_shared<pqxx::connection>(dbConnectionString);
+	this->saveThread = std::thread(&CoreManager::runSaveThread, this,
+		std::move(this->saveThreadExitSignal.get_future()));
+	this->saveThread.detach();
 }
 
 std::shared_ptr<CoreManager> CoreManager::create(
@@ -70,6 +76,7 @@ std::shared_ptr<CoreManager> CoreManager::create(
 
 CoreManager::~CoreManager()
 {
+	this->saveThreadExitSignal.set_value();
 	saveAllPlayers();
 	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
@@ -419,6 +426,16 @@ void CoreManager::sendNotificationToAllFormatted(
 	{
 		Player::getPlayerExt(*player)->sendTranslatedMessageFormatted(
 			message, args...);
+	}
+}
+
+void CoreManager::runSaveThread(std::future<void> exitSignal)
+{
+	while (exitSignal.wait_for(std::chrono::minutes(3))
+		== std::future_status::timeout)
+	{
+		spdlog::info("Saving player data...");
+		this->saveAllPlayers();
 	}
 }
 
