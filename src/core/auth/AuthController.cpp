@@ -204,7 +204,7 @@ void AuthController::onRegistrationSubmit(IPlayer& player)
 		spdlog::error(std::format("Error occurred when trying to create new "
 								  "user entry in DB. Error: {}",
 			e.what()));
-		playerExt->sendInfoMessage(
+		playerExt->sendErrorMessage(
 			_("Something went wrong when trying to create user!", player));
 		playerExt->delayedKick();
 		return;

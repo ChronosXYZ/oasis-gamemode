@@ -173,3 +173,37 @@ SELECT
     id
 FROM
     public.players;
+
+CREATE OR REPLACE FUNCTION create_stats_rows_after_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO general_player_stats ( account_id )
+    VALUES(NEW.id);
+
+    INSERT INTO dm_player_stats ( account_id )
+    VALUES(NEW.id);
+
+    INSERT INTO freeroam_player_stats ( account_id )
+    VALUES(NEW.id);
+
+
+    INSERT INTO derby_player_stats ( account_id )
+    VALUES(NEW.id);
+
+    INSERT INTO cnr_player_stats ( account_id )
+    VALUES(NEW.id);
+
+    INSERT INTO ptp_player_stats ( account_id )
+    VALUES(NEW.id);
+
+    INSERT INTO group_war_player_stats ( account_id )
+    VALUES(NEW.id);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER create_stats_rows_after_insert_player_trigger
+AFTER INSERT ON players
+FOR EACH ROW
+EXECUTE FUNCTION create_stats_rows_after_insert();
