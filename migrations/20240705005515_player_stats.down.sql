@@ -5,3 +5,4 @@ DROP TABLE derby_player_stats;
 DROP TABLE cnr_player_stats;
 DROP TABLE ptp_player_stats;
 DROP TABLE group_war_player_stats;
+DROP FUNCTION create_stats_rows_after_insert() CASCADE;
