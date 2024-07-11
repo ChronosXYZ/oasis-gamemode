@@ -527,11 +527,14 @@ void DeathmatchController::showDeathmatchStatsDialog(
 				   "- Rifles kills:\t\t\t\t\t%d\n"
 				   "- Heavy weapon kills:\t\t\t\t%d\n"
 				   "- Explosives kills:\t\t\t\t%d");
+	int ratioDeaths = playerData->dmStats->deaths;
+	if (ratioDeaths == 0)
+		ratioDeaths = 1;
 	auto formattedBody = fmt::sprintf(_(body, player),
 		anotherPlayer->getName().to_string(), anotherPlayer->getID(),
 		playerData->dmStats->score, playerData->dmStats->highestKillStreak,
 		playerData->dmStats->kills, playerData->dmStats->deaths,
-		float(playerData->dmStats->kills) / float(playerData->dmStats->deaths),
+		float(playerData->dmStats->kills) / float(ratioDeaths),
 		playerData->dmStats->handKills,
 		playerData->dmStats->handheldWeaponKills,
 		playerData->dmStats->meleeKills, playerData->dmStats->handgunKills,
