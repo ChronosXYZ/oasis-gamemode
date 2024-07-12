@@ -394,7 +394,6 @@ void DeathmatchController::initCommand()
 void DeathmatchController::initRooms()
 {
 	WeaponSet runWeaponSet(WeaponSet::Value::Run);
-	WeaponSet walkWeaponSet(WeaponSet::Value::Walk);
 	WeaponSet dssWeaponSet(WeaponSet::Value::DSS);
 
 	this->_rooms = {
@@ -410,9 +409,9 @@ void DeathmatchController::initRooms()
 			.defaultArmor = 100.0,
 		}),
 		std::shared_ptr<Room>(new Room {
-			.map = randomlySelectMap(walkWeaponSet),
-			.allowedWeapons = walkWeaponSet.getWeapons(),
-			.weaponSet = walkWeaponSet,
+			.map = randomlySelectMap(dssWeaponSet),
+			.allowedWeapons = dssWeaponSet.getWeapons(),
+			.weaponSet = dssWeaponSet,
 			.host = {},
 			.virtualWorld = VIRTUAL_WORLD_PREFIX + 1,
 			.cbugEnabled = true,
@@ -449,7 +448,9 @@ void DeathmatchController::showRoomSelectionDialog(
 
 		body += fmt::sprintf("{999999}%d. "
 							 "{00FF00}%s\t{00FF00}%s\t{00FF00}%s\t{00FF00}%d\n",
-			i + 1, room->map.name, room->weaponSet.toString(player),
+			i + 1, room->map.name,
+			room->weaponSet.toString(player).append(
+				room->cbugEnabled ? "" : _(" #RED#(NO CBUG)", player)),
 			room->host.value_or(_("Server", player)), room->players.size());
 	}
 	this->dialogManager->createDialog(player, DialogStyle_TABLIST_HEADERS,
@@ -1182,9 +1183,6 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
 {
 	auto weaponSet = room->weaponSet;
-	if (room->weaponSet
-		== WeaponSet(WeaponSet::Value::DSS)) // use maps from Walk weapon set
-		weaponSet = WeaponSet(WeaponSet::Value::Walk);
 
 	if (room->randomMap)
 		room->map = randomlySelectMap(weaponSet);
