@@ -18,7 +18,6 @@ public:
 	enum class Value : unsigned char
 	{
 		Run,
-		Walk,
 		DSS,
 		Team,
 		Custom
@@ -42,11 +41,9 @@ public:
 		case Value::Run:
 			return { PlayerWeapon_Sawedoff, PlayerWeapon_UZI,
 				PlayerWeapon_Colt45 };
-		case Value::Walk:
+		case Value::DSS:
 			return { PlayerWeapon_Deagle, PlayerWeapon_Shotgun,
 				PlayerWeapon_Sniper };
-		case Value::DSS:
-			return { PlayerWeapon_Deagle };
 		default:
 			return {};
 		}
@@ -58,8 +55,6 @@ public:
 		{
 		case Value::Run:
 			return _("Run", player);
-		case Value::Walk:
-			return _("Walk", player);
 		case Value::DSS:
 			return _("DSS", player);
 		case Value::Custom:
