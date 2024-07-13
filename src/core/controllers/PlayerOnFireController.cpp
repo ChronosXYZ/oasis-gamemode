@@ -2,6 +2,7 @@
 
 #include "../player/PlayerExtension.hpp"
 #include "../utils/Events.hpp"
+#include "Server/Components/Dialogs/dialogs.hpp"
 
 #include <fmt/printf.h>
 #include <memory>
@@ -16,27 +17,38 @@ void PlayerOnFireController::initCommands()
 		"onfire",
 		[this](std::reference_wrapper<IPlayer> player)
 		{
-			std::string body = _("Players on fire:\n", player);
+			std::string body;
 			bool exists = false;
 			for (auto& playersPerMode : this->playersOnFire)
 			{
 				for (auto& player : playersPerMode.second)
 				{
-					body += fmt::sprintf("- %s (%d)\n",
+					body += fmt::sprintf("%s (%d)\n",
 						player->getName().to_string(), player->getID());
 					exists = true;
 				}
 			}
 			if (!exists)
 			{
-				body += _("None", player);
+				body = _("No players on fire!", player);
+				this->dialogManager->createDialog(player, DialogStyle_MSGBOX,
+					fmt::sprintf(
+						DIALOG_HEADER_TITLE, _("Players on fire", player)),
+					body, "OK", "",
+					[](DialogResponse response, int listItem, StringView input)
+					{
+					});
 			}
-			this->dialogManager->createDialog(player, DialogStyle_MSGBOX,
-				fmt::sprintf(DIALOG_HEADER_TITLE, _("Players on fire", player)),
-				body, "OK", "",
-				[](DialogResponse response, int listItem, StringView input)
-				{
-				});
+			else
+			{
+				this->dialogManager->createDialog(player, DialogStyle_LIST,
+					fmt::sprintf(
+						DIALOG_HEADER_TITLE, _("Players on fire", player)),
+					body, "OK", "",
+					[](DialogResponse response, int listItem, StringView input)
+					{
+					});
+			}
 		},
 		Commands::CommandInfo {
 			.args = {},

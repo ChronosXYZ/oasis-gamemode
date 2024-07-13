@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DialogManager.hpp"
+#include "dialogs/DialogManager.hpp"
 #include "auth/AuthController.hpp"
 #include "commands/CommandManager.hpp"
 #include "player/PlayerModel.hpp"

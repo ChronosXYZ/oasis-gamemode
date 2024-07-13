@@ -10,6 +10,7 @@
 #include "../../core/utils/Events.hpp"
 #include "../../core/utils/Common.hpp"
 #include "../../core/utils/QueryNames.hpp"
+#include "../../core/dialogs/DialogManager.hpp"
 #include "../../core/SQLQueryManager.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
 #include "DeathmatchResult.hpp"

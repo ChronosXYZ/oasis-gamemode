@@ -3,7 +3,7 @@
 #include "../../modes/Modes.hpp"
 #include "../utils/Events.hpp"
 #include "../commands/CommandManager.hpp"
-#include "../DialogManager.hpp"
+#include "../dialogs/DialogManager.hpp"
 
 #include <eventbus/event_bus.hpp>
 #include <player.hpp>

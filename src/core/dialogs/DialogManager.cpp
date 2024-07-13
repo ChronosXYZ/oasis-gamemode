@@ -5,7 +5,8 @@ namespace Core
 
 DialogManager::DialogManager(IComponentList* components)
 {
-	IDialogsComponent* dialogsComponent = components->queryComponent<IDialogsComponent>();
+	IDialogsComponent* dialogsComponent
+		= components->queryComponent<IDialogsComponent>();
 	this->dialogsComponent = dialogsComponent;
 	this->dialogsComponent->getEventDispatcher().addEventHandler(this);
 }
@@ -15,7 +16,8 @@ DialogManager::~DialogManager()
 	this->dialogsComponent->getEventDispatcher().removeEventHandler(this);
 }
 
-void DialogManager::onDialogResponse(IPlayer& player, int dialogId, DialogResponse response, int listItem, StringView inputText)
+void DialogManager::onDialogResponse(IPlayer& player, int dialogId,
+	DialogResponse response, int listItem, StringView inputText)
 {
 	if (dialogId != MAGIC_DIALOG_ID)
 		return;
@@ -32,18 +34,15 @@ void DialogManager::hideDialog(IPlayer& player)
 	dialogData->hide(player);
 }
 
-void DialogManager::createDialog(IPlayer& player,
-	DialogStyle style,
-	StringView title,
-	StringView body,
-	StringView button1,
-	StringView button2,
+void DialogManager::createDialog(IPlayer& player, DialogStyle style,
+	StringView title, StringView body, StringView button1, StringView button2,
 	DialogManager::Callback callback)
 {
 	this->dialogs[player.getID()] = callback;
 
 	IPlayerDialogData* dialogData = queryExtension<IPlayerDialogData>(player);
-	dialogData->show(player, MAGIC_DIALOG_ID, style, title, body, button1, button2);
+	dialogData->show(
+		player, MAGIC_DIALOG_ID, style, title, body, button1, button2);
 }
 
 }
