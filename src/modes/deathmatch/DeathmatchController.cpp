@@ -2,6 +2,7 @@
 #include "Maps.hpp"
 #include "PlayerTempData.hpp"
 #include "Room.hpp"
+#include "Room.tpp"
 #include "WeaponSet.hpp"
 #include "../../core/utils/Localization.hpp"
 #include "../../core/player/PlayerExtension.hpp"
@@ -263,6 +264,7 @@ void DeathmatchController::onPlayerKeyStateChange(
 			playerData->tempData->deathmatch->cbugging = true;
 			player.sendGameText(
 				_("Don't use ~r~C-bug!", player), Milliseconds(3000), 5);
+			player.playSound(4604, Vector3(0.0, 0.0, 0.0));
 
 			if (auto oldTimerId
 				= playerData->tempData->deathmatch->cbugFreezeTimerId)
@@ -307,16 +309,12 @@ void DeathmatchController::onPlayerOnFire(
 	playerData->dmStats->score += 4;
 	auto room = this->_rooms[playerData->tempData->deathmatch->roomId];
 
-	for (auto roomPlayer : room->players)
-	{
-		auto roomPlayerExt = Core::Player::getPlayerExt(*roomPlayer);
-		roomPlayerExt->sendTranslatedMessageFormatted(
-			__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
-			   "killed %s(%d) "
-			   "and is now on fire!"),
-			event.player.getName().to_string(), event.player.getID(),
-			event.lastKillee.getName().to_string(), event.lastKillee.getID());
-	}
+	room->sendMessageToAll(
+		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
+		   "killed %s(%d) "
+		   "and is now on fire!"),
+		event.player.getName().to_string(), event.player.getID(),
+		event.lastKillee.getName().to_string(), event.lastKillee.getID());
 }
 
 void DeathmatchController::onPlayerOnFireBeenKilled(
@@ -328,7 +326,14 @@ void DeathmatchController::onPlayerOnFireBeenKilled(
 	killerData->dmStats->score += 4;
 	auto killerExt = Core::Player::getPlayerExt(event.killer);
 	killerExt->sendInfoMessage(
-		__("You have killed player on fire and got 4 additional score!"));
+		__("You killed player on fire and got 4 extra points!"));
+	auto room = this->_rooms[killerData->tempData->deathmatch->roomId];
+
+	room->sendMessageToAll(
+		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
+		   "killed %s(%d)!"),
+		event.killer.getName().to_string(), event.killer.getID(),
+		event.player.getName().to_string(), event.player.getID());
 }
 
 DeathmatchController* DeathmatchController::create(
@@ -1169,15 +1174,10 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 		}
 	}
 
-	for (auto roomPlayer : room->players)
-	{
-		Core::Player::getPlayerExt(*roomPlayer)
-			->sendTranslatedMessageFormatted(
-				__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player "
-				   "%s has "
-				   "joined the room (%d players)"),
-				player.getName().to_string(), room->players.size());
-	}
+	room->sendMessageToAll(__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player "
+							  "%s has "
+							  "joined the room (%d players)"),
+		player.getName().to_string(), room->players.size());
 }
 
 void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
@@ -1325,15 +1325,10 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 	auto playerExt = Core::Player::getPlayerExt(player);
 	playerExt->getTextDrawManager()->destroy(TextDraws::DeathmatchTimer::NAME);
 
-	for (auto roomPlayer : room->players)
-	{
-		Core::Player::getPlayerExt(*roomPlayer)
-			->sendTranslatedMessageFormatted(
-				__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player "
-				   "%s has left "
-				   "the room (%d players)"),
-				player.getName().to_string(), room->players.size());
-	}
+	room->sendMessageToAll(__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player "
+							  "%s has left "
+							  "the room (%d players)"),
+		player.getName().to_string(), room->players.size());
 }
 
 void DeathmatchController::onTick()

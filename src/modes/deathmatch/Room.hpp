@@ -108,5 +108,8 @@ struct Room
 
 	std::optional<ITimer*> roundStartTimer;
 	unsigned int roundStartTimerCount;
+
+	template <typename... T>
+	void sendMessageToAll(const std::string& message, const T&... args);
 };
 }
