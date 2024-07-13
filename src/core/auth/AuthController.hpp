@@ -1,9 +1,13 @@
 #pragma once
 
-#include "Server/Components/Timers/timers.hpp"
+#include "../dialogs/DialogManager.hpp"
+
+#include <Server/Components/Timers/timers.hpp>
 #include <Server/Components/Classes/classes.hpp>
 #include <player.hpp>
+
 #include <regex>
+#include <memory>
 
 namespace Core
 {
@@ -12,20 +16,26 @@ class CoreManager;
 
 namespace Core::Auth
 {
-inline const std::regex EMAIL_REGEX("(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?:(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
+inline const std::regex EMAIL_REGEX(
+	"(?:(?:[^<>()\\[\\].,;:\\s@\"]+(?:\\.[^<>()\\[\\].,;:\\s@\"]+)*)|\".+\")@(?"
+	":(?:[^<>()‌​\\[\\].,;:\\s@\"]+\\.)+[^<>()\\[\\].,;:\\s@\"]{2,})");
 
-class AuthController : public PlayerConnectEventHandler, public ClassEventHandler
+class AuthController : public PlayerConnectEventHandler,
+					   public ClassEventHandler
 {
 public:
-	AuthController(IPlayerPool* playerPool, std::weak_ptr<Core::CoreManager> coreManager);
+	AuthController(IPlayerPool* playerPool,
+		std::shared_ptr<DialogManager> dialogManager,
+		std::weak_ptr<Core::CoreManager> coreManager);
 	~AuthController();
 
 	void onPlayerConnect(IPlayer& player) override;
 
 private:
-	IPlayerPool* const _playerPool;
-	IClassesComponent* const _classesComponent;
-	ITimersComponent* const _timersComponent;
+	IPlayerPool* const playerPool;
+	IClassesComponent* const classesComponent;
+	ITimersComponent* const timersComponent;
+	std::shared_ptr<DialogManager> dialogManager;
 	std::weak_ptr<Core::CoreManager> _coreManager;
 
 	void showLanguageDialog(IPlayer& player);

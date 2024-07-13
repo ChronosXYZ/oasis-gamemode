@@ -102,7 +102,7 @@ struct Room
 	bool isStarting;
 
 	/// Last round results in form of string
-	std::optional<std::string> cachedLastResult;
+	std::optional<std::vector<std::vector<std::string>>> cachedLastResult;
 
 	PrivacyMode privacyMode = PrivacyMode(PrivacyMode::Value::Everyone);
 

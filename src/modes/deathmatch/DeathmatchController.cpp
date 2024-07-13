@@ -442,44 +442,47 @@ void DeathmatchController::initRooms()
 void DeathmatchController::showRoomSelectionDialog(
 	IPlayer& player, bool modeSelection)
 {
-	std::string body = _("#CREAM_BRULEE#Map\t#CREAM_BRULEE#Weapon\t#CREAM_"
-						 "BRULEE#Host\t#CREAM_BRULEE#Players",
-		player);
-	body += "\n";
-	body += _("Create custom room", player);
-	body += "\n";
+	std::vector<std::vector<std::string>> items;
+	items.push_back({ _("Create custom room", player) });
 	for (std::size_t i = 0; i < _rooms.size(); i++)
 	{
 		auto room = _rooms[i];
-
-		body += fmt::sprintf("{999999}%d. "
-							 "{00FF00}%s\t{00FF00}%s\t{00FF00}%s\t{00FF00}%d\n",
-			i + 1, room->map.name,
-			room->weaponSet.toString(player).append(
-				room->cbugEnabled ? "" : _(" #RED#(NO CBUG)", player)),
-			room->host.value_or(_("Server", player)), room->players.size());
+		items.push_back(
+			{ fmt::sprintf("{999999}%d. {00FF00}%s", i + 1, room->map.name),
+				fmt::sprintf("{00FF00}%s",
+					room->weaponSet.toString(player).append(
+						room->cbugEnabled ? "" : _(" #RED#(NO CBUG)", player))),
+				fmt::sprintf(
+					"{00FF00}%s", room->host.value_or(_("Server", player))),
+				fmt::sprintf("{00FF00}%d", room->players.size()) });
 	}
-	this->dialogManager->createDialog(player, DialogStyle_TABLIST_HEADERS,
-		fmt::sprintf(DIALOG_HEADER_TITLE, _("Select Deathmatch room", player)),
-		body, _("Select", player), _("Close", player),
-		[modeSelection, this, &player](
-			DialogResponse response, int listItem, StringView input)
+	auto dialog = std::shared_ptr<Core::TabListHeadersDialog>(
+		new Core::TabListHeadersDialog(fmt::sprintf(DIALOG_HEADER_TITLE,
+										   _("Select Deathmatch room", player)),
+			{ _("#CREAM_BRULEE#Map", player), _("#CREAM_BRULEE#Weapon", player),
+				_("#CREAM_BRULEE#Host", player),
+				_("#CREAM_BRULEE#Players", player) },
+
+			items, _("Select", player), _("Close", player)));
+
+	this->dialogManager->showDialog(player, dialog,
+		[modeSelection, this, &player](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
-				if (listItem == 0)
+				if (result.listItem() == 0)
 				{
 					this->showRoomCreationDialog(player);
 					return;
 				}
-				if (listItem > this->_rooms.size())
+				if (result.listItem() > this->_rooms.size())
 				{
 					// when player selected a room and this room has
 					// been evicted
 					this->showRoomSelectionDialog(player);
 					return;
 				}
-				auto roomIndex = std::size_t(listItem - 1);
+				auto roomIndex = std::size_t(result.listItem() - 1);
 				this->coreManager.lock()->joinMode(
 					player, Mode::Deathmatch, { { ROOM_INDEX, roomIndex } });
 			}
@@ -500,11 +503,14 @@ void DeathmatchController::showRoundResultDialog(
 		return;
 	}
 	std::string header = _("Player\tK : D\tRatio\tDamage inflicted\n", player);
-	this->dialogManager->createDialog(player, DialogStyle_TABLIST_HEADERS,
-		fmt::sprintf(DIALOG_HEADER_TITLE, _("Deathmatch statistics", player)),
-		header + room->cachedLastResult.value(), _("Close", player), "",
-		[this, &player, room](
-			DialogResponse response, int listitem, StringView inputText)
+	auto dialog = std::shared_ptr<Core::TabListHeadersDialog>(
+		new Core::TabListHeadersDialog(fmt::sprintf(DIALOG_HEADER_TITLE,
+										   _("Deathmatch statistics", player)),
+			{ _("Player", player), _("K : D", player), _("Ratio", player),
+				_("Damage inflicted", player) },
+			{} /* TODO */, _("Close", player), ""));
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, room](Core::DialogResult result)
 		{
 			if (room->isRestarting)
 			{
@@ -549,10 +555,12 @@ void DeathmatchController::showDeathmatchStatsDialog(
 		playerData->dmStats->assaultRiflesKills,
 		playerData->dmStats->riflesKills, playerData->dmStats->heavyWeaponKills,
 		playerData->dmStats->explosivesKills);
-	this->dialogManager->createDialog(player, DialogStyle_MSGBOX,
+
+	auto dialog = std::shared_ptr<Core::MessageDialog>(new Core::MessageDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("DM stats", player)), formattedBody,
-		_("OK", player), "",
-		[](DialogResponse response, int listItem, StringView input)
+		_("OK", player), ""));
+	this->dialogManager->showDialog(player, dialog,
+		[](Core::DialogResult result)
 		{
 		});
 }
@@ -594,16 +602,35 @@ void DeathmatchController::showRoomCreationDialog(IPlayer& player)
 			static_cast<unsigned int>(room->defaultArmor),
 			room->refillEnabled ? _("Yes", player) : _("No", player),
 			room->randomMap ? _("Yes", player) : _("No", player));
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_TABLIST,
+	auto dialog = std::shared_ptr<Core::TabListDialog>(new Core::TabListDialog(
 		fmt::sprintf(
 			DIALOG_HEADER_TITLE, _("Create new deathmatch room", player)),
-		dialogBody, _("Select", player), _("Cancel", player),
-		[this, playerData, &player](
-			DialogResponse response, int listitem, StringView inputText)
+		{ { _("Map", player), room->map.name },
+			{ _("Weapon set", player), room->weaponSet.toString(player) },
+			{ _("Privacy mode", player), room->privacyMode.toString(player) },
+			{ _("Is C-bug enabled?", player),
+				room->cbugEnabled ? _("Yes", player) : _("No", player) },
+			{ _("Round time", player),
+				fmt::sprintf(_("%d minutes", player),
+					std::chrono::duration_cast<std::chrono::minutes>(
+						room->defaultTime)
+						.count()) },
+			{ _("Default health", player),
+				std::to_string(
+					static_cast<unsigned int>(room->defaultHealth)) },
+			{ _("Default armor", player),
+				std::to_string(static_cast<unsigned int>(room->defaultArmor)) },
+			{ _("Refill player health", player),
+				room->refillEnabled ? _("Yes", player) : _("No", player) },
+			{ _("Random map", player),
+				room->randomMap ? _("Yes", player) : _("No", player) } },
+		_("Select", player), _("Cancel", player)));
+	this->dialogManager->showDialog(player, dialog,
+		[this, playerData, &player](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
-				switch (listitem)
+				switch (result.listItem())
 				{
 				case 0:
 				{
@@ -674,23 +701,22 @@ void DeathmatchController::showRoomMapSelectionDialog(IPlayer& player)
 	if (!playerData->tempData->deathmatch->temporaryRoomSettings)
 		return;
 
-	std::string body;
-
+	std::vector<std::string> items;
 	for (const auto& map : MAPS)
 	{
-		body += map.name + "\n";
+		items.push_back(map.name);
 	}
+	auto dialog = std::shared_ptr<Core::ListDialog>(new Core::ListDialog(
+		fmt::sprintf(DIALOG_HEADER_TITLE, _("Map selection", player)), items,
+		_("Select", player), _("Cancel", player)));
 
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
-		fmt::sprintf(DIALOG_HEADER_TITLE, _("Map selection", player)), body,
-		"Select", "Cancel",
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
 				playerData->tempData->deathmatch->temporaryRoomSettings->map
-					= MAPS[listitem];
+					= MAPS[result.listItem()];
 				this->showRoomCreationDialog(player);
 			}
 			else
@@ -708,20 +734,18 @@ void DeathmatchController::showRoomWeaponSetSelectionDialog(IPlayer& player)
 	if (!playerData->tempData->deathmatch->temporaryRoomSettings)
 		return;
 
-	auto body = _("Run", player) + "\n";
-	body += _("Walk", player) + "\n";
-	body += _("DSS", player);
-
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
+	auto dialog = std::shared_ptr<Core::ListDialog>(new Core::ListDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Weapon set selection", player)),
-		body, _("Select", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+		{ _("Run", player), _("DSS", player) }, _("Select", player),
+		_("Cancel", player)));
+
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
-				WeaponSet set(
-					magic_enum::enum_value<WeaponSet::Value>(listitem));
+				WeaponSet set(magic_enum::enum_value<WeaponSet::Value>(
+					result.listItem()));
 				playerData->tempData->deathmatch->temporaryRoomSettings
 					->weaponSet
 					= set;
@@ -745,23 +769,24 @@ void DeathmatchController::showRoomPrivacyModeSelectionDialog(IPlayer& player)
 	if (!playerData->tempData->deathmatch->temporaryRoomSettings)
 		return;
 
-	std::string body;
+	std::vector<std::string> items;
 	auto modes = magic_enum::enum_values<PrivacyMode::Value>();
 	for (auto mode : modes)
 	{
-		body += PrivacyMode(mode).toString(player) + "\n";
+		items.push_back(PrivacyMode(mode).toString(player));
 	}
 
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
+	auto dialog = std::shared_ptr<Core::ListDialog>(new Core::ListDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Privacy mode selection", player)),
-		body, _("Select", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+		items, _("Select", player), _("Cancel", player)));
+
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
-				PrivacyMode mode(
-					magic_enum::enum_value<PrivacyMode::Value>(listitem));
+				PrivacyMode mode(magic_enum::enum_value<PrivacyMode::Value>(
+					result.listItem()));
 				playerData->tempData->deathmatch->temporaryRoomSettings
 					->privacyMode
 					= mode;
@@ -783,18 +808,19 @@ void DeathmatchController::showRoomSetCbugEnabledDialog(IPlayer& player)
 		return;
 
 	std::string body = _("Yes", player) + "\n" + _("No", player) + "\n";
+	auto dialog = std::shared_ptr<Core::ListDialog>(
+		new Core::ListDialog(fmt::sprintf(DIALOG_HEADER_TITLE,
+								 _("Should C-bug be enabled?", player)),
+			{ _("Yes", player), _("No", player) }, _("Select", player),
+			_("Cancel", player)));
 
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
-		fmt::sprintf(
-			DIALOG_HEADER_TITLE, _("Should C-bug be enabled?", player)),
-		body, _("Select", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
 				bool enabled = true;
-				switch (listitem)
+				switch (result.listItem())
 				{
 				case 0:
 				{
@@ -828,17 +854,17 @@ void DeathmatchController::showRoomSetRoundTimeDialog(IPlayer& player)
 		return;
 
 	std::string body = _("Enter the round time in minutes (1-60):", player);
+	auto dialog = std::shared_ptr<Core::InputDialog>(new Core::InputDialog(
+		fmt::sprintf(DIALOG_HEADER_TITLE, _("Round time", player)), body, false,
+		_("Enter", player), _("Cancel", player)));
 
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_INPUT,
-		fmt::sprintf(DIALOG_HEADER_TITLE, _("Round time", player)), body,
-		_("Enter", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
 				auto playerExt = Core::Player::getPlayerExt(player);
-				if (inputText == "")
+				if (result.inputText() == "")
 				{
 					this->showRoomSetRoundTimeDialog(player);
 					return;
@@ -847,7 +873,7 @@ void DeathmatchController::showRoomSetRoundTimeDialog(IPlayer& player)
 
 				try
 				{
-					minutes = std::stoi(inputText.to_string());
+					minutes = std::stoi(result.inputText());
 				}
 				catch (std::exception&)
 				{
@@ -890,16 +916,17 @@ void DeathmatchController::showRoomSetHealthDialog(IPlayer& player)
 	std::string body
 		= _("Enter the default HP for players in the room (1-100):", player);
 
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_INPUT,
+	auto dialog = std::shared_ptr<Core::InputDialog>(new Core::InputDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Default room HP", player)), body,
-		_("Enter", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+		false, _("Enter", player), _("Cancel", player)));
+
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
 				auto playerExt = Core::Player::getPlayerExt(player);
-				if (inputText == "")
+				if (result.inputText() == "")
 				{
 					this->showRoomSetHealthDialog(player);
 					return;
@@ -908,7 +935,7 @@ void DeathmatchController::showRoomSetHealthDialog(IPlayer& player)
 
 				try
 				{
-					hp = std::stoi(inputText.to_string());
+					hp = std::stoi(result.inputText());
 				}
 				catch (std::exception&)
 				{
@@ -949,16 +976,17 @@ void DeathmatchController::showRoomSetArmorDialog(IPlayer& player)
 	std::string body
 		= _("Enter the default armor for players in the room (1-100):", player);
 
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_INPUT,
+	auto dialog = std::shared_ptr<Core::InputDialog>(new Core::InputDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Default room armor", player)),
-		body, _("Enter", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+		body, false, _("Enter", player), _("Cancel", player)));
+
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
 				auto playerExt = Core::Player::getPlayerExt(player);
-				if (inputText == "")
+				if (result.inputText() == "")
 				{
 					this->showRoomSetArmorDialog(player);
 					return;
@@ -967,7 +995,7 @@ void DeathmatchController::showRoomSetArmorDialog(IPlayer& player)
 
 				try
 				{
-					armor = std::stoi(inputText.to_string());
+					armor = std::stoi(result.inputText());
 				}
 				catch (std::exception&)
 				{
@@ -1005,19 +1033,19 @@ void DeathmatchController::showRoomSetRefillHealthDialog(IPlayer& player)
 	if (!playerData->tempData->deathmatch->temporaryRoomSettings)
 		return;
 
-	std::string body = _("Yes", player) + "\n" + _("No", player) + "\n";
+	auto dialog = std::shared_ptr<Core::ListDialog>(
+		new Core::ListDialog(fmt::sprintf(DIALOG_HEADER_TITLE,
+								 _("Should refill be enabled?", player)),
+			{ _("Yes", player), _("No", player) }, _("Select", player),
+			_("Cancel", player)));
 
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
-		fmt::sprintf(
-			DIALOG_HEADER_TITLE, _("Should refill be enabled?", player)),
-		body, _("Select", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
 				bool refillEnabled = true;
-				switch (listitem)
+				switch (result.listItem())
 				{
 				case 0:
 				{
@@ -1050,19 +1078,19 @@ void DeathmatchController::showRoomSetRandomMapDialog(IPlayer& player)
 	if (!playerData->tempData->deathmatch->temporaryRoomSettings)
 		return;
 
-	std::string body = _("Yes", player) + "\n" + _("No", player) + "\n";
-
-	this->dialogManager->createDialog(player, DialogStyle::DialogStyle_LIST,
+	auto dialog = std::shared_ptr<Core::ListDialog>(new Core::ListDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE,
 			_("Change map to random one after round ends?", player)),
-		body, _("Select", player), _("Cancel", player),
-		[this, &player, playerData](
-			DialogResponse response, int listitem, StringView inputText)
+		{ _("Yes", player), _("No", player) }, _("Select", player),
+		_("Cancel", player)));
+
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
 		{
-			if (response)
+			if (result.response())
 			{
 				bool randomMap = true;
-				switch (listitem)
+				switch (result.listItem())
 				{
 				case 0:
 				{
@@ -1252,13 +1280,15 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 			return x1.kills > x2.kills;
 		});
 
-	std::string lastResults;
+	std::vector<std::vector<std::string>> lastResults;
 	for (std::size_t i = 0; i < resultArray.size(); i++)
 	{
 		auto playerResult = resultArray.at(i);
-		lastResults += fmt::sprintf("%d. %s\t%d : %d\t%.2f\t%.2f\n", i + 1,
-			playerResult.playerName, playerResult.kills, playerResult.deaths,
-			playerResult.ratio, playerResult.damageInflicted);
+		lastResults.push_back({ fmt::sprintf(
+									"%d. %s", i + 1, playerResult.playerName),
+			fmt::sprintf("%d : %d", playerResult.kills, playerResult.deaths),
+			fmt::sprintf("%.2f", playerResult.ratio),
+			fmt::sprintf("%.2f", playerResult.damageInflicted) });
 	}
 	room->cachedLastResult = lastResults;
 

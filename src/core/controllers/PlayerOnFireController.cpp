@@ -2,7 +2,6 @@
 
 #include "../player/PlayerExtension.hpp"
 #include "../utils/Events.hpp"
-#include "Server/Components/Dialogs/dialogs.hpp"
 
 #include <fmt/printf.h>
 #include <memory>
@@ -17,35 +16,34 @@ void PlayerOnFireController::initCommands()
 		"onfire",
 		[this](std::reference_wrapper<IPlayer> player)
 		{
-			std::string body;
-			bool exists = false;
+			std::vector<std::string> items;
 			for (auto& playersPerMode : this->playersOnFire)
 			{
 				for (auto& player : playersPerMode.second)
 				{
-					body += fmt::sprintf("%s (%d)\n",
-						player->getName().to_string(), player->getID());
-					exists = true;
+					items.push_back(fmt::sprintf("%s (%d)\n",
+						player->getName().to_string(), player->getID()));
 				}
 			}
-			if (!exists)
+			if (items.empty())
 			{
-				body = _("No players on fire!", player);
-				this->dialogManager->createDialog(player, DialogStyle_MSGBOX,
-					fmt::sprintf(
-						DIALOG_HEADER_TITLE, _("Players on fire", player)),
-					body, "OK", "",
-					[](DialogResponse response, int listItem, StringView input)
+				auto dialog = std::shared_ptr<MessageDialog>(
+					new MessageDialog(fmt::sprintf(DIALOG_HEADER_TITLE,
+										  _("Players on fire", player)),
+						_("No players on fire!", player), _("OK", player), ""));
+				this->dialogManager->showDialog(player, dialog,
+					[](DialogResult result)
 					{
 					});
 			}
 			else
 			{
-				this->dialogManager->createDialog(player, DialogStyle_LIST,
-					fmt::sprintf(
-						DIALOG_HEADER_TITLE, _("Players on fire", player)),
-					body, "OK", "",
-					[](DialogResponse response, int listItem, StringView input)
+				auto dialog = std::shared_ptr<ListDialog>(
+					new ListDialog(fmt::sprintf(DIALOG_HEADER_TITLE,
+									   _("Players on fire", player)),
+						items, _("OK", player), ""));
+				this->dialogManager->showDialog(player, dialog,
+					[](DialogResult result)
 					{
 					});
 			}

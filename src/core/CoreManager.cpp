@@ -4,6 +4,8 @@
 #include "commands/CommandManager.hpp"
 #include "controllers/PlayerOnFireController.hpp"
 #include "controllers/SpeedometerController.hpp"
+#include "dialogs/DialogResult.hpp"
+#include "dialogs/Dialogs.hpp"
 #include "eventbus/event_bus.hpp"
 #include "player.hpp"
 #include "player/PlayerExtension.hpp"
@@ -25,6 +27,7 @@
 #include <fmt/printf.h>
 #include <Server/Components/Timers/timers.hpp>
 #include <stdexcept>
+#include <string>
 #include <thread>
 
 namespace Core
@@ -133,8 +136,8 @@ std::shared_ptr<DialogManager> CoreManager::getDialogManager()
 
 void CoreManager::initHandlers()
 {
-	_authController
-		= std::make_unique<Auth::AuthController>(_playerPool, weak_from_this());
+	_authController = std::make_unique<Auth::AuthController>(
+		_playerPool, _dialogManager, weak_from_this());
 
 	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
 		weak_from_this(), _playerPool, bus));
@@ -302,24 +305,27 @@ bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 
 void CoreManager::showModeSelectionDialog(IPlayer& player)
 {
-	this->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_TABLIST_HEADERS, _("Modes", player),
-		fmt::sprintf(_("Mode\tCommand\tPlayers\n"
-					   "Freeroam\t/fr\t%d\n"
-					   "Deathmatch\t/dm\t%d\n"
-					   "Protect the President\t/ptp\t%d\n"
-					   "Derby\t/derby\t%d\n"
-					   "Cops and Robbers\t/cnr\t%d",
-						 player),
-			_modes->resolve<Modes::Freeroam::FreeroamController>()
-				->playerCount(),
-			_modes->resolve<Modes::Deathmatch::DeathmatchController>()
-				->playerCount(),
-			0, 0, 0),
-		_("Select", player), "",
-		[&](DialogResponse resp, int listItem, StringView inputText)
+	auto dialog = std::shared_ptr<TabListHeadersDialog>(
+		new TabListHeadersDialog(_("Modes", player),
+			{ _("Mode", player), _("Command", player), _("Players", player) },
+			{ { _("Freeroam", player), "/fr",
+				  std::to_string(
+					  _modes->resolve<Modes::Freeroam::FreeroamController>()
+						  ->playerCount()) },
+				{ _("Deathmatch", player), "/dm",
+					std::to_string(
+						_modes
+							->resolve<Modes::Deathmatch::DeathmatchController>()
+							->playerCount()) },
+				{ _("Protect the President", player), "/ptp",
+					std::to_string(0) },
+				{ _("Derby", player), "/derby", std::to_string(0) },
+				{ _("Cops and Robbers", player), "/cnr", std::to_string(0) } },
+			_("Select", player), ""));
+	this->getDialogManager()->showDialog(player, dialog,
+		[&](DialogResult result)
 		{
-			selectMode(player, static_cast<Modes::Mode>(listItem));
+			selectMode(player, static_cast<Modes::Mode>(result.listItem()));
 		});
 }
 

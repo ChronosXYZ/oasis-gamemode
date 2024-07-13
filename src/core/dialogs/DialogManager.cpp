@@ -1,4 +1,7 @@
 #include "DialogManager.hpp"
+#include "DialogResult.hpp"
+#include "IDialog.hpp"
+#include <memory>
 
 namespace Core
 {
@@ -25,7 +28,8 @@ void DialogManager::onDialogResponse(IPlayer& player, int dialogId,
 	if (this->dialogs.count(player.getID()) == 0)
 		return;
 
-	this->dialogs[player.getID()](response, listItem, inputText);
+	this->dialogs[player.getID()](
+		DialogResult(response, listItem, inputText.to_string()));
 }
 
 void DialogManager::hideDialog(IPlayer& player)
@@ -34,15 +38,50 @@ void DialogManager::hideDialog(IPlayer& player)
 	dialogData->hide(player);
 }
 
-void DialogManager::createDialog(IPlayer& player, DialogStyle style,
-	StringView title, StringView body, StringView button1, StringView button2,
+void DialogManager::showDialog(IPlayer& player,
+	std::shared_ptr<InputDialog> dialog, DialogManager::Callback callback)
+{
+	this->showDialog(
+		player, std::static_pointer_cast<IDialog>(dialog), callback);
+}
+
+void DialogManager::showDialog(IPlayer& player,
+	std::shared_ptr<ListDialog> dialog, DialogManager::Callback callback)
+{
+	this->showDialog(
+		player, std::static_pointer_cast<IDialog>(dialog), callback);
+}
+
+void DialogManager::showDialog(IPlayer& player,
+	std::shared_ptr<MessageDialog> dialog, DialogManager::Callback callback)
+{
+	this->showDialog(
+		player, std::static_pointer_cast<IDialog>(dialog), callback);
+}
+
+void DialogManager::showDialog(IPlayer& player,
+	std::shared_ptr<TabListDialog> dialog, DialogManager::Callback callback)
+{
+	this->showDialog(
+		player, std::static_pointer_cast<IDialog>(dialog), callback);
+}
+
+void DialogManager::showDialog(IPlayer& player,
+	std::shared_ptr<TabListHeadersDialog> dialog,
+	DialogManager::Callback callback)
+{
+	this->showDialog(
+		player, std::static_pointer_cast<IDialog>(dialog), callback);
+}
+
+void DialogManager::showDialog(IPlayer& player, std::shared_ptr<IDialog> dialog,
 	DialogManager::Callback callback)
 {
 	this->dialogs[player.getID()] = callback;
 
 	IPlayerDialogData* dialogData = queryExtension<IPlayerDialogData>(player);
-	dialogData->show(
-		player, MAGIC_DIALOG_ID, style, title, body, button1, button2);
+	dialogData->show(player, MAGIC_DIALOG_ID, dialog->style, dialog->title,
+		dialog->content, dialog->button1, dialog->button2);
 }
 
 }

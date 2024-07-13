@@ -10,26 +10,29 @@
 #include <Server/Components/Timers/timers.hpp>
 #include <Server/Components/Timers/Impl/timers_impl.hpp>
 #include <functional>
+#include <memory>
 #include <spdlog/spdlog.h>
 
 namespace Core::Auth
 {
 
-AuthController::AuthController(
-	IPlayerPool* playerPool, std::weak_ptr<CoreManager> coreManager)
+AuthController::AuthController(IPlayerPool* playerPool,
+	std::shared_ptr<DialogManager> dialogManager,
+	std::weak_ptr<CoreManager> coreManager)
 	: _coreManager(coreManager)
-	, _playerPool(playerPool)
-	, _classesComponent(
+	, playerPool(playerPool)
+	, classesComponent(
 		  coreManager.lock()->components->queryComponent<IClassesComponent>())
-	, _timersComponent(
+	, timersComponent(
 		  coreManager.lock()->components->queryComponent<ITimersComponent>())
+	, dialogManager(dialogManager)
 {
 	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 }
 
 AuthController::~AuthController()
 {
-	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
+	playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
 }
 
 void AuthController::onPlayerConnect(IPlayer& player)
@@ -42,20 +45,19 @@ void AuthController::onPlayerConnect(IPlayer& player)
 	}
 	else
 	{
-		auto data = this->_coreManager.lock()->getPlayerData(player);
+		auto data = Player::getPlayerData(player);
 		data->tempData->auth->loginAttempts = 0;
 		showLoginDialog(player, false);
 	}
-	_timersComponent->create(new Impl::SimpleTimerHandler(std::bind(
-								 &AuthController::interpolatePlayerCamera, this,
-								 std::reference_wrapper<IPlayer>(player))),
+	timersComponent->create(new Impl::SimpleTimerHandler(std::bind(
+								&AuthController::interpolatePlayerCamera, this,
+								std::reference_wrapper<IPlayer>(player))),
 		Milliseconds(100), false);
 }
 
 void AuthController::showRegistrationDialog(IPlayer& player)
 {
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle_PASSWORD,
+	auto dialog = std::shared_ptr<InputDialog>(new InputDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Registration", player)),
 		fmt::sprintf(_("{999999}Welcome to #RED#Oasis #WHITE#Freeroam, "
 					   "#DEEP_SAFFRON#%s\n\n\n"
@@ -66,16 +68,16 @@ void AuthController::showRegistrationDialog(IPlayer& player)
 					   "#LIGHT_GRAY#> If you have any trouble, please visit "
 					   "our discord server or contact any staff member:\n"
 					   "#DEEP_SAFFRON#oasisfreeroam.xyz",
-						 player),
-			player.getName().to_string()),
-		_("Enter", player), _("Quit", player),
-		[&](DialogResponse resp, int listItem, StringView inputText)
+			player)),
+		true, _("Enter", player), _("Quit", player)));
+	this->dialogManager->showDialog(player, dialog,
+		[&](DialogResult result)
 		{
-			switch (resp)
+			switch (result.response())
 			{
 			case DialogResponse_Left:
 			{
-				onPasswordSubmit(player, inputText.to_string());
+				onPasswordSubmit(player, result.inputText());
 				break;
 			}
 			case DialogResponse_Right:
@@ -92,11 +94,11 @@ void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 	int loginAttempts = 0;
 	if (wrongPass)
 	{
-		auto data = this->_coreManager.lock()->getPlayerData(player);
+		auto data = Player::getPlayerData(player);
 		loginAttempts = data->tempData->auth->loginAttempts;
 	}
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle_PASSWORD,
+
+	auto dialog = std::shared_ptr<InputDialog>(new InputDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Login", player)),
 		wrongPass
 			? fmt::sprintf(
@@ -118,14 +120,15 @@ void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 				  "server:\n#DEEP_SAFFRON#oasisfreeroam.xyz",
 					player),
 				player.getName().to_string()),
-		_("Login", player), _("Quit", player),
-		[&](DialogResponse resp, int listItem, StringView inputText)
+		true, _("Login", player), _("Quit", player)));
+	this->dialogManager->showDialog(player, dialog,
+		[&](DialogResult result)
 		{
-			switch (resp)
+			switch (result.response())
 			{
 			case DialogResponse_Left:
 			{
-				onLoginSubmit(player, inputText.to_string());
+				onLoginSubmit(player, result.inputText());
 				break;
 			}
 			case DialogResponse_Right:
@@ -139,7 +142,8 @@ void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 
 void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 {
-	auto playerData = this->_coreManager.lock()->getPlayerData(player);
+	spdlog::info(password);
+	auto playerData = Player::getPlayerData(player);
 	auto playerExt = Player::getPlayerExt(player);
 	if (password.length() > 5)
 	{
@@ -215,23 +219,21 @@ void AuthController::onRegistrationSubmit(IPlayer& player)
 
 void AuthController::showLanguageDialog(IPlayer& player)
 {
-	std::string languagesList;
-	for (auto lang : Localization::LANGUAGES)
-	{
-		languagesList.append(fmt::sprintf("%s\n", lang));
-	}
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle_LIST, fmt::sprintf(DIALOG_HEADER_TITLE, "Select language"),
-		languagesList, "Select", "Quit",
-		[&](DialogResponse resp, int listItem, StringView inputText)
+	std::vector<std::string> items(
+		std::begin(Localization::LANGUAGES), std::end(Localization::LANGUAGES));
+	auto dialog = std::shared_ptr<ListDialog>(
+		new ListDialog(fmt::sprintf(DIALOG_HEADER_TITLE, "Select language"),
+			items, "Select", "Quit"));
+	this->dialogManager->showDialog(player, dialog,
+		[&](DialogResult result)
 		{
-			switch (resp)
+			switch (result.response())
 			{
 			case DialogResponse_Left:
 			{
 				auto pData = this->_coreManager.lock()->getPlayerData(player);
 				pData->language
-					= Localization::LANGUAGE_CODE_NAMES.at(listItem);
+					= Localization::LANGUAGE_CODE_NAMES.at(result.listItem());
 				showRegistrationDialog(player);
 				break;
 			}
@@ -246,8 +248,7 @@ void AuthController::showLanguageDialog(IPlayer& player)
 
 void AuthController::showEmailDialog(IPlayer& player)
 {
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle_INPUT,
+	auto dialog = std::shared_ptr<InputDialog>(new InputDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Enter your email", player)),
 		fmt::sprintf(
 			_("#LIGHT_GRAY#Please enter your #WHITE#Email "
@@ -259,14 +260,15 @@ void AuthController::showEmailDialog(IPlayer& player)
 			  "limited! Use #WHITE#/verify#LIGHT_GRAY# later",
 				player),
 			player.getName().to_string()),
-		_("Enter", player), _("Skip", player),
-		[&](DialogResponse resp, int listItem, StringView inputText)
+		false, _("Enter", player), _("Skip", player)));
+	this->dialogManager->showDialog(player, dialog,
+		[&](DialogResult result)
 		{
-			switch (resp)
+			switch (result.response())
 			{
 			case DialogResponse_Left:
 			{
-				onEmailSubmit(player, inputText.to_string());
+				onEmailSubmit(player, result.inputText());
 				break;
 			}
 			case DialogResponse_Right:
@@ -296,9 +298,8 @@ void AuthController::onEmailSubmit(IPlayer& player, const std::string& email)
 
 void AuthController::showRegistrationInfoDialog(IPlayer& player)
 {
-	auto pData = this->_coreManager.lock()->getPlayerData(player);
-	this->_coreManager.lock()->getDialogManager()->createDialog(player,
-		DialogStyle::DialogStyle_MSGBOX,
+	auto pData = Player::getPlayerData(player);
+	auto dialog = std::shared_ptr<MessageDialog>(new MessageDialog(
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Registration info", player)),
 		fmt::sprintf(_("#DRY_HIGHLIGHTER_GREEN#Your account has been "
 					   "successfully registered and logged in.\n\n"
@@ -312,8 +313,9 @@ void AuthController::showRegistrationInfoDialog(IPlayer& player)
 			pData->name, pData->userId,
 			pData->tempData->auth->plainTextPassword,
 			std::format("{:%Y-%m-%d}", pData->registrationDate)),
-		_("OK", player), "",
-		[&](DialogResponse resp, int listItem, StringView inputText)
+		_("OK", player), ""));
+	this->_coreManager.lock()->getDialogManager()->showDialog(player, dialog,
+		[&](DialogResult result)
 		{
 			Player::getPlayerExt(player)->sendInfoMessage(
 				_("You have successfully registered!", player));
