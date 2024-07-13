@@ -1,12 +1,6 @@
 # Oasis
 
 <p align="center">
-  <a aria-label="Oasis Freeroam" href="https://oasisfreeroam.xyz">
-    <img src="https://cdn.discordapp.com/attachments/1089521368699240528/1092068205071188098/5.png" width="420" />
-  </a>
-</p>
-
-<p align="center">
   <em>A freeroam multi-mode server for SA-MP.</em>
 </p>
 												
