@@ -57,10 +57,6 @@ DeathmatchController::DeathmatchController(
 	, _playerPool(playerPool)
 	, _timersComponent(timersComponent)
 	, dbConnection(dbConnection)
-	, playerOnFireBeenKilledRegistration(
-		  this->bus
-			  ->register_handler<Core::Utils::Events::PlayerOnFireBeenKilled>(
-				  this, &DeathmatchController::onPlayerOnFireBeenKilled))
 {
 	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
@@ -75,6 +71,13 @@ DeathmatchController::DeathmatchController(
 	this->playerOnFireEventRegistration
 		= this->bus->register_handler<Core::Utils::Events::PlayerOnFireEvent>(
 			this, &DeathmatchController::onPlayerOnFire);
+
+	// re-register player on fire been killed handler
+	this->bus->remove_handler(this->playerOnFireBeenKilledRegistration);
+	this->playerOnFireEventRegistration
+		= this->bus
+			  ->register_handler<Core::Utils::Events::PlayerOnFireBeenKilled>(
+				  this, &DeathmatchController::onPlayerOnFireBeenKilled);
 }
 
 DeathmatchController::~DeathmatchController()
@@ -310,14 +313,7 @@ void DeathmatchController::onPlayerOnFire(
 		return;
 	auto playerData = Core::Player::getPlayerData(event.player);
 	playerData->dmStats->score += 4;
-	auto room = this->rooms.at(playerData->tempData->deathmatch->roomId);
-
-	room->sendMessageToAll(
-		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
-		   "killed %s(%d) "
-		   "and is now on fire!"),
-		event.player.getName().to_string(), event.player.getID(),
-		event.lastKillee.getName().to_string(), event.lastKillee.getID());
+	super::onPlayerOnFire(event);
 }
 
 void DeathmatchController::onPlayerOnFireBeenKilled(
@@ -330,13 +326,7 @@ void DeathmatchController::onPlayerOnFireBeenKilled(
 	auto killerExt = Core::Player::getPlayerExt(event.killer);
 	killerExt->sendInfoMessage(
 		__("You killed player on fire and got 4 extra points!"));
-	auto room = this->rooms.at(killerData->tempData->deathmatch->roomId);
-
-	room->sendMessageToAll(
-		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
-		   "killed %s(%d)!"),
-		event.killer.getName().to_string(), event.killer.getID(),
-		event.player.getName().to_string(), event.player.getID());
+	super::onPlayerOnFireBeenKilled(event);
 }
 
 DeathmatchController* DeathmatchController::create(

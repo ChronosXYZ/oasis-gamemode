@@ -1,6 +1,5 @@
 #include "ModeBase.hpp"
 
-#include "../core/player/PlayerExtension.hpp"
 #include "../core/utils/Localization.hpp"
 #include "Modes.hpp"
 
@@ -22,12 +21,16 @@ ModeBase::ModeBase(Mode mode, std::shared_ptr<dp::event_bus> bus)
 	, playerJoinedModeSubsciption(
 		  bus->register_handler<Core::Utils::Events::PlayerJoinedMode>(
 			  this, &ModeBase::onPlayerJoinedMode))
+	, playerOnFireBeenKilledRegistration(
+		  bus->register_handler<Core::Utils::Events::PlayerOnFireBeenKilled>(
+			  this, &ModeBase::onPlayerOnFireBeenKilled))
 {
 }
 
 ModeBase::~ModeBase()
 {
 	this->bus->remove_handler(this->playerOnFireEventRegistration);
+	this->bus->remove_handler(this->playerOnFireBeenKilledRegistration);
 	this->bus->remove_handler(this->x1ArenaWinRegistration);
 }
 
@@ -61,15 +64,21 @@ void ModeBase::onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event)
 {
 	if (event.mode != this->mode)
 		return;
-	for (auto player : players)
-	{
-		auto playerExt = Core::Player::getPlayerExt(*player);
-		playerExt->sendTranslatedMessageFormatted(
-			__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) "
-			   "and is now on fire!"),
-			event.player.getName().to_string(), event.player.getID(),
-			event.lastKillee.getName().to_string(), event.lastKillee.getID());
-	}
+	this->sendMessageToAll(
+		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) "
+		   "and is now on fire!"),
+		event.player.getName().to_string(), event.player.getID(),
+		event.lastKillee.getName().to_string(), event.lastKillee.getID());
+}
+
+void ModeBase::onPlayerOnFireBeenKilled(
+	Core::Utils::Events::PlayerOnFireBeenKilled event)
+{
+	this->sendMessageToAll(
+		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
+		   "killed player on fire %s(%d)!"),
+		event.killer.getName().to_string(), event.killer.getID(),
+		event.player.getName().to_string(), event.player.getID());
 }
 
 void ModeBase::onX1ArenaWin(Core::Utils::Events::X1ArenaWin event)

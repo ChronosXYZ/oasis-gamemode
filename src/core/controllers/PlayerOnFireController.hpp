@@ -19,8 +19,7 @@ class PlayerOnFireController : public PlayerDamageEventHandler,
 {
 	std::shared_ptr<dp::event_bus> bus;
 	IPlayerPool* playerPool;
-	std::unordered_map<Modes::Mode, std::unordered_set<IPlayer*>> playersOnFire;
-	dp::handler_registration roundEndRegistration;
+	std::unordered_set<IPlayer*> playersOnFire;
 	std::shared_ptr<Commands::CommandManager> commandManager;
 	std::shared_ptr<DialogManager> dialogManager;
 
@@ -36,8 +35,5 @@ public:
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
 	void onPlayerDisconnect(
 		IPlayer& player, PeerDisconnectReason reason) override;
-
-	void onModeLeave(IPlayer& player, Modes::Mode mode);
-	void onRoundEnd(Utils::Events::RoundEndEvent event);
 };
 }

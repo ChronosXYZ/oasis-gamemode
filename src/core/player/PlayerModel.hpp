@@ -6,6 +6,7 @@
 #include "../utils/Localization.hpp"
 #include "PlayerTempData.hpp"
 #include "../../modes/deathmatch/DeathmatchStats.hpp"
+#include "../../modes/deathmatch/X1Stats.hpp"
 
 #include <Server/Components/Timers/timers.hpp>
 
@@ -39,6 +40,8 @@ struct PlayerModel
 	std::unique_ptr<AdminData> adminData;
 	std::unique_ptr<Modes::Deathmatch::DeathmatchStats> dmStats
 		= std::make_unique<Modes::Deathmatch::DeathmatchStats>();
+	std::unique_ptr<Modes::Deathmatch::X1Stats> x1Stats
+		= std::make_unique<Modes::Deathmatch::X1Stats>();
 	std::unique_ptr<Player::PlayerTempData> tempData
 		= std::make_unique<Player::PlayerTempData>();
 

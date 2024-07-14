@@ -33,8 +33,10 @@ class X1Controller : public ModeBase,
 	void createRoom(std::shared_ptr<Room> room);
 	void setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
+	void logStatsForPlayer(IPlayer& player, bool winner, int weapon);
 
 	void showArenaSelectionDialog(IPlayer& player);
+	void showX1StatsDialog(IPlayer& player, unsigned int id);
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
 
@@ -56,6 +58,13 @@ public:
 	void onModeSelect(IPlayer& player) override;
 	void onModeJoin(IPlayer& player, JoinData joinData) override;
 	void onModeLeave(IPlayer& player) override;
+	void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event) override;
+	void onPlayerOnFireBeenKilled(
+		Core::Utils::Events::PlayerOnFireBeenKilled event) override;
+	void onPlayerLoad(
+		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn) override;
+	void onPlayerSave(
+		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn) override;
 
 	static X1Controller* create(std::weak_ptr<Core::CoreManager> coreManager,
 		std::shared_ptr<Core::Commands::CommandManager> commandManager,

@@ -185,6 +185,8 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 
 	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
 		->onPlayerLoad(data, txn);
+	this->_modes->resolve<Modes::Deathmatch::X1Controller>()->onPlayerLoad(
+		data, txn);
 	txn.commit();
 	return true;
 }
@@ -216,6 +218,10 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 	// save DM info
 	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
 		->onPlayerSave(data, txn);
+
+	// save X1 info
+	this->_modes->resolve<Modes::Deathmatch::X1Controller>()->onPlayerSave(
+		data, txn);
 
 	txn.commit();
 	spdlog::info("Player {} has been successfully saved", data->name);
@@ -442,19 +448,6 @@ void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
 	if (modeBase.get() == nullptr)
 		return;
 	modeBase->onModeLeave(player);
-	this->_playerControllers->resolve<Controllers::PlayerOnFireController>()
-		->onModeLeave(player, mode);
-}
-
-template <typename... T>
-void CoreManager::sendNotificationToAllFormatted(
-	const std::string& message, const T&... args)
-{
-	for (const auto& player : this->_playerPool->players())
-	{
-		Player::getPlayerExt(*player)->sendTranslatedMessageFormatted(
-			message, args...);
-	}
 }
 
 void CoreManager::runSaveThread(std::future<void> exitSignal)

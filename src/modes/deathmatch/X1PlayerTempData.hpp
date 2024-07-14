@@ -5,6 +5,7 @@ namespace Modes::Deathmatch
 struct X1PlayerTempData
 {
 	unsigned int roomId;
-	bool defeated = false;
+	unsigned int subsequentKills;
+	bool endArena = false;
 };
 }

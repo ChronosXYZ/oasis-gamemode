@@ -84,7 +84,6 @@ class DeathmatchController : public Modes::ModeBase,
 	std::shared_ptr<pqxx::connection> dbConnection;
 
 	ITimer* _ticker;
-	dp::handler_registration playerOnFireBeenKilledRegistration;
 
 public:
 	virtual ~DeathmatchController();
@@ -106,7 +105,7 @@ public:
 
 	void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event) override;
 	void onPlayerOnFireBeenKilled(
-		Core::Utils::Events::PlayerOnFireBeenKilled event);
+		Core::Utils::Events::PlayerOnFireBeenKilled event) override;
 
 	static DeathmatchController* create(
 		std::weak_ptr<Core::CoreManager> coreManager,

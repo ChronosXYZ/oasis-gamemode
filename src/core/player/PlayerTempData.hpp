@@ -20,6 +20,7 @@ struct PlayerTempData
 	std::unique_ptr<Modes::Freeroam::PlayerTempData> freeroam
 		= std::make_unique<Modes::Freeroam::PlayerTempData>();
 	std::unique_ptr<Modes::Deathmatch::PlayerTempData> deathmatch;
-	std::unique_ptr<Modes::Deathmatch::X1PlayerTempData> x1;
+	std::unique_ptr<Modes::Deathmatch::X1PlayerTempData> x1
+		= std::make_unique<Modes::Deathmatch::X1PlayerTempData>();
 };
 }

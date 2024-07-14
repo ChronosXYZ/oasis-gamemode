@@ -17,13 +17,10 @@ void PlayerOnFireController::initCommands()
 		[this](std::reference_wrapper<IPlayer> player)
 		{
 			std::vector<std::string> items;
-			for (auto& playersPerMode : this->playersOnFire)
+			for (auto player : this->playersOnFire)
 			{
-				for (auto& player : playersPerMode.second)
-				{
-					items.push_back(fmt::sprintf("%s (%d)\n",
-						player->getName().to_string(), player->getID()));
-				}
+				items.push_back(fmt::sprintf("%s (%d)\n",
+					player->getName().to_string(), player->getID()));
 			}
 			if (items.empty())
 			{
@@ -61,8 +58,6 @@ PlayerOnFireController::PlayerOnFireController(IPlayerPool* playerPool,
 	std::shared_ptr<DialogManager> dialogManager)
 	: bus(bus)
 	, playerPool(playerPool)
-	, roundEndRegistration(bus->register_handler<Utils::Events::RoundEndEvent>(
-		  this, &PlayerOnFireController::onRoundEnd))
 	, commandManager(commandManager)
 	, dialogManager(dialogManager)
 {
@@ -73,7 +68,6 @@ PlayerOnFireController::PlayerOnFireController(IPlayerPool* playerPool,
 PlayerOnFireController::~PlayerOnFireController()
 {
 	this->playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
-	this->bus->remove_handler(this->roundEndRegistration);
 }
 
 void PlayerOnFireController::onPlayerDeath(
@@ -81,14 +75,14 @@ void PlayerOnFireController::onPlayerDeath(
 {
 	auto killeeData = Player::getPlayerData(player);
 	auto killeeExt = Player::getPlayerExt(player);
-	if (this->playersOnFire[killeeExt->getMode()].contains(&player))
+	if (this->playersOnFire.contains(&player))
 		this->bus->fire_event(
 			Utils::Events::PlayerOnFireBeenKilled { .player = player,
 				.killer = *killer,
 				.mode = killeeExt->getMode() });
 	killeeData->tempData->core->subsequentKills = 0;
 	player.setWantedLevel(0);
-	this->playersOnFire[killeeExt->getMode()].erase(&player);
+	this->playersOnFire.erase(&player);
 
 	if (killer == nullptr)
 		return;
@@ -102,7 +96,7 @@ void PlayerOnFireController::onPlayerDeath(
 			Utils::Events::PlayerOnFireEvent { .player = *killer,
 				.lastKillee = player,
 				.mode = killerExt->getMode() });
-		this->playersOnFire[killerExt->getMode()].emplace(killer);
+		this->playersOnFire.emplace(killer);
 	}
 }
 
@@ -110,25 +104,7 @@ void PlayerOnFireController::onPlayerDisconnect(
 	IPlayer& player, PeerDisconnectReason reason)
 {
 	auto playerExt = Player::getPlayerExt(player);
-	this->playersOnFire[playerExt->getMode()].erase(&player);
+	this->playersOnFire.erase(&player);
 }
 
-void PlayerOnFireController::onModeLeave(IPlayer& player, Modes::Mode mode)
-{
-	auto playerData = Player::getPlayerData(player);
-	playerData->tempData->core->subsequentKills = 0;
-	player.setWantedLevel(0);
-	this->playersOnFire[mode].erase(&player);
-}
-
-void PlayerOnFireController::onRoundEnd(Utils::Events::RoundEndEvent event)
-{
-	for (auto player : event.players)
-	{
-		auto playerData = Player::getPlayerData(*player);
-		playerData->tempData->core->subsequentKills = 0;
-		player->setWantedLevel(0);
-		this->playersOnFire[event.mode].erase(player);
-	}
-}
 }

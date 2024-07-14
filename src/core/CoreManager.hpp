@@ -76,9 +76,6 @@ private:
 	void savePlayer(IPlayer& player);
 	void saveAllPlayers();
 	void removePlayerFromCurrentMode(IPlayer& player);
-	template <typename... T>
-	void sendNotificationToAllFormatted(
-		const std::string& message, const T&... args);
 	void runSaveThread(std::future<void> exitSignal);
 
 	IPlayerPool* const _playerPool = nullptr;

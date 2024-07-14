@@ -29,6 +29,8 @@ struct ModeBase
 	virtual void onPlayerLoad(
 		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn);
 	virtual void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event);
+	virtual void onPlayerOnFireBeenKilled(
+		Core::Utils::Events::PlayerOnFireBeenKilled event);
 	virtual void onX1ArenaWin(Core::Utils::Events::X1ArenaWin event);
 	virtual void onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode);
 
@@ -52,6 +54,7 @@ protected:
 	std::shared_ptr<dp::event_bus> bus;
 
 	dp::handler_registration playerOnFireEventRegistration;
+	dp::handler_registration playerOnFireBeenKilledRegistration;
 	dp::handler_registration x1ArenaWinRegistration;
 	dp::handler_registration playerJoinedModeSubsciption;
 };
