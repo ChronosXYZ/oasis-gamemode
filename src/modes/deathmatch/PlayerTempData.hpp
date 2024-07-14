@@ -10,7 +10,7 @@ namespace Modes::Deathmatch
 {
 struct PlayerTempData
 {
-	std::size_t roomId;
+	unsigned int roomId;
 	std::time_t lastShootTime = 0;
 	bool cbugging = false;
 	std::optional<std::string> cbugFreezeTimerId;

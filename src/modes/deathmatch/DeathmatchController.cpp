@@ -53,6 +53,7 @@ DeathmatchController::DeathmatchController(
 	, coreManager(coreManager)
 	, commandManager(commandManager)
 	, dialogManager(dialogManager)
+	, roomIdPool(std::make_unique<Core::Utils::IDPool>())
 	, _playerPool(playerPool)
 	, _timersComponent(timersComponent)
 	, dbConnection(dbConnection)
@@ -88,7 +89,7 @@ void DeathmatchController::onModeJoin(IPlayer& player,
 	std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
 	super::onModeJoin(player, joinData);
-	auto roomIndex = std::get<std::size_t>(joinData[ROOM_INDEX]);
+	auto roomIndex = std::get<unsigned int>(joinData[ROOM_INDEX]);
 	this->onRoomJoin(player, roomIndex);
 }
 
@@ -139,7 +140,7 @@ void DeathmatchController::onPlayerSpawn(IPlayer& player)
 	if (!playerExt->isInMode(Modes::Mode::Deathmatch))
 		return;
 	auto roomId = pData->tempData->deathmatch->roomId;
-	auto room = this->_rooms[roomId];
+	auto room = this->rooms[roomId];
 	this->setupRoomForPlayer(player, room);
 }
 
@@ -162,7 +163,7 @@ void DeathmatchController::onPlayerDeath(
 	playerData->tempData->deathmatch->subsequentKills = 0;
 
 	auto roomId = playerData->tempData->deathmatch->roomId;
-	auto room = this->_rooms[roomId];
+	auto room = this->rooms[roomId];
 	if (killer)
 	{
 		auto killerData = Core::Player::getPlayerData(*killer);
@@ -248,7 +249,7 @@ void DeathmatchController::onPlayerKeyStateChange(
 		return;
 
 	auto roomId = playerData->tempData->deathmatch->roomId;
-	if (this->_rooms.at(roomId)->cbugEnabled)
+	if (this->rooms.at(roomId)->cbugEnabled)
 		return;
 	using namespace std::chrono;
 	if (PRESSED(newKeys, oldKeys, Key::FIRE))
@@ -309,7 +310,7 @@ void DeathmatchController::onPlayerOnFire(
 		return;
 	auto playerData = Core::Player::getPlayerData(event.player);
 	playerData->dmStats->score += 4;
-	auto room = this->_rooms[playerData->tempData->deathmatch->roomId];
+	auto room = this->rooms[playerData->tempData->deathmatch->roomId];
 
 	room->sendMessageToAll(
 		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
@@ -329,7 +330,7 @@ void DeathmatchController::onPlayerOnFireBeenKilled(
 	auto killerExt = Core::Player::getPlayerExt(event.killer);
 	killerExt->sendInfoMessage(
 		__("You killed player on fire and got 4 extra points!"));
-	auto room = this->_rooms[killerData->tempData->deathmatch->roomId];
+	auto room = this->rooms[killerData->tempData->deathmatch->roomId];
 
 	room->sendMessageToAll(
 		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
@@ -360,14 +361,14 @@ void DeathmatchController::initCommand()
 		{
 			auto playerExt = Core::Player::getPlayerExt(player.get());
 			auto playerData = Core::Player::getPlayerData(player.get());
-			if (id > this->_rooms.size() || id <= 0)
+			if (!this->rooms.contains((unsigned int)id - 1) || id <= 0)
 			{
 				playerExt->sendErrorMessage(
 					_("Such room doesn't exist!", player));
 				return;
 			}
 			this->coreManager.lock()->joinMode(player, Mode::Deathmatch,
-				{ { ROOM_INDEX, std::size_t(id - 1) } });
+				{ { ROOM_INDEX, (unsigned int)id - 1 } });
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") },
 			.description = __("Enter DM room"),
@@ -403,40 +404,49 @@ void DeathmatchController::initRooms()
 	WeaponSet runWeaponSet(WeaponSet::Value::Run);
 	WeaponSet dssWeaponSet(WeaponSet::Value::DSS);
 
-	this->_rooms = {
-		std::shared_ptr<Room>(new Room {
-			.map = randomlySelectMap(runWeaponSet),
-			.allowedWeapons = runWeaponSet.getWeapons(),
-			.weaponSet = runWeaponSet,
-			.host = {},
-			.virtualWorld = VIRTUAL_WORLD_PREFIX + 0,
-			.cbugEnabled = true,
-			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
-			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
-			.defaultArmor = 100.0,
-		}),
-		std::shared_ptr<Room>(new Room {
-			.map = randomlySelectMap(dssWeaponSet),
-			.allowedWeapons = dssWeaponSet.getWeapons(),
-			.weaponSet = dssWeaponSet,
-			.host = {},
-			.virtualWorld = VIRTUAL_WORLD_PREFIX + 1,
-			.cbugEnabled = true,
-			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
-			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
-			.defaultArmor = 100.0,
-		}),
-		std::shared_ptr<Room>(new Room {
-			.map = randomlySelectMap(dssWeaponSet),
-			.allowedWeapons = dssWeaponSet.getWeapons(),
-			.weaponSet = dssWeaponSet,
-			.host = {},
-			.virtualWorld = VIRTUAL_WORLD_PREFIX + 2,
-			.cbugEnabled = false,
-			.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
-			.defaultTime = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
-			.defaultArmor = 100.0,
-		}),
+	auto roomId1 = this->roomIdPool->allocateId();
+	auto roomId2 = this->roomIdPool->allocateId();
+	auto roomId3 = this->roomIdPool->allocateId();
+	this->rooms = {
+		{ roomId1,
+			std::shared_ptr<Room>(new Room {
+				.map = randomlySelectMap(runWeaponSet),
+				.allowedWeapons = runWeaponSet.getWeapons(),
+				.weaponSet = runWeaponSet,
+				.host = {},
+				.virtualWorld = VIRTUAL_WORLD_PREFIX + 0,
+				.cbugEnabled = true,
+				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+				.defaultTime
+				= std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+				.defaultArmor = 100.0,
+			}) },
+		{ roomId2,
+			std::shared_ptr<Room>(new Room {
+				.map = randomlySelectMap(dssWeaponSet),
+				.allowedWeapons = dssWeaponSet.getWeapons(),
+				.weaponSet = dssWeaponSet,
+				.host = {},
+				.virtualWorld = VIRTUAL_WORLD_PREFIX + 1,
+				.cbugEnabled = true,
+				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+				.defaultTime
+				= std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+				.defaultArmor = 100.0,
+			}) },
+		{ roomId3,
+			std::shared_ptr<Room>(new Room {
+				.map = randomlySelectMap(dssWeaponSet),
+				.allowedWeapons = dssWeaponSet.getWeapons(),
+				.weaponSet = dssWeaponSet,
+				.host = {},
+				.virtualWorld = VIRTUAL_WORLD_PREFIX + 2,
+				.cbugEnabled = false,
+				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+				.defaultTime
+				= std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
+				.defaultArmor = 100.0,
+			}) },
 	};
 }
 
@@ -445,17 +455,16 @@ void DeathmatchController::showRoomSelectionDialog(
 {
 	std::vector<std::vector<std::string>> items;
 	items.push_back({ _("Create custom room", player) });
-	for (std::size_t i = 0; i < _rooms.size(); i++)
+	for (auto [roomId, room] : this->rooms)
 	{
-		auto room = _rooms[i];
-		items.push_back(
-			{ fmt::sprintf("{999999}%d. {00FF00}%s", i + 1, room->map.name),
-				fmt::sprintf("{00FF00}%s",
-					room->weaponSet.toString(player).append(
-						room->cbugEnabled ? "" : _(" #RED#(NO CBUG)", player))),
-				fmt::sprintf(
-					"{00FF00}%s", room->host.value_or(_("Server", player))),
-				fmt::sprintf("{00FF00}%d", room->players.size()) });
+		items.push_back({ fmt::sprintf("{999999}%d. {00FF00}%s", roomId + 1,
+							  room->map.name),
+			fmt::sprintf("{00FF00}%s",
+				room->weaponSet.toString(player).append(
+					room->cbugEnabled ? "" : _(" #RED#(NO CBUG)", player))),
+			fmt::sprintf(
+				"{00FF00}%s", room->host.value_or(_("Server", player))),
+			fmt::sprintf("{00FF00}%d", room->players.size()) });
 	}
 	auto dialog = std::shared_ptr<Core::TabListHeadersDialog>(
 		new Core::TabListHeadersDialog(fmt::sprintf(DIALOG_HEADER_TITLE,
@@ -476,14 +485,14 @@ void DeathmatchController::showRoomSelectionDialog(
 					this->showRoomCreationDialog(player);
 					return;
 				}
-				if (result.listItem() > this->_rooms.size())
+				if (result.listItem() > this->rooms.size())
 				{
 					// when player selected a room and this room has
 					// been evicted
 					this->showRoomSelectionDialog(player);
 					return;
 				}
-				auto roomIndex = std::size_t(result.listItem() - 1);
+				auto roomIndex = (unsigned int)result.listItem() - 1;
 				this->coreManager.lock()->joinMode(
 					player, Mode::Deathmatch, { { ROOM_INDEX, roomIndex } });
 			}
@@ -1111,19 +1120,22 @@ void DeathmatchController::createRoom(IPlayer& player)
 		return;
 
 	auto room = playerData->tempData->deathmatch->temporaryRoomSettings;
-	room->virtualWorld = VIRTUAL_WORLD_PREFIX + this->_rooms.size();
-	auto roomId = this->_rooms.size();
-	this->_rooms.push_back(std::make_shared<Room>(*room));
+	room->virtualWorld = VIRTUAL_WORLD_PREFIX + this->rooms.size();
+	auto roomId = this->roomIdPool->allocateId();
+	this->rooms[roomId] = std::make_shared<Room>(*room);
 	this->coreManager.lock()->joinMode(
 		player, Mode::Deathmatch, { { ROOM_INDEX, roomId } });
 }
 
-void DeathmatchController::deleteRoom(std::size_t roomId)
+void DeathmatchController::deleteRoom(unsigned int roomId)
 {
-	auto room = this->_rooms[roomId];
+	if (!this->rooms.contains(roomId))
+		return;
+	auto room = this->rooms[roomId];
 	if (room->roundStartTimer.has_value())
 		room->roundStartTimer.value()->kill();
-	this->_rooms.erase(this->_rooms.begin() + roomId);
+	this->rooms.erase(roomId);
+	this->roomIdPool->freeId(roomId);
 }
 
 std::shared_ptr<TextDraws::DeathmatchTimer>
@@ -1156,7 +1168,7 @@ DeathmatchController::getDeathmatchTimer(IPlayer& player)
 }
 
 void DeathmatchController::updateDeathmatchTimer(
-	IPlayer& player, std::size_t roomIndex, std::shared_ptr<Room> room)
+	IPlayer& player, unsigned int roomIndex, std::shared_ptr<Room> room)
 {
 	auto playerData = Core::Player::getPlayerData(player);
 	auto deathmatchTimerTxd = this->getDeathmatchTimer(player);
@@ -1169,9 +1181,9 @@ void DeathmatchController::updateDeathmatchTimer(
 		playerData->tempData->deathmatch->damageInflicted, room->countdown);
 }
 
-void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
+void DeathmatchController::onRoomJoin(IPlayer& player, unsigned int roomId)
 {
-	auto room = this->_rooms.at(roomId);
+	auto room = this->rooms.at(roomId);
 	if (room->deletionTimer.has_value())
 	{
 		room->deletionTimer.value()->kill();
@@ -1208,9 +1220,9 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 		player.getName().to_string(), room->players.size());
 }
 
-void DeathmatchController::onRoomLeave(IPlayer& player, std::size_t roomId)
+void DeathmatchController::onRoomLeave(IPlayer& player, unsigned int roomId)
 {
-	auto room = this->_rooms[roomId];
+	auto room = this->rooms[roomId];
 	if (room->players.size() == 0 && room->host.has_value())
 	{
 		auto deletionTimer
@@ -1364,7 +1376,7 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 {
 	auto pData = Core::Player::getPlayerData(player);
 	auto roomId = pData->tempData->deathmatch->roomId;
-	auto room = this->_rooms[roomId];
+	auto room = this->rooms[roomId];
 	room->players.erase(&player);
 	this->onRoomLeave(player, roomId);
 
@@ -1381,9 +1393,10 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 
 void DeathmatchController::onTick()
 {
-	for (int i = 0; i < this->_rooms.size(); i++)
+	for (auto [id, room] : this->rooms)
 	{
-		auto room = this->_rooms[i];
+		if (!room)
+			continue;
 		if (room->isRestarting || room->isStarting)
 			continue;
 		if (room->countdown == std::chrono::seconds(0))
@@ -1397,7 +1410,7 @@ void DeathmatchController::onTick()
 		}
 		for (auto player : room->players)
 		{
-			this->updateDeathmatchTimer(*player, i, room);
+			this->updateDeathmatchTimer(*player, id, room);
 		}
 	}
 }

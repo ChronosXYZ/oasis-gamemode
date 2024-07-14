@@ -2,12 +2,14 @@
 
 #include "../../modes/ModeBase.hpp"
 #include "../../core/CoreManager.hpp"
+#include "../../core/utils/IDPool.hpp"
 #include "Room.hpp"
 #include "Server/Components/Timers/timers.hpp"
 #include "WeaponSet.hpp"
 #include "textdraws/DeathmatchTimer.hpp"
 
 #include <cstddef>
+#include <map>
 #include <player.hpp>
 #include <eventbus/event_bus.hpp>
 #include <pqxx/pqxx>
@@ -51,17 +53,17 @@ class DeathmatchController : public Modes::ModeBase,
 	void showRoomSetRefillHealthDialog(IPlayer& player);
 	void showRoomSetRandomMapDialog(IPlayer& player);
 	void createRoom(IPlayer& player);
-	void deleteRoom(std::size_t roomId);
+	void deleteRoom(unsigned int roomId);
 
 	std::shared_ptr<TextDraws::DeathmatchTimer> createDeathmatchTimer(
 		IPlayer& player);
 	std::optional<std::shared_ptr<TextDraws::DeathmatchTimer>>
 	getDeathmatchTimer(IPlayer& player);
 	void updateDeathmatchTimer(
-		IPlayer& player, std::size_t roomIndex, std::shared_ptr<Room> room);
+		IPlayer& player, unsigned int roomIndex, std::shared_ptr<Room> room);
 
-	void onRoomJoin(IPlayer& player, std::size_t roomId);
-	void onRoomLeave(IPlayer& player, std::size_t roomId);
+	void onRoomJoin(IPlayer& player, unsigned int roomId);
+	void onRoomLeave(IPlayer& player, unsigned int roomId);
 	void onNewRound(std::shared_ptr<Room> room);
 	void onRoundEnd(std::shared_ptr<Room> room);
 
@@ -70,7 +72,8 @@ class DeathmatchController : public Modes::ModeBase,
 	void removePlayerFromRoom(IPlayer& player);
 	void onTick();
 
-	std::vector<std::shared_ptr<Room>> _rooms;
+	std::map<unsigned int, std::shared_ptr<Room>> rooms;
+	std::unique_ptr<Core::Utils::IDPool> roomIdPool;
 	std::unordered_map<std::string, ITimer*> _cbugFreezeTimers;
 
 	std::weak_ptr<Core::CoreManager> coreManager;

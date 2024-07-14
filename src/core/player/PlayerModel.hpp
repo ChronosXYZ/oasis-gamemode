@@ -21,7 +21,7 @@
 
 namespace Core
 {
-typedef std::variant<int, float, std::string, bool, std::size_t, std::time_t>
+typedef std::variant<int, float, std::string, bool, std::time_t, unsigned int>
 	PrimitiveType;
 struct PlayerModel
 {
