@@ -140,7 +140,7 @@ void DeathmatchController::onPlayerSpawn(IPlayer& player)
 	if (!playerExt->isInMode(Modes::Mode::Deathmatch))
 		return;
 	auto roomId = pData->tempData->deathmatch->roomId;
-	auto room = this->rooms[roomId];
+	auto room = this->rooms.at(roomId);
 	this->setupRoomForPlayer(player, room);
 }
 
@@ -163,7 +163,7 @@ void DeathmatchController::onPlayerDeath(
 	playerData->tempData->deathmatch->subsequentKills = 0;
 
 	auto roomId = playerData->tempData->deathmatch->roomId;
-	auto room = this->rooms[roomId];
+	auto room = this->rooms.at(roomId);
 	if (killer)
 	{
 		auto killerData = Core::Player::getPlayerData(*killer);
@@ -310,7 +310,7 @@ void DeathmatchController::onPlayerOnFire(
 		return;
 	auto playerData = Core::Player::getPlayerData(event.player);
 	playerData->dmStats->score += 4;
-	auto room = this->rooms[playerData->tempData->deathmatch->roomId];
+	auto room = this->rooms.at(playerData->tempData->deathmatch->roomId);
 
 	room->sendMessageToAll(
 		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
@@ -330,7 +330,7 @@ void DeathmatchController::onPlayerOnFireBeenKilled(
 	auto killerExt = Core::Player::getPlayerExt(event.killer);
 	killerExt->sendInfoMessage(
 		__("You killed player on fire and got 4 extra points!"));
-	auto room = this->rooms[killerData->tempData->deathmatch->roomId];
+	auto room = this->rooms.at(killerData->tempData->deathmatch->roomId);
 
 	room->sendMessageToAll(
 		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
@@ -1131,7 +1131,7 @@ void DeathmatchController::deleteRoom(unsigned int roomId)
 {
 	if (!this->rooms.contains(roomId))
 		return;
-	auto room = this->rooms[roomId];
+	auto room = this->rooms.at(roomId);
 	if (room->roundStartTimer.has_value())
 		room->roundStartTimer.value()->kill();
 	this->rooms.erase(roomId);
@@ -1222,7 +1222,7 @@ void DeathmatchController::onRoomJoin(IPlayer& player, unsigned int roomId)
 
 void DeathmatchController::onRoomLeave(IPlayer& player, unsigned int roomId)
 {
-	auto room = this->rooms[roomId];
+	auto room = this->rooms.at(roomId);
 	if (room->players.size() == 0 && room->host.has_value())
 	{
 		auto deletionTimer
@@ -1376,7 +1376,7 @@ void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 {
 	auto pData = Core::Player::getPlayerData(player);
 	auto roomId = pData->tempData->deathmatch->roomId;
-	auto room = this->rooms[roomId];
+	auto room = this->rooms.at(roomId);
 	room->players.erase(&player);
 	this->onRoomLeave(player, roomId);
 
