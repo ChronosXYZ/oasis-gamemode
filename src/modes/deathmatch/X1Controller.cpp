@@ -26,21 +26,25 @@ void X1Controller::initRooms()
 		.allowedWeapons = runWeaponSet.getWeapons(),
 		.weaponSet = runWeaponSet,
 		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 0,
+		.cbugEnabled = true,
 		.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(1),
 		.allowedWeapons = runWeaponSet.getWeapons(),
 		.weaponSet = runWeaponSet,
 		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 1,
+		.cbugEnabled = true,
 		.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(3),
 		.allowedWeapons = runWeaponSet.getWeapons(),
 		.weaponSet = runWeaponSet,
 		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 2,
+		.cbugEnabled = true,
 		.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(11),
 		.allowedWeapons = runWeaponSet.getWeapons(),
 		.weaponSet = runWeaponSet,
 		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 3,
+		.cbugEnabled = true,
 		.defaultArmor = 100.0 }));
 
 	// deagle
@@ -48,6 +52,7 @@ void X1Controller::initRooms()
 		.allowedWeapons = dssWeaponSet.getWeapons(),
 		.weaponSet = dssWeaponSet,
 		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 4,
+		.cbugEnabled = false,
 		.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(1),
 		.allowedWeapons = dssWeaponSet.getWeapons(),
@@ -58,11 +63,13 @@ void X1Controller::initRooms()
 		.allowedWeapons = dssWeaponSet.getWeapons(),
 		.weaponSet = dssWeaponSet,
 		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 6,
+		.cbugEnabled = false,
 		.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(11),
 		.allowedWeapons = dssWeaponSet.getWeapons(),
 		.weaponSet = dssWeaponSet,
 		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 7,
+		.cbugEnabled = false,
 		.defaultArmor = 100.0 }));
 }
 
