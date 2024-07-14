@@ -142,7 +142,6 @@ void AuthController::showLoginDialog(IPlayer& player, bool wrongPass)
 
 void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 {
-	spdlog::info(password);
 	auto playerData = Player::getPlayerData(player);
 	auto playerExt = Player::getPlayerExt(player);
 	if (password.length() > 5)

@@ -51,6 +51,7 @@ class DeathmatchController : public Modes::ModeBase,
 	void showRoomSetRefillHealthDialog(IPlayer& player);
 	void showRoomSetRandomMapDialog(IPlayer& player);
 	void createRoom(IPlayer& player);
+	void deleteRoom(std::size_t roomId);
 
 	std::shared_ptr<TextDraws::DeathmatchTimer> createDeathmatchTimer(
 		IPlayer& player);
@@ -60,6 +61,7 @@ class DeathmatchController : public Modes::ModeBase,
 		IPlayer& player, std::size_t roomIndex, std::shared_ptr<Room> room);
 
 	void onRoomJoin(IPlayer& player, std::size_t roomId);
+	void onRoomLeave(IPlayer& player, std::size_t roomId);
 	void onNewRound(std::shared_ptr<Room> room);
 	void onRoundEnd(std::shared_ptr<Room> room);
 

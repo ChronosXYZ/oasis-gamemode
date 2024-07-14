@@ -16,6 +16,7 @@
 #include "DeathmatchResult.hpp"
 
 #include <chrono>
+#include <cstddef>
 #include <fmt/printf.h>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
@@ -587,21 +588,6 @@ void DeathmatchController::showRoomCreationDialog(IPlayer& player)
 		playerData->tempData->deathmatch->temporaryRoomSettings = { room };
 	}
 	auto room = playerData->tempData->deathmatch->temporaryRoomSettings;
-	auto dialogBody
-		= fmt::sprintf(_("Map\t%s\nWeapon set\t%s\nPrivacy mode\t%s\nIs C-bug "
-						 "enabled?\t%s\nRound time\t%d minutes\nDefault "
-						 "health\t%d\nDefault armor\t%d\nRefill player "
-						 "health\t%s\nRandom map\t%s\n#YELLOW#Start",
-						   player),
-			room->map.name, room->weaponSet.toString(player),
-			room->privacyMode.toString(player),
-			room->cbugEnabled ? _("Yes", player) : _("No", player),
-			std::chrono::duration_cast<std::chrono::minutes>(room->defaultTime)
-				.count(),
-			static_cast<unsigned int>(room->defaultHealth),
-			static_cast<unsigned int>(room->defaultArmor),
-			room->refillEnabled ? _("Yes", player) : _("No", player),
-			room->randomMap ? _("Yes", player) : _("No", player));
 	auto dialog = std::shared_ptr<Core::TabListDialog>(new Core::TabListDialog(
 		fmt::sprintf(
 			DIALOG_HEADER_TITLE, _("Create new deathmatch room", player)),
@@ -623,7 +609,8 @@ void DeathmatchController::showRoomCreationDialog(IPlayer& player)
 			{ _("Refill player health", player),
 				room->refillEnabled ? _("Yes", player) : _("No", player) },
 			{ _("Random map", player),
-				room->randomMap ? _("Yes", player) : _("No", player) } },
+				room->randomMap ? _("Yes", player) : _("No", player) },
+			{ _("#YELLOW#Start", player) } },
 		_("Select", player), _("Cancel", player)));
 	this->dialogManager->showDialog(player, dialog,
 		[this, playerData, &player](Core::DialogResult result)
@@ -1131,6 +1118,14 @@ void DeathmatchController::createRoom(IPlayer& player)
 		player, Mode::Deathmatch, { { ROOM_INDEX, roomId } });
 }
 
+void DeathmatchController::deleteRoom(std::size_t roomId)
+{
+	auto room = this->_rooms[roomId];
+	if (room->roundStartTimer.has_value())
+		room->roundStartTimer.value()->kill();
+	this->_rooms.erase(this->_rooms.begin() + roomId);
+}
+
 std::shared_ptr<TextDraws::DeathmatchTimer>
 DeathmatchController::createDeathmatchTimer(IPlayer& player)
 {
@@ -1177,6 +1172,10 @@ void DeathmatchController::updateDeathmatchTimer(
 void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 {
 	auto room = this->_rooms.at(roomId);
+	if (room->deletionTimer.has_value())
+	{
+		room->deletionTimer.value()->kill();
+	}
 	auto playerData = Core::Player::getPlayerData(player);
 
 	playerData->tempData->deathmatch = std::make_unique<PlayerTempData>();
@@ -1207,6 +1206,22 @@ void DeathmatchController::onRoomJoin(IPlayer& player, std::size_t roomId)
 							  "%s has "
 							  "joined the room (%d players)"),
 		player.getName().to_string(), room->players.size());
+}
+
+void DeathmatchController::onRoomLeave(IPlayer& player, std::size_t roomId)
+{
+	auto room = this->_rooms[roomId];
+	if (room->players.size() == 0 && room->host.has_value())
+	{
+		auto deletionTimer
+			= this->_timersComponent->create(new Impl::SimpleTimerHandler(
+												 [this, roomId]()
+												 {
+													 this->deleteRoom(roomId);
+												 }),
+				Seconds(30), false);
+		room->deletionTimer = deletionTimer;
+	}
 }
 
 void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
@@ -1348,8 +1363,10 @@ void DeathmatchController::setupRoomForPlayer(
 void DeathmatchController::removePlayerFromRoom(IPlayer& player)
 {
 	auto pData = Core::Player::getPlayerData(player);
-	auto room = this->_rooms[pData->tempData->deathmatch->roomId];
+	auto roomId = pData->tempData->deathmatch->roomId;
+	auto room = this->_rooms[roomId];
 	room->players.erase(&player);
+	this->onRoomLeave(player, roomId);
 
 	pData->tempData->deathmatch.reset();
 
