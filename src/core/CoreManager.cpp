@@ -17,6 +17,7 @@
 #include "utils/ServiceLocator.hpp"
 #include "../modes/freeroam/FreeroamController.hpp"
 #include "../modes/deathmatch/DeathmatchController.hpp"
+#include "../modes/deathmatch/X1Controller.hpp"
 
 #include <chrono>
 #include <cstddef>
@@ -145,6 +146,9 @@ void CoreManager::initHandlers()
 		weak_from_this(), _commandManager, _dialogManager, _playerPool,
 		components->queryComponent<ITimersComponent>(), this->bus,
 		_dbConnection));
+	_modes->registerInstance(Modes::Deathmatch::X1Controller::create(
+		weak_from_this(), _commandManager, _dialogManager, _playerPool,
+		components->queryComponent<ITimersComponent>(), this->bus));
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool, components->queryComponent<IVehiclesComponent>(),
 		components->queryComponent<ITimersComponent>()));
@@ -345,6 +349,12 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 			->onModeSelect(player);
 		break;
 	}
+	case Modes::Mode::X1:
+	{
+		this->_modes->resolve<Modes::Deathmatch::X1Controller>()->onModeSelect(
+			player);
+		break;
+	}
 	default:
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(
@@ -379,6 +389,12 @@ void CoreManager::joinMode(IPlayer& player, Modes::Mode mode,
 			this->_modes->resolve<Modes::Deathmatch::DeathmatchController>());
 		break;
 	}
+	case Modes::Mode::X1:
+	{
+		modeBase = static_pointer_cast<Modes::ModeBase>(
+			this->_modes->resolve<Modes::Deathmatch::X1Controller>());
+		break;
+	}
 	default:
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(
@@ -410,6 +426,12 @@ void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
 	{
 		modeBase = static_pointer_cast<Modes::ModeBase>(
 			this->_modes->resolve<Modes::Deathmatch::DeathmatchController>());
+		break;
+	}
+	case Modes::Mode::X1:
+	{
+		modeBase = static_pointer_cast<Modes::ModeBase>(
+			this->_modes->resolve<Modes::Deathmatch::X1Controller>());
 		break;
 	}
 	default:

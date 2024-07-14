@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../modes/ModeBase.hpp"
+#include "../ModeBase.hpp"
 #include "../../core/CoreManager.hpp"
 #include "../../core/utils/IDPool.hpp"
 #include "Room.hpp"

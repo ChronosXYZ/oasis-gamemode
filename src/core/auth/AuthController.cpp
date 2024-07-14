@@ -68,7 +68,8 @@ void AuthController::showRegistrationDialog(IPlayer& player)
 					   "#LIGHT_GRAY#> If you have any trouble, please visit "
 					   "our discord server or contact any staff member:\n"
 					   "#DEEP_SAFFRON#oasisfreeroam.xyz",
-			player)),
+						 player),
+			player.getName().to_string()),
 		true, _("Enter", player), _("Quit", player)));
 	this->dialogManager->showDialog(player, dialog,
 		[&](DialogResult result)

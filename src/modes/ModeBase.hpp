@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../core/player/PlayerModel.hpp"
+#include "../core/player/PlayerExtension.hpp"
 #include "Modes.hpp"
 #include "../core/utils/Events.hpp"
 
@@ -21,18 +22,28 @@ struct ModeBase
 	virtual ~ModeBase();
 
 	virtual void onModeSelect(IPlayer& player) = 0;
-	virtual void onModeJoin(IPlayer& player,
-		std::unordered_map<std::string, Core::PrimitiveType> joinData);
+	virtual void onModeJoin(IPlayer& player, JoinData joinData);
 	virtual void onModeLeave(IPlayer& player);
 	virtual void onPlayerSave(
-		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn)
-		= 0;
+		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn);
 	virtual void onPlayerLoad(
-		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn)
-		= 0;
+		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn);
 	virtual void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event);
+	virtual void onX1ArenaWin(Core::Utils::Events::X1ArenaWin event);
+	virtual void onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode);
+
 	unsigned int playerCount();
 	const Mode& getModeType();
+
+	template <typename... T>
+	inline void sendMessageToAll(const std::string& message, const T&... args)
+	{
+		for (auto player : this->players)
+		{
+			auto playerExt = Core::Player::getPlayerExt(*player);
+			playerExt->sendTranslatedMessageFormatted(message, args...);
+		}
+	}
 
 protected:
 	std::unordered_set<IPlayer*> players;
@@ -41,5 +52,7 @@ protected:
 	std::shared_ptr<dp::event_bus> bus;
 
 	dp::handler_registration playerOnFireEventRegistration;
+	dp::handler_registration x1ArenaWinRegistration;
+	dp::handler_registration playerJoinedModeSubsciption;
 };
 }
