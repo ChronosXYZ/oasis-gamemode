@@ -88,6 +88,8 @@ void ModeBase::onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode event)
 	{
 	case Mode::X1:
 	{
+		if (this->mode == Mode::X1)
+			break;
 		this->sendMessageToAll(__("#LIME#>> #RED#X1#LIGHT_GRAY#: %s(%d) "
 								  "has joined X1 arena (/x1)!"),
 			event.player.getName().to_string(), event.player.getID());
