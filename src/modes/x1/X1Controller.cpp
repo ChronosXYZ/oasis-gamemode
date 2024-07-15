@@ -1,79 +1,86 @@
 #include "X1Controller.hpp"
-#include "Maps.hpp"
-#include "Room.hpp"
-#include "Room.tpp"
+#include "../deathmatch/Maps.hpp"
+#include "../deathmatch/Room.hpp"
+#include "../deathmatch/Room.tpp"
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/utils/Common.hpp"
 #include "../../core/utils/QueryNames.hpp"
 #include "../../core/SQLQueryManager.hpp"
 #include "X1PlayerTempData.hpp"
-#include "player.hpp"
 
+#include <player.hpp>
 #include <chrono>
 #include <fmt/printf.h>
 
 #include <memory>
 
-namespace Modes::Deathmatch
+namespace Modes::X1
 {
-
 void X1Controller::initRooms()
 {
-	WeaponSet runWeaponSet(WeaponSet::Value::Run);
-	WeaponSet dssWeaponSet(WeaponSet::Value::DSS);
+	Deathmatch::WeaponSet runWeaponSet(Deathmatch::WeaponSet::Value::Run);
+	Deathmatch::WeaponSet dssWeaponSet(Deathmatch::WeaponSet::Value::DSS);
 
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(0),
-		.allowedWeapons = runWeaponSet.getWeapons(),
-		.weaponSet = runWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 0,
-		.cbugEnabled = true,
-		.defaultArmor = 100.0 }));
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(1),
-		.allowedWeapons = runWeaponSet.getWeapons(),
-		.weaponSet = runWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 1,
-		.cbugEnabled = true,
-		.defaultArmor = 100.0 }));
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(3),
-		.allowedWeapons = runWeaponSet.getWeapons(),
-		.weaponSet = runWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 2,
-		.cbugEnabled = true,
-		.defaultArmor = 100.0 }));
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(11),
-		.allowedWeapons = runWeaponSet.getWeapons(),
-		.weaponSet = runWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 3,
-		.cbugEnabled = true,
-		.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(0),
+			.allowedWeapons = runWeaponSet.getWeapons(),
+			.weaponSet = runWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 0,
+			.cbugEnabled = true,
+			.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(1),
+			.allowedWeapons = runWeaponSet.getWeapons(),
+			.weaponSet = runWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 1,
+			.cbugEnabled = true,
+			.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(3),
+			.allowedWeapons = runWeaponSet.getWeapons(),
+			.weaponSet = runWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 2,
+			.cbugEnabled = true,
+			.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(11),
+			.allowedWeapons = runWeaponSet.getWeapons(),
+			.weaponSet = runWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 3,
+			.cbugEnabled = true,
+			.defaultArmor = 100.0 }));
 
 	// deagle
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(0),
-		.allowedWeapons = dssWeaponSet.getWeapons(),
-		.weaponSet = dssWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 4,
-		.cbugEnabled = false,
-		.defaultArmor = 100.0 }));
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(1),
-		.allowedWeapons = dssWeaponSet.getWeapons(),
-		.weaponSet = dssWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 5,
-		.defaultArmor = 100.0 }));
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(3),
-		.allowedWeapons = dssWeaponSet.getWeapons(),
-		.weaponSet = dssWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 6,
-		.cbugEnabled = false,
-		.defaultArmor = 100.0 }));
-	this->createRoom(std::shared_ptr<Room>(new Room { .map = MAPS.at(11),
-		.allowedWeapons = dssWeaponSet.getWeapons(),
-		.weaponSet = dssWeaponSet,
-		.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 7,
-		.cbugEnabled = false,
-		.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(0),
+			.allowedWeapons = dssWeaponSet.getWeapons(),
+			.weaponSet = dssWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 4,
+			.cbugEnabled = false,
+			.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(1),
+			.allowedWeapons = dssWeaponSet.getWeapons(),
+			.weaponSet = dssWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 5,
+			.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(3),
+			.allowedWeapons = dssWeaponSet.getWeapons(),
+			.weaponSet = dssWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 6,
+			.cbugEnabled = false,
+			.defaultArmor = 100.0 }));
+	this->createRoom(std::shared_ptr<Deathmatch::Room>(
+		new Deathmatch::Room { .map = Deathmatch::MAPS.at(11),
+			.allowedWeapons = dssWeaponSet.getWeapons(),
+			.weaponSet = dssWeaponSet,
+			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 7,
+			.cbugEnabled = false,
+			.defaultArmor = 100.0 }));
 }
 
-void X1Controller::createRoom(std::shared_ptr<Room> room)
+void X1Controller::createRoom(std::shared_ptr<Deathmatch::Room> room)
 {
 	room->virtualWorld = X1_VIRTUAL_WORLD_PREFIX + this->rooms.size();
 	auto roomId = this->roomIdPool->allocateId();
@@ -81,7 +88,7 @@ void X1Controller::createRoom(std::shared_ptr<Room> room)
 }
 
 void X1Controller::setRandomSpawnPoint(
-	IPlayer& player, std::shared_ptr<Room> room)
+	IPlayer& player, std::shared_ptr<Deathmatch::Room> room)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -104,7 +111,7 @@ void X1Controller::setRandomSpawnPoint(
 }
 
 void X1Controller::setupRoomForPlayer(
-	IPlayer& player, std::shared_ptr<Room> room)
+	IPlayer& player, std::shared_ptr<Deathmatch::Room> room)
 {
 	player.setArmour(room->defaultArmor);
 	player.setVirtualWorld(room->virtualWorld);
@@ -368,17 +375,16 @@ X1Controller::X1Controller(std::weak_ptr<Core::CoreManager> coreManager,
 	this->playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 
 	// re-register PoF event subscription
-	this->bus->remove_handler(this->playerOnFireEventRegistration);
 	this->playerOnFireEventRegistration
-		= this->bus->register_handler<Core::Utils::Events::PlayerOnFireEvent>(
-			this, &X1Controller::onPlayerOnFire);
-	this->bus->remove_handler(this->playerOnFireBeenKilledRegistration);
+		= this->hookEvent<Core::Utils::Events::PlayerOnFireEvent>(
+			this->playerOnFireEventRegistration, this,
+			&X1Controller::onPlayerOnFire);
 
 	// re-register PoF been killed event subscription
-	this->playerOnFireEventRegistration
-		= this->bus
-			  ->register_handler<Core::Utils::Events::PlayerOnFireBeenKilled>(
-				  this, &X1Controller::onPlayerOnFireBeenKilled);
+	this->playerOnFireBeenKilledRegistration
+		= this->hookEvent<Core::Utils::Events::PlayerOnFireBeenKilled>(
+			this->playerOnFireBeenKilledRegistration, this,
+			&X1Controller::onPlayerOnFireBeenKilled);
 }
 
 X1Controller::~X1Controller()

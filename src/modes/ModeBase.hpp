@@ -47,6 +47,16 @@ struct ModeBase
 		}
 	}
 
+	template <typename EventType, typename ClassType, typename MemberFunction>
+	inline dp::handler_registration hookEvent(
+		dp::handler_registration& registration, ClassType* classInstance,
+		MemberFunction&& memberFunction)
+	{
+		this->bus->remove_handler(registration);
+		return this->bus->register_handler<EventType>(
+			classInstance, memberFunction);
+	}
+
 protected:
 	std::unordered_set<IPlayer*> players;
 	typedef ModeBase super;

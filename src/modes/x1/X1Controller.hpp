@@ -5,7 +5,7 @@
 #include "../../core/commands/CommandManager.hpp"
 #include "../../core/dialogs/DialogManager.hpp"
 #include "../../core/utils/IDPool.hpp"
-#include "Room.hpp"
+#include "../deathmatch/Room.hpp"
 
 #include <player.hpp>
 
@@ -13,7 +13,7 @@
 #include <memory>
 #include <string>
 
-namespace Modes::Deathmatch
+namespace Modes::X1
 {
 inline const unsigned int X1_VIRTUAL_WORLD_PREFIX = 200;
 inline const std::string X1_ROOM_INDEX = "roomIndex";
@@ -30,9 +30,11 @@ class X1Controller : public ModeBase,
 
 	void initCommands();
 	void initRooms();
-	void createRoom(std::shared_ptr<Room> room);
-	void setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room);
-	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
+	void createRoom(std::shared_ptr<Deathmatch::Room> room);
+	void setRandomSpawnPoint(
+		IPlayer& player, std::shared_ptr<Deathmatch::Room> room);
+	void setupRoomForPlayer(
+		IPlayer& player, std::shared_ptr<Deathmatch::Room> room);
 	void logStatsForPlayer(IPlayer& player, bool winner, int weapon);
 
 	void showArenaSelectionDialog(IPlayer& player);
@@ -40,7 +42,7 @@ class X1Controller : public ModeBase,
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
 
-	std::map<unsigned int, std::shared_ptr<Room>> rooms;
+	std::map<unsigned int, std::shared_ptr<Deathmatch::Room>> rooms;
 	std::unique_ptr<Core::Utils::IDPool> roomIdPool;
 
 	std::weak_ptr<Core::CoreManager> coreManager;

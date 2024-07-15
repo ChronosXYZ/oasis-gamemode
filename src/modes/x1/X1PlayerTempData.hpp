@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Modes::Deathmatch
+namespace Modes::X1
 {
 struct X1PlayerTempData
 {

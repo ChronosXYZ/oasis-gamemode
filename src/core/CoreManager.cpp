@@ -17,7 +17,7 @@
 #include "utils/ServiceLocator.hpp"
 #include "../modes/freeroam/FreeroamController.hpp"
 #include "../modes/deathmatch/DeathmatchController.hpp"
-#include "../modes/deathmatch/X1Controller.hpp"
+#include "../modes/x1/X1Controller.hpp"
 
 #include <chrono>
 #include <cstddef>
@@ -146,8 +146,8 @@ void CoreManager::initHandlers()
 		weak_from_this(), _commandManager, _dialogManager, _playerPool,
 		components->queryComponent<ITimersComponent>(), this->bus,
 		_dbConnection));
-	_modes->registerInstance(Modes::Deathmatch::X1Controller::create(
-		weak_from_this(), _commandManager, _dialogManager, _playerPool,
+	_modes->registerInstance(Modes::X1::X1Controller::create(weak_from_this(),
+		_commandManager, _dialogManager, _playerPool,
 		components->queryComponent<ITimersComponent>(), this->bus));
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool, components->queryComponent<IVehiclesComponent>(),
@@ -185,8 +185,7 @@ bool CoreManager::refreshPlayerData(IPlayer& player)
 
 	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
 		->onPlayerLoad(data, txn);
-	this->_modes->resolve<Modes::Deathmatch::X1Controller>()->onPlayerLoad(
-		data, txn);
+	this->_modes->resolve<Modes::X1::X1Controller>()->onPlayerLoad(data, txn);
 	txn.commit();
 	return true;
 }
@@ -220,8 +219,7 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 		->onPlayerSave(data, txn);
 
 	// save X1 info
-	this->_modes->resolve<Modes::Deathmatch::X1Controller>()->onPlayerSave(
-		data, txn);
+	this->_modes->resolve<Modes::X1::X1Controller>()->onPlayerSave(data, txn);
 
 	txn.commit();
 	spdlog::info("Player {} has been successfully saved", data->name);
@@ -357,8 +355,7 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	}
 	case Modes::Mode::X1:
 	{
-		this->_modes->resolve<Modes::Deathmatch::X1Controller>()->onModeSelect(
-			player);
+		this->_modes->resolve<Modes::X1::X1Controller>()->onModeSelect(player);
 		break;
 	}
 	default:
@@ -398,7 +395,7 @@ void CoreManager::joinMode(IPlayer& player, Modes::Mode mode,
 	case Modes::Mode::X1:
 	{
 		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Deathmatch::X1Controller>());
+			this->_modes->resolve<Modes::X1::X1Controller>());
 		break;
 	}
 	default:
@@ -437,7 +434,7 @@ void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
 	case Modes::Mode::X1:
 	{
 		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Deathmatch::X1Controller>());
+			this->_modes->resolve<Modes::X1::X1Controller>());
 		break;
 	}
 	default:

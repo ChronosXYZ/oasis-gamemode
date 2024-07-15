@@ -2,7 +2,7 @@
 
 #include <pqxx/pqxx>
 
-namespace Modes::Deathmatch
+namespace Modes::X1
 {
 struct X1Stats
 {
