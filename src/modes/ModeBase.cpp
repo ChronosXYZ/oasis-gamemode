@@ -3,6 +3,7 @@
 #include "../core/utils/Localization.hpp"
 #include "../core/textdraws/Notification.hpp"
 #include "Modes.hpp"
+#include "deathmatch/DeathmatchController.hpp"
 
 #include <fmt/printf.h>
 #include <player.hpp>
@@ -72,7 +73,7 @@ void ModeBase::onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event)
 		return;
 	this->sendMessageToAll(
 		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) "
-		   "and is now on fire!"),
+		   "and is now on fire"),
 		event.player.getName().to_string(), event.player.getID(),
 		event.lastKillee.getName().to_string(), event.lastKillee.getID());
 }
@@ -82,16 +83,15 @@ void ModeBase::onPlayerOnFireBeenKilled(
 {
 	this->sendMessageToAll(
 		__("#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) "
-		   "killed player on fire %s(%d)!"),
+		   "killed player on fire %s(%d)"),
 		event.killer.getName().to_string(), event.killer.getID(),
 		event.player.getName().to_string(), event.player.getID());
 }
 
 void ModeBase::onX1ArenaWin(Core::Utils::Events::X1ArenaWin event)
 {
-	this->sendMessageToAll(
-		__("#LIME#>> #RED#X1#WHITE#: %s(%d) "
-		   "has defeated %s(%d) with %.1f health and %.1f armour left!"),
+	this->sendMessageToAll(__("#LIME#>> #RED#X1#WHITE#: %s(%d) "
+							  "has defeated %s(%d) (%.1f HP, %.1f AP)"),
 		event.winner.getName().to_string(), event.winner.getID(),
 		event.loser.getName().to_string(), event.loser.getID(),
 		event.healthLeft, event.armourLeft);
@@ -106,8 +106,19 @@ void ModeBase::onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode event)
 		if (this->mode == Mode::X1)
 			break;
 		this->sendMessageToAll(__("#LIME#>> #RED#X1#LIGHT_GRAY#: %s(%d) "
-								  "has joined X1 arena (/x1)!"),
+								  "has joined X1 arena (/x1)"),
 			event.player.getName().to_string(), event.player.getID());
+		break;
+	}
+	case Mode::Deathmatch:
+	{
+		if (this->mode == Mode::Deathmatch)
+			break;
+		this->sendMessageToAll(
+			__("#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: %s(%d) "
+			   "has joined DM mode (/dm %d)"),
+			event.player.getName().to_string(), event.player.getID(),
+			std::get<unsigned int>(event.joinData[Deathmatch::ROOM_INDEX]) + 1);
 		break;
 	}
 	default:

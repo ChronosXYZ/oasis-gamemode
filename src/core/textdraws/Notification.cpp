@@ -12,33 +12,56 @@ Notification::Notification(IPlayer& player, ITimersComponent* timersComponent)
 	, timersComponent(timersComponent)
 	, player(player)
 {
-	topLabel = CreatePlayerTextDraw(
+	topNotification = CreatePlayerTextDraw(
 		player, 319.0000, 16.0000, "_"); //"Starboy~n~~w~1");
-	PlayerTextDrawFont(player, topLabel, 2);
-	PlayerTextDrawLetterSize(player, topLabel, 0.3199, 1.6000);
-	PlayerTextDrawAlignment(player, topLabel, 2);
-	PlayerTextDrawColor(player, topLabel, -301989633);
-	PlayerTextDrawSetShadow(player, topLabel, 0);
-	PlayerTextDrawSetOutline(player, topLabel, 1);
-	PlayerTextDrawBackgroundColor(player, topLabel, 255);
-	PlayerTextDrawSetProportional(player, topLabel, true);
-	PlayerTextDrawTextSize(player, topLabel, 0.0000, 0.0000);
+	PlayerTextDrawFont(player, topNotification, 2);
+	PlayerTextDrawLetterSize(player, topNotification, 0.3199, 1.6000);
+	PlayerTextDrawAlignment(player, topNotification, 2);
+	PlayerTextDrawColor(player, topNotification, -301989633);
+	PlayerTextDrawSetShadow(player, topNotification, 0);
+	PlayerTextDrawSetOutline(player, topNotification, 1);
+	PlayerTextDrawBackgroundColor(player, topNotification, 255);
+	PlayerTextDrawSetProportional(player, topNotification, true);
+	PlayerTextDrawTextSize(player, topNotification, 0.0000, 0.0000);
+
+	bottomNotification = CreatePlayerTextDraw(player, 320.0000, 401.5000,
+		"_"); //"The Quick brown fucking fox fucking jumped over the fucking
+			  // bridge for no fucking reason");
+	PlayerTextDrawFont(player, bottomNotification, 1);
+	PlayerTextDrawLetterSize(player, bottomNotification, 0.2199, 1.3000);
+	PlayerTextDrawAlignment(player, bottomNotification, 2);
+	PlayerTextDrawColor(player, bottomNotification, -1);
+	PlayerTextDrawSetShadow(player, bottomNotification, 0);
+	PlayerTextDrawSetOutline(player, bottomNotification, 1);
+	PlayerTextDrawBackgroundColor(player, bottomNotification, 85);
+	PlayerTextDrawSetProportional(player, bottomNotification, true);
+	PlayerTextDrawTextSize(player, bottomNotification, 774.0000, 361.5000);
+
+	this->showTimers = {
+		{ NotificationPosition::Top, {} },
+		{ NotificationPosition::Bottom, {} },
+		{ NotificationPosition::Left, {} },
+		{ NotificationPosition::Right, {} },
+	};
 }
 
 Notification::~Notification()
 {
-	if (this->showTimer)
+	for (auto [position, timer] : this->showTimers)
 	{
-		this->showTimer.value()->kill();
-		this->showTimer.reset();
+		if (timer)
+		{
+			timer.value()->kill();
+			timer.reset();
+		}
 	}
 }
 
 void Notification::show(std::string text, NotificationPosition position,
 	unsigned int notificationSound, unsigned int seconds)
 {
-	if (this->showTimer)
-		this->showTimer.value()->kill();
+	if (this->showTimers.at(position))
+		this->showTimers.at(position).value()->kill();
 
 	switch (position)
 	{
@@ -46,8 +69,14 @@ void Notification::show(std::string text, NotificationPosition position,
 	case NotificationPosition::Left:
 	case NotificationPosition::Right:
 	{
-		topLabel->setText(text);
-		topLabel->show();
+		topNotification->setText(text);
+		topNotification->show();
+		break;
+	}
+	case NotificationPosition::Bottom:
+	{
+		this->bottomNotification->setText(text);
+		this->bottomNotification->show();
 		break;
 	}
 	}
@@ -55,23 +84,42 @@ void Notification::show(std::string text, NotificationPosition position,
 	if (notificationSound != 0)
 		player.playSound(notificationSound, Vector3(0.0, 0.0, 0.0));
 
-	this->showTimer
-		= this->timersComponent->create(new Impl::SimpleTimerHandler(
-											[this]()
-											{
-												this->hide();
-												this->showTimer.reset();
-											}),
-			Seconds(seconds), false);
+	this->showTimers[position] = this->timersComponent->create(
+		new Impl::SimpleTimerHandler(
+			[this, position]()
+			{
+				this->hide(position);
+				this->showTimers[position].reset();
+			}),
+		Seconds(seconds), false);
+}
+
+void Notification::hide(NotificationPosition position)
+{
+	switch (position)
+	{
+	case NotificationPosition::Top:
+	{
+		this->topNotification->hide();
+		break;
+	}
+	case NotificationPosition::Left:
+	case NotificationPosition::Right:
+	case NotificationPosition::Bottom:
+	{
+		this->bottomNotification->hide();
+		break;
+	}
+	}
 }
 
 void Notification::show() { }
 
-void Notification::hide() { topLabel->hide(); }
+void Notification::hide() { this->topNotification->hide(); }
 
 void Notification::destroy()
 {
-	this->playerTextDrawData->release(this->topLabel->getID());
+	this->playerTextDrawData->release(this->topNotification->getID());
+	this->playerTextDrawData->release(this->bottomNotification->getID());
 }
-
 }

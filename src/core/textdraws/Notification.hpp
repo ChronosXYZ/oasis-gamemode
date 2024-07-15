@@ -6,6 +6,7 @@
 #include <Server/Components/TextDraws/textdraws.hpp>
 #include <chrono>
 #include <player.hpp>
+#include <unordered_map>
 
 namespace Core::TextDraws
 {
@@ -15,7 +16,8 @@ enum class NotificationPosition
 {
 	Top,
 	Left,
-	Right
+	Right,
+	Bottom
 };
 
 class Notification : public ITextDrawWrapper
@@ -24,8 +26,9 @@ class Notification : public ITextDrawWrapper
 	IPlayer& player;
 	ITimersComponent* timersComponent;
 
-	IPlayerTextDraw* topLabel;
-	std::optional<ITimer*> showTimer;
+	IPlayerTextDraw* topNotification;
+	IPlayerTextDraw* bottomNotification;
+	std::unordered_map<NotificationPosition, std::optional<ITimer*>> showTimers;
 
 public:
 	Notification(IPlayer& player, ITimersComponent* timersComponent);
@@ -37,6 +40,7 @@ public:
 
 	void show(std::string text, NotificationPosition position,
 		unsigned int notificationSound = 0, unsigned int seconds = 3);
+	void hide(NotificationPosition position);
 
 	inline static const auto NAME = "NOTIFICATION"s;
 };

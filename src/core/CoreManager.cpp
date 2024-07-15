@@ -477,5 +477,19 @@ bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 void CoreManager::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
 	_playerPool->sendDeathMessageToAll(killer, player, reason);
+
+	if (killer)
+	{
+		auto killerExt = Player::getPlayerExt(*killer);
+		player.sendGameText(
+			fmt::sprintf(_("~w~You got killed by~n~~r~%s(%d)", player),
+				killer->getName().to_string(), killer->getID()),
+			Seconds(4), 3);
+
+		killerExt->showNotification(
+			fmt::sprintf(_("~w~You killed~n~~r~%s(%d)", player),
+				player.getName().to_string(), player.getID()),
+			TextDraws::NotificationPosition::Bottom, 6);
+	}
 }
 }
