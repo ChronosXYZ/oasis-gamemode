@@ -133,7 +133,7 @@ void ModeBase::onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
 	playerExt->showNotification(
-		fmt::sprintf("%s~n~~w~%.1f%%", to.getName().to_string(),
+		fmt::sprintf("%s(%d)~n~~w~%.1f%%", to.getName().to_string(), to.getID(),
 			(to.getArmour() + to.getHealth()) - amount),
 		Core::TextDraws::NotificationPosition::Top, 3);
 	player.playSound(17802, Vector3(0.0, 0.0, 0.0));
