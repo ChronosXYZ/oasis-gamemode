@@ -1,7 +1,9 @@
 #include "FreeroamController.hpp"
 #include "../../core/CoreManager.hpp"
 #include "../../core/player/PlayerExtension.hpp"
+#include "FreeroamVehicles.hpp"
 #include "eventbus/event_bus.hpp"
+#include "types.hpp"
 
 #include <fmt/printf.h>
 #include <magic_enum/magic_enum.hpp>
@@ -50,6 +52,7 @@ FreeroamController* FreeroamController::create(
 {
 	auto handler = new FreeroamController(coreManager, playerPool, bus);
 	handler->initCommands();
+	handler->initVehicles();
 	return handler;
 }
 
@@ -150,6 +153,32 @@ void FreeroamController::initCommands()
 			.description = __("Set player skin"),
 			.category = MODE_NAME,
 		});
+}
+
+void FreeroamController::initVehicles()
+{
+	std::vector<std::vector<Vehicle>> vehiclesList
+		= { GEN_LS_INNER, GEN_LS_OUTER, LS_LAW, LS_AIRPORT, BONE, FLINT,
+			  LV_AIRPORT, LV_GEN, LV_LAW, PILOTS, RED_COUNTY, SF_AIRPORT,
+			  SF_GEN, SF_LAW, SF_TRAIN, TIERRA, TRAINS, WHETSTONE };
+	for (auto list : vehiclesList)
+	{
+		for (auto v : list)
+		{
+			auto vehicle = this->_vehiclesComponent->create(VehicleSpawnData {
+				.respawnDelay = Minutes(30),
+				.modelID = v.vehicleType,
+				.position = Vector3(v.position.x, v.position.y, v.position.z),
+				.zRotation = v.position.w,
+				.colour1 = v.color1,
+				.colour2 = v.color2,
+
+			});
+			vehicle->setVirtualWorld(VIRTUAL_WORLD_ID);
+			vehicle->setPlate(
+				fmt::sprintf("oasis{44AA33}%d", vehicle->getID()));
+		}
+	}
 }
 
 void FreeroamController::onPlayerDeath(

@@ -30,6 +30,7 @@ class FreeroamController : public Modes::ModeBase,
 	IVehiclesComponent* _vehiclesComponent;
 
 	void initCommands();
+	void initVehicles();
 	void setupSpawn(IPlayer& player);
 	void deleteLastSpawnedCar(IPlayer& player);
 
