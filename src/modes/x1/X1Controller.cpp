@@ -363,7 +363,7 @@ X1Controller::X1Controller(std::weak_ptr<Core::CoreManager> coreManager,
 	std::shared_ptr<Core::Commands::CommandManager> commandManager,
 	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
 	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
-	: super(Mode::X1, bus)
+	: super(Mode::X1, bus, playerPool)
 	, roomIdPool(std::make_unique<Core::Utils::IDPool>())
 	, coreManager(coreManager)
 	, commandManager(commandManager)

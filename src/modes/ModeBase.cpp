@@ -1,15 +1,18 @@
 #include "ModeBase.hpp"
 
 #include "../core/utils/Localization.hpp"
+#include "../core/textdraws/Notification.hpp"
 #include "Modes.hpp"
 
+#include <fmt/printf.h>
 #include <player.hpp>
 #include <spdlog/spdlog.h>
 #include <magic_enum/magic_enum.hpp>
 
 namespace Modes
 {
-ModeBase::ModeBase(Mode mode, std::shared_ptr<dp::event_bus> bus)
+ModeBase::ModeBase(
+	Mode mode, std::shared_ptr<dp::event_bus> bus, IPlayerPool* playerPool)
 	: mode(mode)
 	, bus(bus)
 	, playerOnFireEventRegistration(
@@ -24,7 +27,9 @@ ModeBase::ModeBase(Mode mode, std::shared_ptr<dp::event_bus> bus)
 	, playerOnFireBeenKilledRegistration(
 		  bus->register_handler<Core::Utils::Events::PlayerOnFireBeenKilled>(
 			  this, &ModeBase::onPlayerOnFireBeenKilled))
+	, playerPool(playerPool)
 {
+	playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 }
 
 ModeBase::~ModeBase()
@@ -32,6 +37,7 @@ ModeBase::~ModeBase()
 	this->bus->remove_handler(this->playerOnFireEventRegistration);
 	this->bus->remove_handler(this->playerOnFireBeenKilledRegistration);
 	this->bus->remove_handler(this->x1ArenaWinRegistration);
+	playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
 }
 
 void ModeBase::onModeJoin(IPlayer& player, JoinData joinData)
@@ -109,6 +115,17 @@ void ModeBase::onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode event)
 		break;
 	}
 	}
+}
+
+void ModeBase::onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
+	unsigned int weapon, BodyPart part)
+{
+	auto playerExt = Core::Player::getPlayerExt(player);
+	playerExt->showNotification(
+		fmt::sprintf("%s~n~~w~%.1f%%", to.getName().to_string(),
+			(to.getArmour() + to.getHealth()) - amount),
+		Core::TextDraws::NotificationPosition::Top, 3);
+	player.playSound(17802, Vector3(0.0, 0.0, 0.0));
 }
 
 unsigned int ModeBase::playerCount() { return this->players.size(); }

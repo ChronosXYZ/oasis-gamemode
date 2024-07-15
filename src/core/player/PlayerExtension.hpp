@@ -2,6 +2,7 @@
 
 #include "PlayerModel.hpp"
 #include "TextDrawManager.hpp"
+#include "../textdraws/Notification.hpp"
 #include "../../modes/Modes.hpp"
 
 #include <types.hpp>
@@ -32,7 +33,8 @@ private:
 public:
 	PROVIDE_EXT_UID(OASIS_PLAYER_EXT_UID)
 
-	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player, ITimersComponent* timerManager);
+	OasisPlayerExt(std::shared_ptr<PlayerModel> data, IPlayer& player,
+		ITimersComponent* timerManager);
 
 	std::shared_ptr<PlayerModel> getPlayerData();
 	std::shared_ptr<TextDrawManager> getTextDrawManager();
@@ -42,10 +44,15 @@ public:
 	void sendErrorMessage(const std::string& message);
 	void sendInfoMessage(const std::string& message);
 	void sendTranslatedMessage(const std::string& message);
+	void showNotification(const std::string& notification,
+		TextDraws::NotificationPosition position, unsigned int seconds = 3,
+		unsigned int notificationSound = 0);
 	template <typename... T>
-	inline void sendTranslatedMessageFormatted(const std::string& message, const T&... args)
+	inline void sendTranslatedMessageFormatted(
+		const std::string& message, const T&... args)
 	{
-		_player.sendClientMessage(Colour::White(), fmt::sprintf(_(message, _player), args...));
+		_player.sendClientMessage(
+			Colour::White(), fmt::sprintf(_(message, _player), args...));
 	}
 
 	const std::string getIP();

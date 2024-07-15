@@ -49,7 +49,7 @@ DeathmatchController::DeathmatchController(
 	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
 	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus,
 	std::shared_ptr<pqxx::connection> dbConnection)
-	: super(Mode::Deathmatch, bus)
+	: super(Mode::Deathmatch, bus, playerPool)
 	, coreManager(coreManager)
 	, commandManager(commandManager)
 	, dialogManager(dialogManager)

@@ -20,8 +20,7 @@ inline const auto SPAWN_LOCATION = Vector3(2037.4828, -1193.1844, 22.7924);
 inline const auto SPAWN_ANGLE = 99.7903;
 
 class FreeroamController : public Modes::ModeBase,
-						   public PlayerSpawnEventHandler,
-						   public PlayerDamageEventHandler
+						   public PlayerSpawnEventHandler
 {
 	FreeroamController(std::weak_ptr<Core::CoreManager> coreManager,
 		IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus);

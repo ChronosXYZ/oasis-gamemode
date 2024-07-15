@@ -11,6 +11,7 @@
 #include "player/PlayerExtension.hpp"
 #include "textdraws/ITextDrawWrapper.hpp"
 #include "textdraws/ServerLogo.hpp"
+#include "textdraws/Notification.hpp"
 #include "types.hpp"
 #include "utils/Common.hpp"
 #include "utils/QueryNames.hpp"
@@ -115,7 +116,11 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 	auto logo
 		= std::shared_ptr<TextDraws::ServerLogo>(new TextDraws::ServerLogo(
 			player, "OASIS", "freeroam", "oasisfreeroam.xyz"));
+	auto notificationTxd
+		= std::shared_ptr<TextDraws::Notification>(new TextDraws::Notification(
+			player, this->components->queryComponent<ITimersComponent>()));
 	txdManager->add(TextDraws::ServerLogo::NAME, logo);
+	txdManager->add(TextDraws::Notification::NAME, notificationTxd);
 	logo->show();
 
 	_playerPool->sendDeathMessageToAll(NULL, player, 200);

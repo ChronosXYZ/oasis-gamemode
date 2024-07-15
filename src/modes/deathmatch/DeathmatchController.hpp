@@ -25,7 +25,6 @@ inline const std::string MODE_NAME = "deathmatch";
 inline const auto DEFAULT_WEAPON_SET = WeaponSet(WeaponSet::Value::Run);
 
 class DeathmatchController : public Modes::ModeBase,
-							 public PlayerDamageEventHandler,
 							 public PlayerSpawnEventHandler,
 							 public PlayerChangeEventHandler
 {
@@ -100,7 +99,7 @@ public:
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
 	void onPlayerKeyStateChange(
 		IPlayer& player, uint32_t newKeys, uint32_t oldKeys) override;
-	void onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
+	virtual void onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
 		unsigned int weapon, BodyPart part) override;
 
 	void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event) override;

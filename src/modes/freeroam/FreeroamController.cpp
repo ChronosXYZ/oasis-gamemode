@@ -18,7 +18,7 @@ namespace Modes::Freeroam
 FreeroamController::FreeroamController(
 	std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool,
 	std::shared_ptr<dp::event_bus> bus)
-	: super(Mode::Freeroam, bus)
+	: super(Mode::Freeroam, bus, playerPool)
 	, _coreManager(coreManager)
 	, _vehiclesComponent(
 		  coreManager.lock()->components->queryComponent<IVehiclesComponent>())

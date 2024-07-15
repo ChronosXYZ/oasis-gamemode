@@ -16,9 +16,10 @@
 
 namespace Modes
 {
-struct ModeBase
+struct ModeBase : public PlayerDamageEventHandler
 {
-	ModeBase(Mode mode, std::shared_ptr<dp::event_bus> bus);
+	ModeBase(
+		Mode mode, std::shared_ptr<dp::event_bus> bus, IPlayerPool* playerPool);
 	virtual ~ModeBase();
 
 	virtual void onModeSelect(IPlayer& player) = 0;
@@ -33,6 +34,9 @@ struct ModeBase
 		Core::Utils::Events::PlayerOnFireBeenKilled event);
 	virtual void onX1ArenaWin(Core::Utils::Events::X1ArenaWin event);
 	virtual void onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode);
+
+	virtual void onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
+		unsigned int weapon, BodyPart part) override;
 
 	unsigned int playerCount();
 	const Mode& getModeType();
@@ -62,6 +66,7 @@ protected:
 	typedef ModeBase super;
 	Mode mode;
 	std::shared_ptr<dp::event_bus> bus;
+	IPlayerPool* playerPool;
 
 	dp::handler_registration playerOnFireEventRegistration;
 	dp::handler_registration playerOnFireBeenKilledRegistration;

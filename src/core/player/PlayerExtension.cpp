@@ -72,6 +72,21 @@ void OasisPlayerExt::sendTranslatedMessage(const std::string& message)
 	_player.sendClientMessage(Colour::White(), _(message, _player));
 }
 
+void OasisPlayerExt::showNotification(const std::string& notification,
+	TextDraws::NotificationPosition position, unsigned int seconds,
+	unsigned int notificationSound)
+{
+	if (auto notificationViewOpt
+		= this->getTextDrawManager()->get(TextDraws::Notification::NAME))
+	{
+		auto notificationView
+			= std::dynamic_pointer_cast<TextDraws::Notification>(
+				*notificationViewOpt);
+		notificationView->show(
+			notification, position, notificationSound, seconds);
+	}
+}
+
 const std::string OasisPlayerExt::getIP()
 {
 	PeerAddress::AddressString ipString;
