@@ -56,27 +56,28 @@ void X1Controller::initRooms()
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
 			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 4,
-			.cbugEnabled = false,
+			.cbugEnabled = true,
 			.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Deathmatch::Room>(
 		new Deathmatch::Room { .map = Deathmatch::MAPS.at(1),
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
 			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 5,
+			.cbugEnabled = true,
 			.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Deathmatch::Room>(
 		new Deathmatch::Room { .map = Deathmatch::MAPS.at(3),
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
 			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 6,
-			.cbugEnabled = false,
+			.cbugEnabled = true,
 			.defaultArmor = 100.0 }));
 	this->createRoom(std::shared_ptr<Deathmatch::Room>(
 		new Deathmatch::Room { .map = Deathmatch::MAPS.at(11),
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
 			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 7,
-			.cbugEnabled = false,
+			.cbugEnabled = true,
 			.defaultArmor = 100.0 }));
 }
 
@@ -203,14 +204,35 @@ void X1Controller::showArenaSelectionDialog(IPlayer& player)
 	std::vector<std::vector<std::string>> items;
 	for (auto [roomId, room] : this->rooms)
 	{
+		std::string playerCount;
+		switch (room->players.size())
+		{
+		case 0:
+		{
+			playerCount = "{FFFFFF}0/2";
+			break;
+		}
+		case 1:
+		{
+			playerCount = "{00FF00}1/2";
+			break;
+		}
+		case 2:
+		{
+			playerCount = "{FF0000}2/2";
+			break;
+		}
+		default:
+		{
+			playerCount = fmt::sprintf("{FFFFFF}%d/2", room->players.size());
+			break;
+		}
+		}
+
 		items.push_back({ fmt::sprintf("{999999}%d. {FFFFFF}%s", roomId + 1,
 							  room->map.name),
-			fmt::sprintf("{00FF00}%s",
-				room->weaponSet.toString(player).append(
-					room->cbugEnabled ? "" : _(" #RED#(NO CBUG)", player))),
-			room->players.size() < 2
-				? fmt::sprintf("{00FF00}%d/2", room->players.size())
-				: fmt::sprintf("{FF0000}2/2") });
+			fmt::sprintf("{FFFFFF}%s", room->weaponSet.toString(player)),
+			playerCount });
 	}
 	auto dialog = std::shared_ptr<Core::TabListHeadersDialog>(
 		new Core::TabListHeadersDialog(
