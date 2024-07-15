@@ -13,6 +13,7 @@
 #include "textdraws/ServerLogo.hpp"
 #include "textdraws/Notification.hpp"
 #include "types.hpp"
+#include "utils/Colors.hpp"
 #include "utils/Common.hpp"
 #include "utils/QueryNames.hpp"
 #include "utils/ServiceLocator.hpp"
@@ -22,6 +23,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <cstdlib>
 #include <future>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
@@ -111,6 +113,9 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 		data, player, components->queryComponent<ITimersComponent>());
 	this->_playerData[player.getID()] = data;
 	player.addExtension(playerExt, true);
+
+	player.setColour(Colour::FromRGBA(
+		Utils::NICKNAME_COLORS[rand() % Utils::NICKNAME_COLORS.size()]));
 
 	auto txdManager = playerExt->getTextDrawManager();
 	auto logo

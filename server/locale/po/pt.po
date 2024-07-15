@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-15 15:13+0000\n"
+"POT-Creation-Date: 2024-07-15 15:22+0000\n"
 "PO-Revision-Date: 2024-05-21 10:39+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Portuguese <translation-team-pt@lists.sourceforge.net>\n"
@@ -57,7 +57,7 @@ msgstr ""
 msgid "Cops and Robbers"
 msgstr ""
 
-#: src/core/CoreManager.cpp:337 src/modes/x1/X1Controller.cpp:222
+#: src/core/CoreManager.cpp:337 src/modes/x1/X1Controller.cpp:244
 #: src/modes/deathmatch/DeathmatchController.cpp:465
 #: src/modes/deathmatch/DeathmatchController.cpp:612
 #: src/modes/deathmatch/DeathmatchController.cpp:696
@@ -207,7 +207,7 @@ msgstr ""
 #: src/core/auth/AuthController.cpp:316
 #: src/core/controllers/PlayerOnFireController.cpp:30
 #: src/core/controllers/PlayerOnFireController.cpp:41
-#: src/modes/x1/X1Controller.cpp:282
+#: src/modes/x1/X1Controller.cpp:304
 #: src/modes/deathmatch/DeathmatchController.cpp:560
 msgid "OK"
 msgstr ""
@@ -247,41 +247,36 @@ msgstr ""
 msgid "#LIME#>>#WHITE#"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:210
-#: src/modes/deathmatch/DeathmatchController.cpp:453
-msgid " #RED#(NO CBUG)"
-msgstr ""
-
-#: src/modes/x1/X1Controller.cpp:217
+#: src/modes/x1/X1Controller.cpp:239
 #, c-format
 msgid "Select Arena"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:218
+#: src/modes/x1/X1Controller.cpp:240
 #: src/modes/deathmatch/DeathmatchController.cpp:461
 msgid "#CREAM_BRULEE#Map"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:219
+#: src/modes/x1/X1Controller.cpp:241
 msgid "#CREAM_BRULEE#Weapon set"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:220
+#: src/modes/x1/X1Controller.cpp:242
 #: src/modes/deathmatch/DeathmatchController.cpp:463
 msgid "#CREAM_BRULEE#Players"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:222
+#: src/modes/x1/X1Controller.cpp:244
 #: src/modes/deathmatch/DeathmatchController.cpp:465
 #: src/modes/deathmatch/DeathmatchController.cpp:510
 msgid "Close"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:235
+#: src/modes/x1/X1Controller.cpp:257
 msgid "This arena is #RED#full#WHITE#!"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:248
+#: src/modes/x1/X1Controller.cpp:270
 #: src/modes/deathmatch/DeathmatchController.cpp:526
 #, c-format
 msgid ""
@@ -303,30 +298,30 @@ msgid ""
 "- Explosives kills:\t\t\t\t%d"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:281
+#: src/modes/x1/X1Controller.cpp:303
 #, c-format
 msgid "X1 stats"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:304
+#: src/modes/x1/X1Controller.cpp:326
 #, c-format
 msgid "#LIME#>> #RED#X1#LIGHT_GRAY#: Player %s has joined the arena!"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:405
+#: src/modes/x1/X1Controller.cpp:427
 msgid "Enter Arena"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:415
+#: src/modes/x1/X1Controller.cpp:437
 #: src/modes/deathmatch/DeathmatchController.cpp:381
 msgid "Invalid player ID"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:421
+#: src/modes/x1/X1Controller.cpp:443
 msgid "Show X1 stats"
 msgstr ""
 
-#: src/modes/x1/X1Controller.cpp:465
+#: src/modes/x1/X1Controller.cpp:487
 #: src/modes/deathmatch/DeathmatchController.cpp:327
 msgid "You killed player on fire and got 4 extra points!"
 msgstr ""
@@ -448,6 +443,10 @@ msgstr ""
 
 #: src/modes/deathmatch/DeathmatchController.cpp:446
 msgid "Create custom room"
+msgstr ""
+
+#: src/modes/deathmatch/DeathmatchController.cpp:453
+msgid " #RED#(NO CBUG)"
 msgstr ""
 
 #: src/modes/deathmatch/DeathmatchController.cpp:455
