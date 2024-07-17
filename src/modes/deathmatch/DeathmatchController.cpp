@@ -38,7 +38,7 @@
 	(((newkeys & (k)) == (k)) && ((oldkeys & (k)) != (k)))
 
 #define CBUG_FREEZE_DELAY 1500
-#define DEFAULT_ROOM_ROUND_TIME_MIN 10
+#define DEFAULT_ROOM_ROUND_TIME_MIN 1
 
 namespace Modes::Deathmatch
 {
@@ -531,7 +531,7 @@ void DeathmatchController::showRoundResultDialog(
 										   _("Deathmatch statistics", player)),
 			{ _("Player", player), _("K : D", player), _("Ratio", player),
 				_("Damage inflicted", player) },
-			{} /* TODO */, _("Close", player), ""));
+			room->cachedLastResult.value(), _("Close", player), ""));
 	this->dialogManager->showDialog(player, dialog,
 		[this, &player, room](Core::DialogResult result)
 		{
@@ -1308,6 +1308,7 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 		auto playerData = Core::Player::getPlayerData(*player);
 		resultArray.push_back(
 			DeathmatchResult { .playerName = player->getName().to_string(),
+				.playerColor = player->getColour(),
 				.kills = playerData->tempData->deathmatch->kills,
 				.deaths = playerData->tempData->deathmatch->deaths,
 				.ratio = playerData->tempData->deathmatch->ratio,
@@ -1324,8 +1325,9 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 	for (std::size_t i = 0; i < resultArray.size(); i++)
 	{
 		auto playerResult = resultArray.at(i);
-		lastResults.push_back({ fmt::sprintf(
-									"%d. %s", i + 1, playerResult.playerName),
+		lastResults.push_back({ fmt::sprintf("{%06x}%d. %s",
+									playerResult.playerColor.RGBA() >> 8, i + 1,
+									playerResult.playerName),
 			fmt::sprintf("%d : %d", playerResult.kills, playerResult.deaths),
 			fmt::sprintf("%.2f", playerResult.ratio),
 			fmt::sprintf("%.2f", playerResult.damageInflicted) });
