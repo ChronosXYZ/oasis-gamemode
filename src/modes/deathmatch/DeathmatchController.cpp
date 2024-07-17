@@ -234,6 +234,14 @@ void DeathmatchController::onPlayerDeath(
 		case Core::Utils::WeaponType::Unknown:
 			break;
 		}
+
+		room->sendMessageToAll(__("{%06x}> %s(%d) killed %s(%d) with %s (AP: "
+								  "%.1f HP: %.1f distance: %.1f)."),
+			killer->getColour().RGBA() >> 8, killer->getName().to_string(),
+			killer->getID(), player.getName().to_string(), player.getID(),
+			Core::Utils::getWeaponName(reason), killer->getArmour(),
+			killer->getHealth(),
+			glm::distance(killer->getPosition(), player.getPosition()));
 	}
 
 	this->setRandomSpawnPoint(player, room);
