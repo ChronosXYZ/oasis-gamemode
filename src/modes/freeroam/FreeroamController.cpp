@@ -129,6 +129,13 @@ void FreeroamController::initCommands()
 		"v",
 		[this](std::reference_wrapper<IPlayer> player)
 		{
+			auto playerExt = Core::Player::getPlayerExt(player);
+			if (!playerExt->isInMode(Mode::Freeroam))
+			{
+				playerExt->sendErrorMessage(
+					_("You can spawn vehicles only in Freeroam mode!", player));
+				return;
+			}
 			this->showVehicleSpawningDialog(player);
 		},
 		Core::Commands::CommandInfo { .args = {},
