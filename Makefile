@@ -6,6 +6,9 @@ all: build copy_output
 build:
 	./build.sh
 
+br:
+	./build.sh && $(MAKE) run
+
 copy_output:
 	mkdir -p ${CURDIR}/server/components
 	cp ${CURDIR}/build/liboasis-gm.so ${CURDIR}/server/components

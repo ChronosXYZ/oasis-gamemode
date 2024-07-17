@@ -22,8 +22,13 @@ CommandManager::~CommandManager()
 	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
 }
 
-bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText)
+bool CommandManager::onPlayerCommandText(
+	IPlayer& player, StringView commandText)
 {
+	auto playerExt = Player::getPlayerExt(player);
+	if (!playerExt->isAuthorized())
+		return true;
+
 	auto cmdText = commandText.to_string();
 	auto cmdParts = Utils::Strings::split(cmdText, ' ');
 	assert(!cmdParts.empty());
@@ -65,12 +70,14 @@ bool CommandManager::onPlayerCommandText(IPlayer& player, StringView commandText
 	catch (const std::exception& e)
 	{
 		spdlog::debug("Failed to invoke command: {}", e.what());
-		Player::getPlayerExt(player)->sendErrorMessage(_("Failed to invoke command!", player));
+		Player::getPlayerExt(player)->sendErrorMessage(
+			_("Failed to invoke command!", player));
 	}
 	return true;
 }
 
-void CommandManager::callCommandHandler(const std::string& cmdName, CommandCallbackValues args)
+void CommandManager::callCommandHandler(
+	const std::string& cmdName, CommandCallbackValues args)
 {
 	bool notFound = true;
 	for (const auto& handler : this->_commandHandlers[cmdName])
@@ -102,7 +109,9 @@ void CommandManager::sendCommandUsage(IPlayer& player, const std::string& name)
 		{
 			usageText += fmt::format(" [{}]", _(arg, player));
 		}
-		player.sendClientMessage(Colour::White(), fmt::format("{} {}", _("#GOLD_FUSION#[USAGE]#WHITE#", player), usageText));
+		player.sendClientMessage(Colour::White(),
+			fmt::format(
+				"{} {}", _("#GOLD_FUSION#[USAGE]#WHITE#", player), usageText));
 	}
 }
 }
