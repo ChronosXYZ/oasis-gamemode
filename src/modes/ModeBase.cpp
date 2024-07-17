@@ -92,11 +92,12 @@ void ModeBase::onPlayerOnFireBeenKilled(
 
 void ModeBase::onX1ArenaWin(Core::Utils::Events::X1ArenaWin event)
 {
-	this->sendMessageToAll(
-		__("#LIME#>> #RED#X1#WHITE#: %s(%d) "
-		   "has defeated %s(%d) (%.1f HP, %.1f AP, W: %s, D: %.1f, Time: %s)"),
+	this->sendMessageToAll(__("#LIME#>> #RED#X1#WHITE#: %s(%d) "
+							  "has defeated %s(%d)"),
 		event.winner.getName().to_string(), event.winner.getID(),
-		event.loser.getName().to_string(), event.loser.getID(),
+		event.loser.getName().to_string(), event.loser.getID());
+	this->sendMessageToAll(__("(%.1f HP, %.1f AP, "
+							  "weapon: %s, distance %.1f, time: %s)"),
 		event.healthLeft, event.armourLeft,
 		Core::Utils::getWeaponName(event.weapon), event.distance,
 		std::format("{:%OM:%OS}", event.fightDuration));

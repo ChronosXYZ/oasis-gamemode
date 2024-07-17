@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 16:55+0000\n"
+"POT-Creation-Date: 2024-07-17 17:15+0000\n"
 "PO-Revision-Date: 2024-05-21 09:31+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -27,11 +27,11 @@ msgstr ""
 msgid "#LIME#>>#WHITE#"
 msgstr ""
 
-#: src/core/commands/CommandManager.cpp:68
+#: src/core/commands/CommandManager.cpp:74
 msgid "Failed to invoke command!"
 msgstr ""
 
-#: src/core/commands/CommandManager.cpp:105
+#: src/core/commands/CommandManager.cpp:114
 msgid "#GOLD_FUSION#[USAGE]#WHITE#"
 msgstr ""
 
@@ -230,12 +230,12 @@ msgstr ""
 msgid "You cannot join a mode while dying"
 msgstr ""
 
-#: src/core/CoreManager.cpp:506
+#: src/core/CoreManager.cpp:528
 #, c-format
 msgid "~w~You got killed by~n~~r~%s(%d)"
 msgstr ""
 
-#: src/core/CoreManager.cpp:511
+#: src/core/CoreManager.cpp:533
 #, c-format
 msgid "~w~You killed~n~~r~%s(%d)"
 msgstr ""
@@ -631,19 +631,22 @@ msgid ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed player on fire %s(%d)"
 msgstr ""
 
-#: src/modes/ModeBase.cpp:96
+#: src/modes/ModeBase.cpp:95
 #, c-format
-msgid ""
-"#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d) (%.1f HP, %.1f AP, W: "
-"%s, D: %.1f, Time: %s)"
+msgid "#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d)"
 msgstr ""
 
-#: src/modes/ModeBase.cpp:113
+#: src/modes/ModeBase.cpp:99
+#, c-format
+msgid "(%.1f HP, %.1f AP, weapon: %s, distance %.1f, time: %s)"
+msgstr ""
+
+#: src/modes/ModeBase.cpp:114
 #, c-format
 msgid "#LIME#>> #RED#X1#LIGHT_GRAY#: %s(%d) has joined X1 arena (/x1)"
 msgstr ""
 
-#: src/modes/ModeBase.cpp:123
+#: src/modes/ModeBase.cpp:124
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: %s(%d) has joined DM mode (/dm %d)"
