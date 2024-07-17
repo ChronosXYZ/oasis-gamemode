@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 17:29+0000\n"
+"POT-Creation-Date: 2024-07-17 22:17+0000\n"
 "PO-Revision-Date: 2024-05-21 10:39+0000\n"
 "Last-Translator: Ubuntu <chronosxyz000@gmail.com>\n"
 "Language-Team: Portuguese <translation-team-pt@lists.sourceforge.net>\n"
@@ -216,6 +216,8 @@ msgstr ""
 #: src/modes/deathmatch/DeathmatchController.cpp:823
 #: src/modes/deathmatch/DeathmatchController.cpp:1048
 #: src/modes/deathmatch/DeathmatchController.cpp:1093
+#: src/modes/freeroam/FreeroamController.cpp:331
+#: src/modes/freeroam/FreeroamController.cpp:360
 msgid "Select"
 msgstr ""
 
@@ -533,6 +535,8 @@ msgstr ""
 #: src/modes/deathmatch/DeathmatchController.cpp:990
 #: src/modes/deathmatch/DeathmatchController.cpp:1049
 #: src/modes/deathmatch/DeathmatchController.cpp:1094
+#: src/modes/freeroam/FreeroamController.cpp:331
+#: src/modes/freeroam/FreeroamController.cpp:360
 msgid "Cancel"
 msgstr ""
 
@@ -616,7 +620,7 @@ msgstr ""
 msgid "~g~~h~~h~GO!"
 msgstr ""
 
-#: src/modes/deathmatch/DeathmatchController.cpp:1401
+#: src/modes/deathmatch/DeathmatchController.cpp:1403
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d "
@@ -654,63 +658,154 @@ msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: %s(%d) has joined DM mode (/dm %d)"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:76
+#: src/modes/freeroam/FreeroamController.cpp:83
 msgid "Teleports player to the Freeroam mode"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:88
+#: src/modes/freeroam/FreeroamController.cpp:95
 msgid "You can spawn vehicles only in Freeroam mode!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:93
+#: src/modes/freeroam/FreeroamController.cpp:100
 msgid "Invalid car model ID!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:98
+#: src/modes/freeroam/FreeroamController.cpp:105
 msgid "Invalid color ID!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:113
+#: src/modes/freeroam/FreeroamController.cpp:120
+#: src/modes/freeroam/FreeroamController.cpp:382
 msgid "You have sucessfully spawned the vehicle!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:118
+#: src/modes/freeroam/FreeroamController.cpp:125
 msgid "vehicle model id"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:118
+#: src/modes/freeroam/FreeroamController.cpp:125
 msgid "color 1"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:118
+#: src/modes/freeroam/FreeroamController.cpp:125
 msgid "color 2"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:119
+#: src/modes/freeroam/FreeroamController.cpp:126
 msgid "Spawns a vehicle"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:128
+#: src/modes/freeroam/FreeroamController.cpp:135
+msgid "Shows dialog with vehicle list for spawning"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:143
 msgid "You have killed yourself!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:132
+#: src/modes/freeroam/FreeroamController.cpp:147
 msgid "Kill yourself"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:142
+#: src/modes/freeroam/FreeroamController.cpp:157
 msgid "Invalid skin ID!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:149
+#: src/modes/freeroam/FreeroamController.cpp:164
 #, c-format
 msgid "You have changed your skin to ID: %d!"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:152
+#: src/modes/freeroam/FreeroamController.cpp:167
 msgid "skin ID"
 msgstr ""
 
-#: src/modes/freeroam/FreeroamController.cpp:153
+#: src/modes/freeroam/FreeroamController.cpp:168
 msgid "Set player skin"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:256
+msgid "Aircraft"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:260
+msgid "Helicopter"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:265
+msgid "Bike"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:269
+msgid "Convertible"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:274
+msgid "Industrial"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:279
+msgid "Lowrider"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:283
+msgid "Off Road"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:288
+msgid "Public Service"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:293
+msgid "Saloon"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:297
+msgid "Sport"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:303
+msgid "Station Wagon"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:308
+msgid "Boat"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:312
+msgid "Trailer"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:317
+msgid "Unique Vehicle"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:321
+msgid "RC Vehicle"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:329
+#, c-format
+msgid "Select vehicle type"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:330
+msgid "Vehicle type"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:330
+msgid "Total vehicles"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:358
+#, c-format
+msgid "Select vehicle"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:359
+msgid "#. Vehicle name"
+msgstr ""
+
+#: src/modes/freeroam/FreeroamController.cpp:359
+msgid "Vehicle ID"
 msgstr ""

@@ -2,6 +2,7 @@
 
 #include "../../core/CoreManager.hpp"
 #include "../ModeBase.hpp"
+#include "../../core/utils/VehicleList.hpp"
 
 #include <types.hpp>
 #include <Server/Components/Vehicles/vehicle_components.hpp>
@@ -23,22 +24,31 @@ class FreeroamController : public Modes::ModeBase,
 						   public PlayerSpawnEventHandler
 {
 	FreeroamController(std::weak_ptr<Core::CoreManager> coreManager,
-		IPlayerPool* playerPool, std::shared_ptr<dp::event_bus> bus);
+		IPlayerPool* playerPool,
+		std::shared_ptr<Core::DialogManager> dialogManager,
+		std::shared_ptr<dp::event_bus> bus);
 
 	std::weak_ptr<Core::CoreManager> _coreManager;
 	IPlayerPool* _playerPool;
 	IVehiclesComponent* _vehiclesComponent;
+
+	std::shared_ptr<Core::DialogManager> dialogManager;
 
 	void initCommands();
 	void initVehicles();
 	void setupSpawn(IPlayer& player);
 	void deleteLastSpawnedCar(IPlayer& player);
 
+	void showVehicleSpawningDialog(IPlayer& player);
+	void showVehicleListDialog(
+		IPlayer& player, Core::Utils::VehicleType vehicleTypeSelected);
+
 public:
 	virtual ~FreeroamController();
 
 	static FreeroamController* create(
 		std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool,
+		std::shared_ptr<Core::DialogManager> dialogManager,
 		std::shared_ptr<dp::event_bus> bus);
 
 	void onModeJoin(IPlayer& player,

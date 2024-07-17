@@ -151,7 +151,7 @@ void CoreManager::initHandlers()
 		_playerPool, _dialogManager, weak_from_this());
 
 	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
-		weak_from_this(), _playerPool, bus));
+		weak_from_this(), _playerPool, this->_dialogManager, bus));
 	_modes->registerInstance(Modes::Deathmatch::DeathmatchController::create(
 		weak_from_this(), _commandManager, _dialogManager, _playerPool,
 		components->queryComponent<ITimersComponent>(), this->bus,
