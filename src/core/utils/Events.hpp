@@ -42,6 +42,8 @@ struct X1ArenaWin
 	IPlayer& loser;
 	float armourLeft;
 	float healthLeft;
+	int weapon;
+	float distance;
 	std::chrono::seconds fightDuration;
 };
 }

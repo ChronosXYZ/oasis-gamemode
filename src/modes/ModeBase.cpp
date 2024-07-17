@@ -1,11 +1,13 @@
 #include "ModeBase.hpp"
 
 #include "../core/utils/Localization.hpp"
+#include "../core/utils/Common.hpp"
 #include "../core/textdraws/Notification.hpp"
 #include "Modes.hpp"
 #include "deathmatch/DeathmatchController.hpp"
 
 #include <fmt/printf.h>
+#include <format>
 #include <player.hpp>
 #include <spdlog/spdlog.h>
 #include <magic_enum/magic_enum.hpp>
@@ -90,11 +92,14 @@ void ModeBase::onPlayerOnFireBeenKilled(
 
 void ModeBase::onX1ArenaWin(Core::Utils::Events::X1ArenaWin event)
 {
-	this->sendMessageToAll(__("#LIME#>> #RED#X1#WHITE#: %s(%d) "
-							  "has defeated %s(%d) (%.1f HP, %.1f AP)"),
+	this->sendMessageToAll(
+		__("#LIME#>> #RED#X1#WHITE#: %s(%d) "
+		   "has defeated %s(%d) (%.1f HP, %.1f AP, W: %s, D: %.1f, Time: %s)"),
 		event.winner.getName().to_string(), event.winner.getID(),
 		event.loser.getName().to_string(), event.loser.getID(),
-		event.healthLeft, event.armourLeft);
+		event.healthLeft, event.armourLeft,
+		Core::Utils::getWeaponName(event.weapon), event.distance,
+		std::format("{:%OM:%OS}", event.fightDuration));
 }
 
 void ModeBase::onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode event)

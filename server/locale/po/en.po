@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-16 13:18+0000\n"
-"PO-Revision-Date: 2024-07-16 13:18+0000\n"
+"POT-Creation-Date: 2024-07-17 16:55+0000\n"
+"PO-Revision-Date: 2024-07-17 16:55+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -200,7 +200,7 @@ msgstr ""
 #: src/core/auth/AuthController.cpp:316
 #: src/core/controllers/PlayerOnFireController.cpp:30
 #: src/core/controllers/PlayerOnFireController.cpp:41
-#: src/modes/x1/X1Controller.cpp:305
+#: src/modes/x1/X1Controller.cpp:296
 #: src/modes/deathmatch/DeathmatchController.cpp:576
 msgid "OK"
 msgstr "OK"
@@ -249,7 +249,7 @@ msgstr "Derby"
 msgid "Cops and Robbers"
 msgstr "Cops and Robbers"
 
-#: src/core/CoreManager.cpp:348 src/modes/x1/X1Controller.cpp:244
+#: src/core/CoreManager.cpp:348 src/modes/x1/X1Controller.cpp:235
 #: src/modes/deathmatch/DeathmatchController.cpp:481
 #: src/modes/deathmatch/DeathmatchController.cpp:628
 #: src/modes/deathmatch/DeathmatchController.cpp:712
@@ -295,36 +295,36 @@ msgstr "No players on fire!"
 msgid "Show all players on fire"
 msgstr "Show all players on fire"
 
-#: src/modes/x1/X1Controller.cpp:239
+#: src/modes/x1/X1Controller.cpp:230
 #, c-format
 msgid "Select Arena"
 msgstr "Select Arena"
 
-#: src/modes/x1/X1Controller.cpp:240
+#: src/modes/x1/X1Controller.cpp:231
 #: src/modes/deathmatch/DeathmatchController.cpp:477
 msgid "#CREAM_BRULEE#Map"
 msgstr "#CREAM_BRULEE#Map"
 
-#: src/modes/x1/X1Controller.cpp:241
+#: src/modes/x1/X1Controller.cpp:232
 msgid "#CREAM_BRULEE#Weapon set"
 msgstr "#CREAM_BRULEE#Weapon set"
 
-#: src/modes/x1/X1Controller.cpp:242
+#: src/modes/x1/X1Controller.cpp:233
 #: src/modes/deathmatch/DeathmatchController.cpp:479
 msgid "#CREAM_BRULEE#Players"
 msgstr "#CREAM_BRULEE#Players"
 
-#: src/modes/x1/X1Controller.cpp:244
+#: src/modes/x1/X1Controller.cpp:235
 #: src/modes/deathmatch/DeathmatchController.cpp:481
 #: src/modes/deathmatch/DeathmatchController.cpp:526
 msgid "Close"
 msgstr "Close"
 
-#: src/modes/x1/X1Controller.cpp:257
+#: src/modes/x1/X1Controller.cpp:248
 msgid "This arena is #RED#full#WHITE#!"
 msgstr "This arena is #RED#full#WHITE#!"
 
-#: src/modes/x1/X1Controller.cpp:271
+#: src/modes/x1/X1Controller.cpp:262
 #: src/modes/deathmatch/DeathmatchController.cpp:542
 #, c-format
 msgid ""
@@ -362,30 +362,34 @@ msgstr ""
 "- Heavy weapon kills:\t\t\t\t%d\n"
 "- Explosives kills:\t\t\t\t%d"
 
-#: src/modes/x1/X1Controller.cpp:304
+#: src/modes/x1/X1Controller.cpp:295
 #, c-format
 msgid "X1 stats"
 msgstr "X1 stats"
 
-#: src/modes/x1/X1Controller.cpp:327
+#: src/modes/x1/X1Controller.cpp:318
 #, c-format
-msgid "#LIME#>> #RED#X1#LIGHT_GRAY#: Player %s has joined the arena!"
-msgstr "#LIME#>> #RED#X1#LIGHT_GRAY#: Player %s has joined the arena!"
+msgid "#LIME#>> #RED#X1#LIGHT_GRAY#: Player %s has joined the arena"
+msgstr "#LIME#>> #RED#X1#LIGHT_GRAY#: Player %s has joined the arena"
 
-#: src/modes/x1/X1Controller.cpp:428
+#: src/modes/x1/X1Controller.cpp:328
+msgid "~r~The fight has started!"
+msgstr "~r~The fight has started!"
+
+#: src/modes/x1/X1Controller.cpp:438
 msgid "Enter Arena"
 msgstr "Enter Arena"
 
-#: src/modes/x1/X1Controller.cpp:438
+#: src/modes/x1/X1Controller.cpp:448
 #: src/modes/deathmatch/DeathmatchController.cpp:397
 msgid "Invalid player ID"
 msgstr "Invalid player ID"
 
-#: src/modes/x1/X1Controller.cpp:444
+#: src/modes/x1/X1Controller.cpp:454
 msgid "Show X1 stats"
 msgstr "Show X1 stats"
 
-#: src/modes/x1/X1Controller.cpp:488
+#: src/modes/x1/X1Controller.cpp:498
 #: src/modes/deathmatch/DeathmatchController.cpp:327
 msgid "You killed player on fire and got 4 extra points!"
 msgstr "You killed player on fire and got 4 extra points!"
@@ -675,7 +679,7 @@ msgstr ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d "
 "players)"
 
-#: src/modes/ModeBase.cpp:75
+#: src/modes/ModeBase.cpp:77
 #, c-format
 msgid ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on "
@@ -684,24 +688,28 @@ msgstr ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on "
 "fire"
 
-#: src/modes/ModeBase.cpp:85
+#: src/modes/ModeBase.cpp:87
 #, c-format
 msgid ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed player on fire %s(%d)"
 msgstr ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed player on fire %s(%d)"
 
-#: src/modes/ModeBase.cpp:93
+#: src/modes/ModeBase.cpp:96
 #, c-format
-msgid "#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d) (%.1f HP, %.1f AP)"
-msgstr "#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d) (%.1f HP, %.1f AP)"
+msgid ""
+"#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d) (%.1f HP, %.1f AP, W: "
+"%s, D: %.1f, Time: %s)"
+msgstr ""
+"#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d) (%.1f HP, %.1f AP, W: "
+"%s, D: %.1f, Time: %s)"
 
-#: src/modes/ModeBase.cpp:108
+#: src/modes/ModeBase.cpp:113
 #, c-format
 msgid "#LIME#>> #RED#X1#LIGHT_GRAY#: %s(%d) has joined X1 arena (/x1)"
 msgstr "#LIME#>> #RED#X1#LIGHT_GRAY#: %s(%d) has joined X1 arena (/x1)"
 
-#: src/modes/ModeBase.cpp:118
+#: src/modes/ModeBase.cpp:123
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: %s(%d) has joined DM mode (/dm %d)"

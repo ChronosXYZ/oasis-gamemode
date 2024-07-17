@@ -3,6 +3,7 @@
 #include <player.hpp>
 
 #include <numbers>
+#include <string>
 
 namespace Core::Utils
 {
@@ -76,6 +77,75 @@ inline const WeaponType getWeaponType(int weaponId)
 		return WeaponType::HeavyWeapons;
 	}
 	return WeaponType::Unknown;
+}
+
+inline const std::string getWeaponName(int weaponId)
+{
+	switch (weaponId)
+	{
+	case PlayerWeapon_Fist:
+		return "Fist";
+	case PlayerWeapon_BrassKnuckle:
+		return "Brass Knuckle";
+	case PlayerWeapon_Knife:
+		return "Knife";
+	case PlayerWeapon_GolfClub:
+		return "Golf Club";
+	case PlayerWeapon_Shovel:
+		return "Shovel";
+	case PlayerWeapon_PoolStick:
+		return "Pool Stick";
+	case PlayerWeapon_NiteStick:
+		return "Baton";
+	case PlayerWeapon_Bat:
+		return "Baseball Bat";
+	case PlayerWeapon_Katana:
+		return "Katana";
+	case PlayerWeapon_Chainsaw:
+		return "Chainsaw";
+	case PlayerWeapon_Flower:
+		return "Flowers";
+	case PlayerWeapon_Cane:
+		return "Cane";
+	case PlayerWeapon_Dildo:
+		return "Dildo";
+	case PlayerWeapon_Deagle:
+		return "Desert Eagle";
+	case PlayerWeapon_Silenced:
+		return "Silenced Pistol";
+	case PlayerWeapon_Colt45:
+		return "9mm";
+	case PlayerWeapon_Sawedoff:
+		return "Sawn-off Shotgun";
+	case PlayerWeapon_Shotgun:
+		return "Shotgun";
+	case PlayerWeapon_Shotgspa:
+		return "Combat Shotgun";
+	case PlayerWeapon_TEC9:
+		return "TEC-9";
+	case PlayerWeapon_UZI:
+		return "UZI";
+	case PlayerWeapon_MP5:
+		return "MP5";
+	case PlayerWeapon_AK47:
+		return "AK-47";
+	case PlayerWeapon_M4:
+		return "M4";
+	case PlayerWeapon_Sniper:
+		return "Sniper Rifle";
+	case PlayerWeapon_Rifle:
+		return "Country Rifle";
+	case PlayerWeapon_FlameThrower:
+		return "Flame Thrower";
+	case PlayerWeapon_RocketLauncher:
+		return "Rocket Launcher";
+	case PlayerWeapon_HeatSeeker:
+		return "Heat Seeker";
+	case PlayerWeapon_Minigun:
+		return "Minigun";
+	default:
+		return "Unknown";
+	}
 }
 
 // trim from start (in place)
