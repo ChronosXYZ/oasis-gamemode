@@ -59,6 +59,7 @@ public:
 		IPlayer& player, PeerDisconnectReason reason) override;
 	bool onPlayerRequestClass(IPlayer& player, unsigned int classId) override;
 	bool onPlayerRequestSpawn(IPlayer& player) override;
+	void onPlayerSpawn(IPlayer& player) override;
 	bool onPlayerText(IPlayer& player, StringView message) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
 

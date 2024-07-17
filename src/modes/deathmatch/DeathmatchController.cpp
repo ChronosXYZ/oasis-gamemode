@@ -350,6 +350,14 @@ void DeathmatchController::initCommand()
 		{
 			auto playerExt = Core::Player::getPlayerExt(player.get());
 			auto playerData = Core::Player::getPlayerData(player.get());
+
+			if (playerData->tempData->core->isDying)
+			{
+				playerExt->sendErrorMessage(
+					_("You cannot join a mode while dying", player));
+				return;
+			}
+
 			if (!this->rooms.contains((unsigned int)id - 1) || id <= 0)
 			{
 				playerExt->sendErrorMessage(
@@ -366,6 +374,14 @@ void DeathmatchController::initCommand()
 		"dm",
 		[&](std::reference_wrapper<IPlayer> player)
 		{
+			auto playerExt = Core::Player::getPlayerExt(player.get());
+			auto playerData = Core::Player::getPlayerData(player.get());
+			if (playerData->tempData->core->isDying)
+			{
+				playerExt->sendErrorMessage(
+					_("You cannot join a mode while dying", player));
+				return;
+			}
 			this->coreManager.lock()->selectMode(player, Mode::Deathmatch);
 		},
 		Core::Commands::CommandInfo { .args = {},

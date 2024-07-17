@@ -321,6 +321,12 @@ bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 	return false;
 }
 
+void CoreManager::onPlayerSpawn(IPlayer& player)
+{
+	auto playerData = Player::getPlayerData(player);
+	playerData->tempData->core->isDying = false;
+}
+
 void CoreManager::showModeSelectionDialog(IPlayer& player)
 {
 	auto dialog = std::shared_ptr<TabListHeadersDialog>(
@@ -381,8 +387,15 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 void CoreManager::joinMode(IPlayer& player, Modes::Mode mode,
 	std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
+	auto pData = Player::getPlayerData(player);
+	auto playerExt = Player::getPlayerExt(player);
+	if (pData->tempData->core->isDying)
+	{
+		playerExt->sendErrorMessage(
+			_("You cannot join a mode while dying", player));
+		return;
+	}
 	this->removePlayerFromCurrentMode(player);
-	auto pData = this->getPlayerData(player);
 
 	pData->tempData->core->lastMode = pData->tempData->core->currentMode;
 	pData->tempData->core->currentMode = mode;
@@ -482,6 +495,9 @@ bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 void CoreManager::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
 	_playerPool->sendDeathMessageToAll(killer, player, reason);
+
+	auto playerData = Player::getPlayerData(player);
+	playerData->tempData->core->isDying = true;
 
 	if (killer)
 	{

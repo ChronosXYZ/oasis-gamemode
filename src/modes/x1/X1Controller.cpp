@@ -255,6 +255,7 @@ void X1Controller::showArenaSelectionDialog(IPlayer& player)
 				{
 					playerExt->sendErrorMessage(
 						_("This arena is #RED#full#WHITE#!", player));
+					this->showArenaSelectionDialog(player);
 					return;
 				}
 				this->coreManager.lock()->joinMode(

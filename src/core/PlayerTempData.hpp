@@ -10,6 +10,7 @@ struct PlayerTempData
 	Modes::Mode currentMode = Modes::Mode::None;
 	Modes::Mode lastMode = Modes::Mode::None;
 	bool skinSelectionMode = false;
+	bool isDying = false;
 
 	unsigned int subsequentKills = 0;
 };
