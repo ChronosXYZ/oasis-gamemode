@@ -487,9 +487,31 @@ std::shared_ptr<Commands::CommandManager> CoreManager::getCommandManager()
 
 bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 {
+	auto playerExt = Player::getPlayerExt(player);
+	if (!playerExt->isAuthorized())
+		return false;
 	player.setChatBubble(
 		message, Colour::White(), 100.0, Milliseconds(CHAT_BUBBLE_EXPIRATION));
-	return true;
+
+	for (auto sPlayer : _playerPool->players())
+	{
+		if (!playerExt->isInAnyMode())
+			sPlayer->sendClientMessage(Colour::White(),
+				fmt::sprintf("{%06x}%s(%d){FFFFFF}: %s",
+					player.getColour().RGBA() >> 8,
+					player.getName().to_string(), player.getID(),
+					message.to_string()));
+		else
+			sPlayer->sendClientMessage(Colour::White(),
+				fmt::sprintf("{%s}%s: {%06x}%s(%d){FFFFFF}: %s",
+					Modes::getModeColor(playerExt->getMode()),
+					Modes::getModeShortName(playerExt->getMode()),
+					player.getColour().RGBA() >> 8,
+					player.getName().to_string(), player.getID(),
+					message.to_string()));
+	}
+
+	return false;
 }
 
 void CoreManager::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)

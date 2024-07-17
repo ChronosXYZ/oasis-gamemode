@@ -59,6 +59,7 @@ public:
 	float getVehicleSpeed();
 	bool isInMode(Modes::Mode mode);
 	bool isInAnyMode();
+	bool isAuthorized();
 	const Modes::Mode& getMode();
 
 	void freeExtension() override;

@@ -127,4 +127,9 @@ bool OasisPlayerExt::isInAnyMode()
 {
 	return !this->isInMode(Modes::Mode::None);
 }
+
+bool OasisPlayerExt::isAuthorized()
+{
+	return this->_playerData->tempData->core->isLoggedIn;
+}
 }
