@@ -5,6 +5,7 @@
 #include "../../modes/deathmatch/PlayerTempData.hpp"
 #include "../../modes/x1/X1PlayerTempData.hpp"
 #include "../../modes/freeroam/PlayerTempData.hpp"
+#include "../../modes/duel/PlayerTempData.hpp"
 
 #include <memory>
 
@@ -22,5 +23,6 @@ struct PlayerTempData
 	std::unique_ptr<Modes::Deathmatch::PlayerTempData> deathmatch;
 	std::unique_ptr<Modes::X1::X1PlayerTempData> x1
 		= std::make_unique<Modes::X1::X1PlayerTempData>();
+	std::unique_ptr<Modes::Duel::PlayerTempData> duel;
 };
 }

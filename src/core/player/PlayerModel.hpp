@@ -7,6 +7,7 @@
 #include "PlayerTempData.hpp"
 #include "../../modes/deathmatch/DeathmatchStats.hpp"
 #include "../../modes/x1/X1Stats.hpp"
+#include "../../modes/duel/DuelStats.hpp"
 
 #include <Server/Components/Timers/timers.hpp>
 
@@ -42,6 +43,8 @@ struct PlayerModel
 		= std::make_unique<Modes::Deathmatch::DeathmatchStats>();
 	std::unique_ptr<Modes::X1::X1Stats> x1Stats
 		= std::make_unique<Modes::X1::X1Stats>();
+	std::unique_ptr<Modes::Duel::DuelStats> duelStats
+		= std::make_unique<Modes::Duel::DuelStats>();
 	std::unique_ptr<Player::PlayerTempData> tempData
 		= std::make_unique<Player::PlayerTempData>();
 

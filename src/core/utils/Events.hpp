@@ -46,4 +46,15 @@ struct X1ArenaWin
 	float distance;
 	std::chrono::seconds fightDuration;
 };
+
+struct DuelWin
+{
+	IPlayer& winner;
+	IPlayer& loser;
+	float armourLeft;
+	float healthLeft;
+	int weapon;
+	float distance;
+	std::chrono::seconds fightDuration;
+};
 }

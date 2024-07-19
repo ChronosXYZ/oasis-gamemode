@@ -16,6 +16,7 @@ enum class Mode
 	Freeroam,
 	Deathmatch,
 	X1,
+	Duel,
 	Derby,
 	PTP,
 	CnR,
@@ -40,6 +41,8 @@ inline const std::string getModeShortName(Mode mode)
 		return "CNR";
 	case Mode::None:
 		return "";
+	case Mode::Duel:
+		return "DUEL";
 	}
 	return "";
 };
@@ -61,6 +64,8 @@ inline const std::string getModeColor(Mode mode)
 	case Mode::CnR:
 		return "FFFFFF";
 	case Mode::None:
+		return "FFFFFF";
+	case Mode::Duel:
 		return "FFFFFF";
 	}
 	return "FFFFFF";
