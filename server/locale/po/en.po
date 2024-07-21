@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-17 22:17+0000\n"
-"PO-Revision-Date: 2024-07-17 22:17+0000\n"
+"POT-Creation-Date: 2024-07-21 14:49+0000\n"
+"PO-Revision-Date: 2024-07-21 14:49+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -17,14 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/core/player/PlayerExtension.cpp:60
-msgid "#RED#[ERROR]#WHITE#"
-msgstr "#RED#[ERROR]#WHITE#"
-
+#: src/core/player/PlayerExtension.hpp:51
 #: src/core/player/PlayerExtension.cpp:67
 #, c-format
 msgid "#LIME#>>#WHITE#"
 msgstr "#LIME#>>#WHITE#"
+
+#: src/core/player/PlayerExtension.cpp:60
+msgid "#RED#[ERROR]#WHITE#"
+msgstr "#RED#[ERROR]#WHITE#"
 
 #: src/core/commands/CommandManager.cpp:74
 msgid "Failed to invoke command!"
@@ -200,7 +201,7 @@ msgstr ""
 #: src/core/auth/AuthController.cpp:316
 #: src/core/controllers/PlayerOnFireController.cpp:30
 #: src/core/controllers/PlayerOnFireController.cpp:41
-#: src/modes/x1/X1Controller.cpp:296
+#: src/modes/x1/X1Controller.cpp:296 src/modes/duel/DuelController.cpp:238
 #: src/modes/deathmatch/DeathmatchController.cpp:584
 msgid "OK"
 msgstr "OK"
@@ -209,47 +210,49 @@ msgstr "OK"
 msgid "You have successfully registered!"
 msgstr "You have successfully registered!"
 
-#: src/core/CoreManager.cpp:310
+#: src/core/CoreManager.cpp:327
 msgid "You are not logged in yet!"
 msgstr "You are not logged in yet!"
 
-#: src/core/CoreManager.cpp:333
+#: src/core/CoreManager.cpp:350
 msgid "Modes"
 msgstr "Modes"
 
-#: src/core/CoreManager.cpp:334
+#: src/core/CoreManager.cpp:351
 msgid "Mode"
 msgstr "Mode"
 
-#: src/core/CoreManager.cpp:334
+#: src/core/CoreManager.cpp:351
 msgid "Command"
 msgstr "Command"
 
-#: src/core/CoreManager.cpp:334
+#: src/core/CoreManager.cpp:351
 msgid "Players"
 msgstr "Players"
 
-#: src/core/CoreManager.cpp:335
+#: src/core/CoreManager.cpp:352
 msgid "Freeroam"
 msgstr "Freeroam"
 
-#: src/core/CoreManager.cpp:339
+#: src/core/CoreManager.cpp:356
 msgid "Deathmatch"
 msgstr "Deathmatch"
 
-#: src/core/CoreManager.cpp:344
+#: src/core/CoreManager.cpp:361
 msgid "Protect the President"
 msgstr "Protect the President"
 
-#: src/core/CoreManager.cpp:346
+#: src/core/CoreManager.cpp:363
 msgid "Derby"
 msgstr "Derby"
 
-#: src/core/CoreManager.cpp:347
+#: src/core/CoreManager.cpp:364
 msgid "Cops and Robbers"
 msgstr "Cops and Robbers"
 
-#: src/core/CoreManager.cpp:348 src/modes/x1/X1Controller.cpp:235
+#: src/core/CoreManager.cpp:365 src/modes/x1/X1Controller.cpp:235
+#: src/modes/duel/DuelController.cpp:263 src/modes/duel/DuelController.cpp:314
+#: src/modes/duel/DuelController.cpp:346 src/modes/duel/DuelController.cpp:385
 #: src/modes/deathmatch/DeathmatchController.cpp:489
 #: src/modes/deathmatch/DeathmatchController.cpp:636
 #: src/modes/deathmatch/DeathmatchController.cpp:720
@@ -258,27 +261,27 @@ msgstr "Cops and Robbers"
 #: src/modes/deathmatch/DeathmatchController.cpp:823
 #: src/modes/deathmatch/DeathmatchController.cpp:1048
 #: src/modes/deathmatch/DeathmatchController.cpp:1093
-#: src/modes/freeroam/FreeroamController.cpp:331
-#: src/modes/freeroam/FreeroamController.cpp:360
+#: src/modes/freeroam/FreeroamController.cpp:338
+#: src/modes/freeroam/FreeroamController.cpp:367
 msgid "Select"
 msgstr "Select"
 
-#: src/core/CoreManager.cpp:380 src/core/CoreManager.cpp:427
+#: src/core/CoreManager.cpp:397 src/core/CoreManager.cpp:444
 msgid "Mode is not implemented yet!"
 msgstr "Mode is not implemented yet!"
 
-#: src/core/CoreManager.cpp:395
+#: src/core/CoreManager.cpp:412
 #: src/modes/deathmatch/DeathmatchController.cpp:365
 #: src/modes/deathmatch/DeathmatchController.cpp:390
 msgid "You cannot join a mode while dying"
 msgstr "You cannot join a mode while dying"
 
-#: src/core/CoreManager.cpp:528
+#: src/core/CoreManager.cpp:545
 #, c-format
 msgid "~w~You got killed by~n~~r~%s(%d)"
 msgstr "~w~You got killed by~n~~r~%s(%d)"
 
-#: src/core/CoreManager.cpp:533
+#: src/core/CoreManager.cpp:550
 #, c-format
 msgid "~w~You killed~n~~r~%s(%d)"
 msgstr "~w~You killed~n~~r~%s(%d)"
@@ -326,7 +329,7 @@ msgstr "Close"
 msgid "This arena is #RED#full#WHITE#!"
 msgstr "This arena is #RED#full#WHITE#!"
 
-#: src/modes/x1/X1Controller.cpp:262
+#: src/modes/x1/X1Controller.cpp:262 src/modes/duel/DuelController.cpp:203
 #: src/modes/deathmatch/DeathmatchController.cpp:550
 #, c-format
 msgid ""
@@ -374,7 +377,7 @@ msgstr "X1 stats"
 msgid "#LIME#>> #RED#X1#LIGHT_GRAY#: Player %s has joined the arena"
 msgstr "#LIME#>> #RED#X1#LIGHT_GRAY#: Player %s has joined the arena"
 
-#: src/modes/x1/X1Controller.cpp:328
+#: src/modes/x1/X1Controller.cpp:328 src/modes/duel/DuelController.cpp:494
 msgid "~r~The fight has started!"
 msgstr "~r~The fight has started!"
 
@@ -382,7 +385,7 @@ msgstr "~r~The fight has started!"
 msgid "Enter Arena"
 msgstr "Enter Arena"
 
-#: src/modes/x1/X1Controller.cpp:448
+#: src/modes/x1/X1Controller.cpp:448 src/modes/duel/DuelController.cpp:623
 #: src/modes/deathmatch/DeathmatchController.cpp:405
 msgid "Invalid player ID"
 msgstr "Invalid player ID"
@@ -391,10 +394,157 @@ msgstr "Invalid player ID"
 msgid "Show X1 stats"
 msgstr "Show X1 stats"
 
-#: src/modes/x1/X1Controller.cpp:498
+#: src/modes/x1/X1Controller.cpp:498 src/modes/duel/DuelController.cpp:681
 #: src/modes/deathmatch/DeathmatchController.cpp:335
 msgid "You killed player on fire and got 4 extra points!"
 msgstr "You killed player on fire and got 4 extra points!"
+
+#: src/modes/duel/DuelController.cpp:33
+msgid "Invalid player id"
+msgstr "Invalid player id"
+
+#: src/modes/duel/DuelController.cpp:40
+msgid "Player has not been authorized"
+msgstr "Player has not been authorized"
+
+#: src/modes/duel/DuelController.cpp:179
+msgid "The player you want to call for a duel has disconnected!"
+msgstr "The player you want to call for a duel has disconnected!"
+
+#: src/modes/duel/DuelController.cpp:191
+#, c-format
+msgid ""
+"DUEL: {%06x}%s(%d) #WHITE#sent you a duel offer, use /duela to accept it"
+msgstr ""
+"DUEL: {%06x}%s(%d) #WHITE#sent you a duel offer, use /duela to accept it"
+
+#: src/modes/duel/DuelController.cpp:196
+msgid "DUEL: You have created duel offer, wait for an answer"
+msgstr "DUEL: You have created duel offer, wait for an answer"
+
+#: src/modes/duel/DuelController.cpp:237
+#, c-format
+msgid "Duel stats"
+msgstr "Duel stats"
+
+#: src/modes/duel/DuelController.cpp:256 src/modes/duel/DuelController.cpp:613
+#, c-format
+msgid "Create duel"
+msgstr "Create duel"
+
+#: src/modes/duel/DuelController.cpp:257
+#: src/modes/deathmatch/DeathmatchController.cpp:616
+msgid "Map"
+msgstr "Map"
+
+#: src/modes/duel/DuelController.cpp:258
+msgid "Round count"
+msgstr "Round count"
+
+#: src/modes/duel/DuelController.cpp:260
+#: src/modes/deathmatch/DeathmatchController.cpp:617
+msgid "Weapon set"
+msgstr "Weapon set"
+
+#: src/modes/duel/DuelController.cpp:262 src/modes/duel/DuelController.cpp:466
+msgid "Confirm"
+msgstr "Confirm"
+
+#: src/modes/duel/DuelController.cpp:263 src/modes/duel/DuelController.cpp:314
+#: src/modes/duel/DuelController.cpp:346 src/modes/duel/DuelController.cpp:385
+#: src/modes/duel/DuelController.cpp:422 src/modes/duel/DuelController.cpp:466
+#: src/modes/deathmatch/DeathmatchController.cpp:636
+#: src/modes/deathmatch/DeathmatchController.cpp:720
+#: src/modes/deathmatch/DeathmatchController.cpp:749
+#: src/modes/deathmatch/DeathmatchController.cpp:790
+#: src/modes/deathmatch/DeathmatchController.cpp:824
+#: src/modes/deathmatch/DeathmatchController.cpp:868
+#: src/modes/deathmatch/DeathmatchController.cpp:930
+#: src/modes/deathmatch/DeathmatchController.cpp:990
+#: src/modes/deathmatch/DeathmatchController.cpp:1049
+#: src/modes/deathmatch/DeathmatchController.cpp:1094
+#: src/modes/freeroam/FreeroamController.cpp:338
+#: src/modes/freeroam/FreeroamController.cpp:367
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/modes/duel/DuelController.cpp:313
+#, c-format
+msgid "Duel map selection"
+msgstr "Duel map selection"
+
+#: src/modes/duel/DuelController.cpp:345
+#, c-format
+msgid "Duel weapon set selection"
+msgstr "Duel weapon set selection"
+
+#: src/modes/duel/DuelController.cpp:384
+#, c-format
+msgid "Duel rounds"
+msgstr "Duel rounds"
+
+#: src/modes/duel/DuelController.cpp:416
+msgid "No duel invites received"
+msgstr "No duel invites received"
+
+#: src/modes/duel/DuelController.cpp:421
+#, c-format
+msgid "Duels"
+msgstr "Duels"
+
+#: src/modes/duel/DuelController.cpp:422
+msgid "Accept"
+msgstr "Accept"
+
+#: src/modes/duel/DuelController.cpp:433
+msgid ""
+"The player which sent you the duel offer has canceled it or disconnected "
+"from the server"
+msgstr ""
+"The player which sent you the duel offer has canceled it or disconnected "
+"from the server"
+
+#: src/modes/duel/DuelController.cpp:450
+msgid "The player has disconnected!"
+msgstr "The player has disconnected!"
+
+#: src/modes/duel/DuelController.cpp:455
+#, c-format
+msgid "Duel confirmation"
+msgstr "Duel confirmation"
+
+#: src/modes/duel/DuelController.cpp:457
+#, c-format
+msgid ""
+"#WHITE#- Player: {%06x}%s(%d)\n"
+"#WHITE#- Map: %s\n"
+"- Weapon set: %s\n"
+"- Round count: %d\n"
+"- Starting health: %.1f\n"
+"- Starting armour: %.1f\n"
+"\n"
+"Do you accept the duel?"
+msgstr ""
+"#WHITE#- Player: {%06x}%s(%d)\n"
+"#WHITE#- Map: %s\n"
+"- Weapon set: %s\n"
+"- Round count: %d\n"
+"- Starting health: %.1f\n"
+"- Starting armour: %.1f\n"
+"\n"
+"Do you accept the duel?"
+
+#: src/modes/duel/DuelController.cpp:612 src/modes/duel/DuelController.cpp:628
+msgid "player id"
+msgstr "player id"
+
+#: src/modes/duel/DuelController.cpp:629
+msgid "Show Duel stats"
+msgstr "Show Duel stats"
+
+#: src/modes/duel/DuelController.cpp:638
+msgid "Accept duels"
+msgstr "Accept duels"
 
 #: src/modes/deathmatch/WeaponSet.hpp:57
 #: src/modes/deathmatch/DeathmatchController.cpp:748
@@ -517,14 +667,6 @@ msgstr "DM stats"
 msgid "Create new deathmatch room"
 msgstr "Create new deathmatch room"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:616
-msgid "Map"
-msgstr "Map"
-
-#: src/modes/deathmatch/DeathmatchController.cpp:617
-msgid "Weapon set"
-msgstr "Weapon set"
-
 #: src/modes/deathmatch/DeathmatchController.cpp:618
 msgid "Privacy mode"
 msgstr "Privacy mode"
@@ -583,21 +725,6 @@ msgstr "Random map"
 #: src/modes/deathmatch/DeathmatchController.cpp:635
 msgid "#YELLOW#Start"
 msgstr "#YELLOW#Start"
-
-#: src/modes/deathmatch/DeathmatchController.cpp:636
-#: src/modes/deathmatch/DeathmatchController.cpp:720
-#: src/modes/deathmatch/DeathmatchController.cpp:749
-#: src/modes/deathmatch/DeathmatchController.cpp:790
-#: src/modes/deathmatch/DeathmatchController.cpp:824
-#: src/modes/deathmatch/DeathmatchController.cpp:868
-#: src/modes/deathmatch/DeathmatchController.cpp:930
-#: src/modes/deathmatch/DeathmatchController.cpp:990
-#: src/modes/deathmatch/DeathmatchController.cpp:1049
-#: src/modes/deathmatch/DeathmatchController.cpp:1094
-#: src/modes/freeroam/FreeroamController.cpp:331
-#: src/modes/freeroam/FreeroamController.cpp:360
-msgid "Cancel"
-msgstr "Cancel"
 
 #: src/modes/deathmatch/DeathmatchController.cpp:719
 #, c-format
@@ -732,6 +859,7 @@ msgid "Teleports player to the Freeroam mode"
 msgstr "Teleports player to the Freeroam mode"
 
 #: src/modes/freeroam/FreeroamController.cpp:95
+#: src/modes/freeroam/FreeroamController.cpp:136
 msgid "You can spawn vehicles only in Freeroam mode!"
 msgstr "You can spawn vehicles only in Freeroam mode!"
 
@@ -744,7 +872,7 @@ msgid "Invalid color ID!"
 msgstr "Invalid color ID!"
 
 #: src/modes/freeroam/FreeroamController.cpp:120
-#: src/modes/freeroam/FreeroamController.cpp:382
+#: src/modes/freeroam/FreeroamController.cpp:389
 msgid "You have sucessfully spawned the vehicle!"
 msgstr "You have sucessfully spawned the vehicle!"
 
@@ -764,117 +892,117 @@ msgstr "color 2"
 msgid "Spawns a vehicle"
 msgstr "Spawns a vehicle"
 
-#: src/modes/freeroam/FreeroamController.cpp:135
+#: src/modes/freeroam/FreeroamController.cpp:142
 msgid "Shows dialog with vehicle list for spawning"
 msgstr "Shows dialog with vehicle list for spawning"
 
-#: src/modes/freeroam/FreeroamController.cpp:143
+#: src/modes/freeroam/FreeroamController.cpp:150
 msgid "You have killed yourself!"
 msgstr "You have killed yourself!"
 
-#: src/modes/freeroam/FreeroamController.cpp:147
+#: src/modes/freeroam/FreeroamController.cpp:154
 msgid "Kill yourself"
 msgstr "Kill yourself"
 
-#: src/modes/freeroam/FreeroamController.cpp:157
+#: src/modes/freeroam/FreeroamController.cpp:164
 msgid "Invalid skin ID!"
 msgstr "Invalid skin ID!"
 
-#: src/modes/freeroam/FreeroamController.cpp:164
+#: src/modes/freeroam/FreeroamController.cpp:171
 #, c-format
 msgid "You have changed your skin to ID: %d!"
 msgstr "You have changed your skin to ID: %d!"
 
-#: src/modes/freeroam/FreeroamController.cpp:167
+#: src/modes/freeroam/FreeroamController.cpp:174
 msgid "skin ID"
 msgstr "skin ID"
 
-#: src/modes/freeroam/FreeroamController.cpp:168
+#: src/modes/freeroam/FreeroamController.cpp:175
 msgid "Set player skin"
 msgstr "Set player skin"
 
-#: src/modes/freeroam/FreeroamController.cpp:256
+#: src/modes/freeroam/FreeroamController.cpp:263
 msgid "Aircraft"
 msgstr "Aircraft"
 
-#: src/modes/freeroam/FreeroamController.cpp:260
+#: src/modes/freeroam/FreeroamController.cpp:267
 msgid "Helicopter"
 msgstr "Helicopter"
 
-#: src/modes/freeroam/FreeroamController.cpp:265
+#: src/modes/freeroam/FreeroamController.cpp:272
 msgid "Bike"
 msgstr "Bike"
 
-#: src/modes/freeroam/FreeroamController.cpp:269
+#: src/modes/freeroam/FreeroamController.cpp:276
 msgid "Convertible"
 msgstr "Convertible"
 
-#: src/modes/freeroam/FreeroamController.cpp:274
+#: src/modes/freeroam/FreeroamController.cpp:281
 msgid "Industrial"
 msgstr "Industrial"
 
-#: src/modes/freeroam/FreeroamController.cpp:279
+#: src/modes/freeroam/FreeroamController.cpp:286
 msgid "Lowrider"
 msgstr "Lowrider"
 
-#: src/modes/freeroam/FreeroamController.cpp:283
+#: src/modes/freeroam/FreeroamController.cpp:290
 msgid "Off Road"
 msgstr "Off Road"
 
-#: src/modes/freeroam/FreeroamController.cpp:288
+#: src/modes/freeroam/FreeroamController.cpp:295
 msgid "Public Service"
 msgstr "Public Service"
 
-#: src/modes/freeroam/FreeroamController.cpp:293
+#: src/modes/freeroam/FreeroamController.cpp:300
 msgid "Saloon"
 msgstr "Saloon"
 
-#: src/modes/freeroam/FreeroamController.cpp:297
+#: src/modes/freeroam/FreeroamController.cpp:304
 msgid "Sport"
 msgstr "Sport"
 
-#: src/modes/freeroam/FreeroamController.cpp:303
+#: src/modes/freeroam/FreeroamController.cpp:310
 msgid "Station Wagon"
 msgstr "Station Wagon"
 
-#: src/modes/freeroam/FreeroamController.cpp:308
+#: src/modes/freeroam/FreeroamController.cpp:315
 msgid "Boat"
 msgstr "Boat"
 
-#: src/modes/freeroam/FreeroamController.cpp:312
+#: src/modes/freeroam/FreeroamController.cpp:319
 msgid "Trailer"
 msgstr "Trailer"
 
-#: src/modes/freeroam/FreeroamController.cpp:317
+#: src/modes/freeroam/FreeroamController.cpp:324
 msgid "Unique Vehicle"
 msgstr "Unique Vehicle"
 
-#: src/modes/freeroam/FreeroamController.cpp:321
+#: src/modes/freeroam/FreeroamController.cpp:328
 msgid "RC Vehicle"
 msgstr "RC Vehicle"
 
-#: src/modes/freeroam/FreeroamController.cpp:329
+#: src/modes/freeroam/FreeroamController.cpp:336
 #, c-format
 msgid "Select vehicle type"
 msgstr "Select vehicle type"
 
-#: src/modes/freeroam/FreeroamController.cpp:330
+#: src/modes/freeroam/FreeroamController.cpp:337
 msgid "Vehicle type"
 msgstr "Vehicle type"
 
-#: src/modes/freeroam/FreeroamController.cpp:330
+#: src/modes/freeroam/FreeroamController.cpp:337
 msgid "Total vehicles"
 msgstr "Total vehicles"
 
-#: src/modes/freeroam/FreeroamController.cpp:358
+#: src/modes/freeroam/FreeroamController.cpp:365
 #, c-format
 msgid "Select vehicle"
 msgstr "Select vehicle"
 
-#: src/modes/freeroam/FreeroamController.cpp:359
+#: src/modes/freeroam/FreeroamController.cpp:366
 msgid "#. Vehicle name"
 msgstr "#. Vehicle name"
 
-#: src/modes/freeroam/FreeroamController.cpp:359
+#: src/modes/freeroam/FreeroamController.cpp:366
 msgid "Vehicle ID"
 msgstr "Vehicle ID"

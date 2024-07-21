@@ -20,6 +20,7 @@
 #include "../modes/freeroam/FreeroamController.hpp"
 #include "../modes/deathmatch/DeathmatchController.hpp"
 #include "../modes/x1/X1Controller.hpp"
+#include "../modes/duel/DuelController.hpp"
 
 #include <chrono>
 #include <cstddef>
@@ -135,6 +136,19 @@ void CoreManager::onPlayerDisconnect(
 	IPlayer& player, PeerDisconnectReason reason)
 {
 	this->savePlayer(player);
+	auto playerData = Player::getPlayerData(player);
+
+	// cleanup sent duel offers
+	for (auto offer : playerData->tempData->core->duelOffersSent)
+	{
+		auto playerData = Player::getPlayerData(*offer->to);
+		std::erase_if(playerData->tempData->core->duelOffersReceived,
+			[&player](std::shared_ptr<Modes::Duel::DuelOffer> x)
+			{
+				return x->from->getID() == player.getID();
+			});
+	}
+
 	this->_playerData.erase(player.getID());
 	this->removePlayerFromCurrentMode(player);
 	_playerPool->sendDeathMessageToAll(NULL, player, 201);
@@ -158,6 +172,9 @@ void CoreManager::initHandlers()
 		_dbConnection));
 	_modes->registerInstance(Modes::X1::X1Controller::create(weak_from_this(),
 		_commandManager, _dialogManager, _playerPool,
+		components->queryComponent<ITimersComponent>(), this->bus));
+	_modes->registerInstance(Modes::Duel::DuelController::create(
+		weak_from_this(), _commandManager, _dialogManager, _playerPool,
 		components->queryComponent<ITimersComponent>(), this->bus));
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
 		_playerPool, components->queryComponent<IVehiclesComponent>(),

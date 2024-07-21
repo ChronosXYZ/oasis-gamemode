@@ -5,9 +5,11 @@
 #include "../../core/commands/CommandManager.hpp"
 #include "../../core/dialogs/DialogManager.hpp"
 #include "../../core/utils/IDPool.hpp"
+#include "DuelOffer.hpp"
 #include "Room.hpp"
 #include "Room.tpp"
 
+#include <functional>
 #include <player.hpp>
 
 #include <map>
@@ -27,7 +29,6 @@ class DuelController : public ModeBase, public PlayerSpawnEventHandler
 		std::shared_ptr<dp::event_bus> bus);
 
 	void initCommands();
-	void createRoom(IPlayer& player);
 	void setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
 	void logStatsForPlayer(IPlayer& player, bool winner, int weapon);
@@ -38,6 +39,12 @@ class DuelController : public ModeBase, public PlayerSpawnEventHandler
 	void showDuelMapSelectionDialog(IPlayer& player);
 	void showDuelWeaponSelectionDialog(IPlayer& player);
 	void showDuelRoundCountSettingDialog(IPlayer& player);
+	void showDuelAcceptListDialog(IPlayer& player);
+	void showDuelAcceptConfirmDialog(
+		IPlayer& player, std::shared_ptr<DuelOffer> offer);
+
+	// Commands
+	void createDuel(IPlayer& player, int id);
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
 	void onRoundEnd(IPlayer& winner, IPlayer& loser, int weaponId);

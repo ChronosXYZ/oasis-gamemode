@@ -6,14 +6,17 @@
 #include "../../core/SQLQueryManager.hpp"
 #include "DuelOffer.hpp"
 #include "PlayerTempData.hpp"
+#include "values.hpp"
 
 #include <bits/chrono.h>
+#include <functional>
 #include <magic_enum/magic_enum.hpp>
 #include <player.hpp>
 #include <chrono>
 #include <fmt/printf.h>
 
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
 
@@ -21,10 +24,39 @@ namespace Modes::Duel
 {
 
 // TODO implement duel accepting
-
-void DuelController::createRoom(IPlayer& player)
+void DuelController::createDuel(IPlayer& player, int id)
 {
-	// TODO create room
+	auto playerExt = Core::Player::getPlayerExt(player);
+	auto to = this->playerPool->get(id);
+	if (!to || id == player.getID())
+	{
+		playerExt->sendErrorMessage(_("Invalid player id", player));
+		return;
+	}
+
+	auto toExt = Core::Player::getPlayerExt(*to);
+	if (!toExt->isAuthorized())
+	{
+		playerExt->sendErrorMessage(__("Player has not been authorized"));
+		return;
+	}
+
+	auto playerData = Core::Player::getPlayerData(player);
+	auto defaultWeaponSet
+		= Deathmatch::WeaponSet(Deathmatch::WeaponSet::Value::Run);
+	auto weaponsArray = defaultWeaponSet.getWeapons();
+	std::vector<PlayerWeapon> weapons(weaponsArray.begin(), weaponsArray.end());
+	playerData->tempData->core->temporaryDuelSettings
+		= std::shared_ptr<DuelOffer>(new DuelOffer {
+			.map = Deathmatch::MAPS[0],
+			.weapons = weapons,
+			.roundCount = 1,
+			.defaultHealth = 100.0,
+			.defaultArmour = 100.0,
+			.from = &player,
+			.to = to,
+		});
+	this->showDuelCreationDialog(player);
 }
 
 void DuelController::setRandomSpawnPoint(
@@ -141,10 +173,11 @@ void DuelController::createDuelOffer(IPlayer& player)
 		return;
 	auto tempDuelSettings
 		= playerData->tempData->core->temporaryDuelSettings.value();
-	if (!tempDuelSettings->to)
+	if (tempDuelSettings->to->getID() == -1)
 	{
-		playerExt->sendErrorMessage(_(
-			"The player you wanna call for a duel has disconnected!", player));
+		playerExt->sendErrorMessage(
+			_("The player you want to call for a duel has disconnected!",
+				player));
 		return;
 	}
 	playerData->tempData->core->duelOffersSent.push_back(tempDuelSettings);
@@ -155,10 +188,12 @@ void DuelController::createDuelOffer(IPlayer& player)
 	receivingPlayerData->tempData->core->duelOffersReceived.push_back(
 		tempDuelSettings);
 	receivingPlayerExt->sendInfoMessage(
-		_("DUEL: %s(%d) sent you a duel offer, use /duela to accept it",
-			*tempDuelSettings->to));
+		__("DUEL: {%06x}%s(%d) #WHITE#sent you a duel offer, use "
+		   "/duela to accept it"),
+		player.getColour().RGBA() >> 8, player.getName().to_string(),
+		player.getID());
 	playerExt->sendInfoMessage(
-		_("DUEL: You have created duel offer, wait for an answer", player));
+		__("DUEL: You have created duel offer, wait for an answer"));
 }
 
 void DuelController::showDuelStatsDialog(IPlayer& player, unsigned int id)
@@ -246,6 +281,7 @@ void DuelController::showDuelCreationDialog(IPlayer& player)
 				case 2:
 				{
 					this->showDuelWeaponSelectionDialog(player);
+					break;
 				}
 				case 3:
 				{
@@ -284,10 +320,7 @@ void DuelController::showDuelMapSelectionDialog(IPlayer& player)
 				playerData->tempData->core->temporaryDuelSettings.value()->map
 					= Deathmatch::MAPS[result.listItem()];
 			}
-			else
-			{
-				this->showDuelCreationDialog(player);
-			}
+			this->showDuelCreationDialog(player);
 		});
 }
 
@@ -327,10 +360,7 @@ void DuelController::showDuelWeaponSelectionDialog(IPlayer& player)
 				duelSettings->weapons
 					= std::vector<PlayerWeapon>(weapons.begin(), weapons.end());
 			}
-			else
-			{
-				this->showDuelCreationDialog(player);
-			}
+			this->showDuelCreationDialog(player);
 		});
 }
 
@@ -364,10 +394,82 @@ void DuelController::showDuelRoundCountSettingDialog(IPlayer& player)
 					= playerData->tempData->core->temporaryDuelSettings.value();
 				duelSettings->roundCount = result.listItem() * 2 + 1;
 			}
-			else
+			this->showDuelCreationDialog(player);
+		});
+}
+
+void DuelController::showDuelAcceptListDialog(IPlayer& player)
+{
+	std::vector<std::string> duels;
+
+	auto playerData = Core::Player::getPlayerData(player);
+	for (auto offer : playerData->tempData->core->duelOffersReceived)
+	{
+		duels.push_back(
+			fmt::sprintf("{%06x}%s(%d)", offer->from->getColour().RGBA() >> 8,
+				offer->from->getName().to_string(), offer->to->getID()));
+	}
+
+	auto playerExt = Core::Player::getPlayerExt(player);
+	if (duels.empty())
+	{
+		playerExt->sendErrorMessage(__("No duel invites received"));
+		return;
+	}
+
+	auto dialog = std::shared_ptr<Core::ListDialog>(new Core::ListDialog(
+		fmt::sprintf(DIALOG_HEADER_TITLE, _("Duels", player)), duels,
+		_("Accept", player), _("Cancel", player)));
+	this->dialogManager->showDialog(player, dialog,
+		[this, &player, playerData](Core::DialogResult result)
+		{
+			if (!result.response())
+				return;
+			auto playerExt = Core::Player::getPlayerExt(player);
+			if (result.listItem()
+				>= playerData->tempData->core->duelOffersReceived.size())
 			{
-				this->showDuelCreationDialog(player);
+				playerExt->sendErrorMessage(
+					_("The player which sent you the duel offer has canceled "
+					  "it or disconnected from the server",
+						player));
+				return;
 			}
+			auto offer = playerData->tempData->core->duelOffersReceived.at(
+				result.listItem());
+			this->showDuelAcceptConfirmDialog(player, offer);
+		});
+}
+
+void DuelController::showDuelAcceptConfirmDialog(
+	IPlayer& player, std::shared_ptr<DuelOffer> offer)
+{
+	auto playerExt = Core::Player::getPlayerExt(player);
+	if (offer->from->getID() == -1)
+	{
+		playerExt->sendErrorMessage(_("The player has disconnected!", player));
+		return;
+	}
+
+	auto dialog = std::shared_ptr<Core::MessageDialog>(new Core::MessageDialog(
+		fmt::sprintf(DIALOG_HEADER_TITLE, _("Duel confirmation", player)),
+		fmt::sprintf(
+			_("#WHITE#- Player: {%06x}%s(%d)\n#WHITE#- Map: %s\n- Weapon set: "
+			  "%s\n- Round count: "
+			  "%d\n- Starting health: %.1f\n- Starting armour: %.1f\n\nDo you "
+			  "accept the duel?",
+				player),
+			offer->from->getColour().RGBA() >> 8,
+			offer->from->getName().to_string(), offer->from->getID(),
+			offer->map.name, offer->weaponSet.toString(player),
+			offer->roundCount, offer->defaultHealth, offer->defaultArmour),
+		_("Confirm", player), _("Cancel", player)));
+	this->dialogManager->showDialog(player, dialog,
+		[](Core::DialogResult result)
+		{
+			if (!result.response())
+				return;
+			// TODO accept duel
 		});
 }
 
@@ -503,11 +605,11 @@ void DuelController::initCommands()
 {
 	this->commandManager->addCommand(
 		"duel",
-		[&](std::reference_wrapper<IPlayer> player)
+		[this](std::reference_wrapper<IPlayer> player, int id)
 		{
-			this->coreManager.lock()->selectMode(player, Mode::Duel);
+			this->createDuel(player, id);
 		},
-		Core::Commands::CommandInfo { .args = {},
+		Core::Commands::CommandInfo { .args = { __("player id") },
 			.description = __("Create duel"),
 			.category = DUEL_MODE_NAME });
 
@@ -523,15 +625,20 @@ void DuelController::initCommands()
 			}
 			this->showDuelStatsDialog(player, id);
 		},
-		Core::Commands::CommandInfo { .args = { "player id" },
+		Core::Commands::CommandInfo { .args = { __("player id") },
 			.description = __("Show Duel stats"),
 			.category = DUEL_MODE_NAME });
+	this->commandManager->addCommand(
+		"duela",
+		[this](std::reference_wrapper<IPlayer> player)
+		{
+			this->showDuelAcceptListDialog(player);
+		},
+		Core::Commands::CommandInfo {
+			.description = __("Accept duels"), .category = DUEL_MODE_NAME });
 }
 
-void DuelController::onModeSelect(IPlayer& player)
-{
-	// TODO create duel creation dialog
-}
+void DuelController::onModeSelect(IPlayer& player) { }
 
 void DuelController::onModeJoin(IPlayer& player, JoinData joinData)
 {

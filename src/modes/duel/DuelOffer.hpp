@@ -13,12 +13,11 @@ struct DuelOffer
 {
 	Deathmatch::Map map;
 	std::vector<PlayerWeapon> weapons;
-	Deathmatch::WeaponSet weaponSet
-		= Deathmatch::WeaponSet(Deathmatch::WeaponSet::Value::Run);
+	Deathmatch::WeaponSet weaponSet;
 	unsigned int roundCount;
 	float defaultHealth;
 	float defaultArmour;
-	IPlayer& from;
+	IPlayer* from;
 	IPlayer* to;
 };
 }
