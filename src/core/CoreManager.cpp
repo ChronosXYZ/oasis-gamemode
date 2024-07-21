@@ -136,19 +136,6 @@ void CoreManager::onPlayerDisconnect(
 	IPlayer& player, PeerDisconnectReason reason)
 {
 	this->savePlayer(player);
-	auto playerData = Player::getPlayerData(player);
-
-	// cleanup sent duel offers
-	for (auto offer : playerData->tempData->core->duelOffersSent)
-	{
-		auto playerData = Player::getPlayerData(*offer->to);
-		std::erase_if(playerData->tempData->core->duelOffersReceived,
-			[&player](std::shared_ptr<Modes::Duel::DuelOffer> x)
-			{
-				return x->from->getID() == player.getID();
-			});
-	}
-
 	this->_playerData.erase(player.getID());
 	this->removePlayerFromCurrentMode(player);
 	_playerPool->sendDeathMessageToAll(NULL, player, 201);

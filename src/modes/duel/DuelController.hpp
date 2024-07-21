@@ -20,7 +20,9 @@ namespace Modes::Duel
 {
 inline const std::string DUEL_ROOM_INDEX = "roomIndex";
 inline const std::string DUEL_MODE_NAME = "Duel";
-class DuelController : public ModeBase, public PlayerSpawnEventHandler
+class DuelController : public ModeBase,
+					   public PlayerSpawnEventHandler,
+					   public PlayerConnectEventHandler
 {
 	DuelController(std::weak_ptr<Core::CoreManager> coreManager,
 		std::shared_ptr<Core::Commands::CommandManager> commandManager,
@@ -50,6 +52,8 @@ class DuelController : public ModeBase, public PlayerSpawnEventHandler
 	void onRoundEnd(IPlayer& winner, IPlayer& loser, int weaponId);
 	void onDuelEnd(std::shared_ptr<Room> duelRoom);
 
+	void deleteDuelOffersFromPlayer(IPlayer& player);
+
 	std::map<unsigned int, std::shared_ptr<Room>> rooms;
 	std::unique_ptr<Core::Utils::IDPool> roomIdPool;
 
@@ -64,6 +68,8 @@ public:
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
+	void onPlayerDisconnect(
+		IPlayer& player, PeerDisconnectReason reason) override;
 
 	void onModeSelect(IPlayer& player) override;
 	void onModeJoin(IPlayer& player, JoinData joinData) override;

@@ -6,6 +6,7 @@
 #include "../../core/SQLQueryManager.hpp"
 #include "DuelOffer.hpp"
 #include "PlayerTempData.hpp"
+#include "events.hpp"
 #include "values.hpp"
 
 #include <bits/chrono.h>
@@ -27,17 +28,29 @@ namespace Modes::Duel
 void DuelController::createDuel(IPlayer& player, int id)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
-	auto to = this->playerPool->get(id);
-	if (!to || id == player.getID())
+	auto receivingPlayer = this->playerPool->get(id);
+	if (!receivingPlayer || id == player.getID())
 	{
 		playerExt->sendErrorMessage(_("Invalid player id", player));
 		return;
 	}
 
-	auto toExt = Core::Player::getPlayerExt(*to);
-	if (!toExt->isAuthorized())
+	auto receivingPlayerExt = Core::Player::getPlayerExt(*receivingPlayer);
+	if (!receivingPlayerExt->isAuthorized())
 	{
 		playerExt->sendErrorMessage(__("Player has not been authorized"));
+		return;
+	}
+	auto duelOffersSent
+		= receivingPlayerExt->getPlayerData()->tempData->core->duelOffersSent;
+	if (auto it = std::find_if(duelOffersSent.begin(), duelOffersSent.end(),
+			[&player](std::shared_ptr<DuelOffer> x)
+			{
+				return x->from->getID() == player.getID();
+			});
+		it != duelOffersSent.end())
+	{
+		playerExt->sendErrorMessage(__("You already sent him a duel offer!"));
 		return;
 	}
 
@@ -54,7 +67,7 @@ void DuelController::createDuel(IPlayer& player, int id)
 			.defaultHealth = 100.0,
 			.defaultArmour = 100.0,
 			.from = &player,
-			.to = to,
+			.to = receivingPlayer,
 		});
 	this->showDuelCreationDialog(player);
 }
@@ -512,6 +525,20 @@ void DuelController::onDuelEnd(std::shared_ptr<Room> duelRoom)
 	// then remove room from the map
 }
 
+void DuelController::deleteDuelOffersFromPlayer(IPlayer& player)
+{
+	auto playerData = Core::Player::getPlayerData(player);
+	for (auto offer : playerData->tempData->core->duelOffersSent)
+	{
+		auto playerData = Core::Player::getPlayerData(*offer->to);
+		std::erase_if(playerData->tempData->core->duelOffersReceived,
+			[&player](std::shared_ptr<Modes::Duel::DuelOffer> x)
+			{
+				return x->from->getID() == player.getID();
+			});
+	}
+}
+
 void DuelController::onPlayerSpawn(IPlayer& player)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
@@ -567,6 +594,12 @@ void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 	this->onRoundEnd(*winner, *loser, reason);
 }
 
+void DuelController::onPlayerDisconnect(
+	IPlayer& player, PeerDisconnectReason reason)
+{
+	this->deleteDuelOffersFromPlayer(player);
+}
+
 DuelController::DuelController(std::weak_ptr<Core::CoreManager> coreManager,
 	std::shared_ptr<Core::Commands::CommandManager> commandManager,
 	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
@@ -581,6 +614,8 @@ DuelController::DuelController(std::weak_ptr<Core::CoreManager> coreManager,
 {
 	this->playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 	this->playerPool->getPlayerDamageDispatcher().addEventHandler(this);
+	this->playerPool->getPlayerConnectDispatcher().addEventHandler(
+		this, EventPriority_Highest);
 
 	// re-register PoF event subscription
 	this->playerOnFireEventRegistration
