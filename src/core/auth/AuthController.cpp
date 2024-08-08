@@ -160,7 +160,7 @@ void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 	playerData->tempData->auth->loginAttempts = ++loginAttempts;
 	if (loginAttempts > 3)
 	{
-		playerExt->sendErrorMessage(_("Too much login attempts!", player));
+		playerExt->sendErrorMessage(__("Too much login attempts!"));
 		playerExt->delayedKick();
 		return;
 	}
@@ -173,7 +173,7 @@ void AuthController::onPasswordSubmit(
 	if (password.length() <= 5 || password.length() > 48)
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(
-			_("Password length must be between 6-48", player));
+			__("Password length must be between 6-48"));
 		this->showRegistrationDialog(player);
 		return;
 	}
@@ -209,7 +209,7 @@ void AuthController::onRegistrationSubmit(IPlayer& player)
 								  "user entry in DB. Error: {}",
 			e.what()));
 		playerExt->sendErrorMessage(
-			_("Something went wrong when trying to create user!", player));
+			__("Something went wrong when trying to create user!"));
 		playerExt->delayedKick();
 		return;
 	}
@@ -286,8 +286,7 @@ void AuthController::onEmailSubmit(IPlayer& player, const std::string& email)
 	if (!std::regex_match(email, m, EMAIL_REGEX))
 	{
 		this->showEmailDialog(player);
-		Player::getPlayerExt(player)->sendErrorMessage(
-			_("Invalid email!", player));
+		Player::getPlayerExt(player)->sendErrorMessage(__("Invalid email!"));
 		return;
 	}
 

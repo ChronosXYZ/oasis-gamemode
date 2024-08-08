@@ -71,7 +71,7 @@ bool CommandManager::onPlayerCommandText(
 	{
 		spdlog::debug("Failed to invoke command: {}", e.what());
 		Player::getPlayerExt(player)->sendErrorMessage(
-			_("Failed to invoke command!", player));
+			__("Failed to invoke command!"));
 	}
 	return true;
 }

@@ -1,5 +1,6 @@
 #include "DuelController.hpp"
 #include "../deathmatch/Maps.hpp"
+#include "../deathmatch/DeathmatchResult.hpp"
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/utils/Common.hpp"
 #include "../../core/utils/QueryNames.hpp"
@@ -7,11 +8,14 @@
 #include "DuelOffer.hpp"
 #include "PlayerTempData.hpp"
 #include "events.hpp"
+#include "types.hpp"
 #include "values.hpp"
 
+#include <array>
 #include <bits/chrono.h>
 #include <functional>
 #include <magic_enum/magic_enum.hpp>
+#include <map>
 #include <player.hpp>
 #include <chrono>
 #include <fmt/printf.h>
@@ -23,15 +27,13 @@
 
 namespace Modes::Duel
 {
-
-// TODO implement duel accepting
 void DuelController::createDuel(IPlayer& player, int id)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
 	auto receivingPlayer = this->playerPool->get(id);
 	if (!receivingPlayer || id == player.getID())
 	{
-		playerExt->sendErrorMessage(_("Invalid player id", player));
+		playerExt->sendErrorMessage(__("Invalid player id"));
 		return;
 	}
 
@@ -41,16 +43,9 @@ void DuelController::createDuel(IPlayer& player, int id)
 		playerExt->sendErrorMessage(__("Player has not been authorized"));
 		return;
 	}
-	auto duelOffersSent
-		= receivingPlayerExt->getPlayerData()->tempData->core->duelOffersSent;
-	if (auto it = std::find_if(duelOffersSent.begin(), duelOffersSent.end(),
-			[&player](std::shared_ptr<DuelOffer> x)
-			{
-				return x->from->getID() == player.getID();
-			});
-		it != duelOffersSent.end())
+	if (playerExt->getPlayerData()->tempData->core->duelOfferSent.has_value())
 	{
-		playerExt->sendErrorMessage(__("You already sent him a duel offer!"));
+		playerExt->sendErrorMessage(__("You already sent a duel offer!"));
 		return;
 	}
 
@@ -70,6 +65,36 @@ void DuelController::createDuel(IPlayer& player, int id)
 			.to = receivingPlayer,
 		});
 	this->showDuelCreationDialog(player);
+}
+
+unsigned int DuelController::createDuelRoom(std::shared_ptr<DuelOffer> offer)
+{
+	auto roomId = this->roomIdPool->allocateId();
+	this->rooms[roomId] = std::shared_ptr<Room>(new Room {
+		.map = offer->map,
+		.allowedWeapons = offer->weaponSet.getWeapons(),
+		.virtualWorld = this->coreManager.lock()->allocateVirtualWorldId(),
+		.roundCount = offer->roundCount,
+	});
+	return roomId;
+}
+
+void DuelController::deleteDuel(unsigned int id)
+{
+	if (!this->rooms.contains(id))
+		return;
+	auto room = this->rooms.at(id);
+	for (auto player : room->players)
+	{
+		auto playerData = Core::Player::getPlayerData(*player);
+		if (!playerData->tempData->duel->duelEnd)
+			this->coreManager.lock()->joinMode(*player, Mode::Freeroam, {});
+	}
+	// if (room->roundStartTimer.has_value())
+	// 	room->roundStartTimer.value()->kill();
+	this->rooms.erase(id);
+	this->roomIdPool->freeId(id);
+	this->coreManager.lock()->freeVirtualWorldId(room->virtualWorld);
 }
 
 void DuelController::setRandomSpawnPoint(
@@ -106,6 +131,8 @@ void DuelController::logStatsForPlayer(IPlayer& player, bool winner, int weapon)
 	auto playerData = Core::Player::getPlayerData(player);
 	if (winner)
 	{
+		playerData->tempData->duel->increaseKills();
+
 		playerData->duelStats->kills++;
 		playerData->duelStats->score++;
 
@@ -175,6 +202,7 @@ void DuelController::logStatsForPlayer(IPlayer& player, bool winner, int weapon)
 		}
 		playerData->tempData->duel->subsequentKills = 0;
 		playerData->duelStats->deaths++;
+		playerData->tempData->duel->increaseDeaths();
 	}
 }
 
@@ -189,17 +217,16 @@ void DuelController::createDuelOffer(IPlayer& player)
 	if (tempDuelSettings->to->getID() == -1)
 	{
 		playerExt->sendErrorMessage(
-			_("The player you want to call for a duel has disconnected!",
-				player));
+			__("The player you want to call for a duel has disconnected!"));
 		return;
 	}
-	playerData->tempData->core->duelOffersSent.push_back(tempDuelSettings);
+	playerData->tempData->core->duelOfferSent = tempDuelSettings;
 	playerData->tempData->core->temporaryDuelSettings.reset();
 	auto receivingPlayerData
 		= Core::Player::getPlayerData(*tempDuelSettings->to);
 	auto receivingPlayerExt = Core::Player::getPlayerExt(*tempDuelSettings->to);
-	receivingPlayerData->tempData->core->duelOffersReceived.push_back(
-		tempDuelSettings);
+	receivingPlayerData->tempData->core->duelOffersReceived[player.getID()]
+		= tempDuelSettings;
 	receivingPlayerExt->sendInfoMessage(
 		__("DUEL: {%06x}%s(%d) #WHITE#sent you a duel offer, use "
 		   "/duela to accept it"),
@@ -234,16 +261,16 @@ void DuelController::showDuelStatsDialog(IPlayer& player, unsigned int id)
 		ratioDeaths = 1;
 	auto formattedBody = fmt::sprintf(_(body, player),
 		anotherPlayer->getName().to_string(), anotherPlayer->getID(),
-		playerData->duelStats->score, playerData->x1Stats->highestKillStreak,
-		playerData->duelStats->kills, playerData->x1Stats->deaths,
+		playerData->duelStats->score, playerData->duelStats->highestKillStreak,
+		playerData->duelStats->kills, playerData->duelStats->deaths,
 		float(playerData->duelStats->kills) / float(ratioDeaths),
 		playerData->duelStats->handKills,
 		playerData->duelStats->handheldWeaponKills,
-		playerData->duelStats->meleeKills, playerData->x1Stats->handgunKills,
-		playerData->duelStats->shotgunKills, playerData->x1Stats->smgKills,
+		playerData->duelStats->meleeKills, playerData->duelStats->handgunKills,
+		playerData->duelStats->shotgunKills, playerData->duelStats->smgKills,
 		playerData->duelStats->assaultRiflesKills,
 		playerData->duelStats->riflesKills,
-		playerData->x1Stats->heavyWeaponKills,
+		playerData->duelStats->heavyWeaponKills,
 		playerData->duelStats->explosivesKills);
 
 	auto dialog = std::shared_ptr<Core::MessageDialog>(new Core::MessageDialog(
@@ -414,13 +441,17 @@ void DuelController::showDuelRoundCountSettingDialog(IPlayer& player)
 void DuelController::showDuelAcceptListDialog(IPlayer& player)
 {
 	std::vector<std::string> duels;
+	std::map<int, int> duelItemToPlayerId;
 
 	auto playerData = Core::Player::getPlayerData(player);
-	for (auto offer : playerData->tempData->core->duelOffersReceived)
+	int i = 0;
+	for (auto [id, offer] : playerData->tempData->core->duelOffersReceived)
 	{
 		duels.push_back(
 			fmt::sprintf("{%06x}%s(%d)", offer->from->getColour().RGBA() >> 8,
 				offer->from->getName().to_string(), offer->to->getID()));
+		duelItemToPlayerId[i] = id;
+		i++;
 	}
 
 	auto playerExt = Core::Player::getPlayerExt(player);
@@ -434,7 +465,8 @@ void DuelController::showDuelAcceptListDialog(IPlayer& player)
 		fmt::sprintf(DIALOG_HEADER_TITLE, _("Duels", player)), duels,
 		_("Accept", player), _("Cancel", player)));
 	this->dialogManager->showDialog(player, dialog,
-		[this, &player, playerData](Core::DialogResult result)
+		[this, &player, playerData, duelItemToPlayerId](
+			Core::DialogResult result)
 		{
 			if (!result.response())
 				return;
@@ -443,13 +475,12 @@ void DuelController::showDuelAcceptListDialog(IPlayer& player)
 				>= playerData->tempData->core->duelOffersReceived.size())
 			{
 				playerExt->sendErrorMessage(
-					_("The player which sent you the duel offer has canceled "
-					  "it or disconnected from the server",
-						player));
+					__("The player which sent you the duel offer has canceled "
+					   "it or disconnected from the server"));
 				return;
 			}
 			auto offer = playerData->tempData->core->duelOffersReceived.at(
-				result.listItem());
+				duelItemToPlayerId.at(result.listItem()));
 			this->showDuelAcceptConfirmDialog(player, offer);
 		});
 }
@@ -460,7 +491,7 @@ void DuelController::showDuelAcceptConfirmDialog(
 	auto playerExt = Core::Player::getPlayerExt(player);
 	if (offer->from->getID() == -1)
 	{
-		playerExt->sendErrorMessage(_("The player has disconnected!", player));
+		playerExt->sendErrorMessage(__("The player has disconnected!"));
 		return;
 	}
 
@@ -476,14 +507,63 @@ void DuelController::showDuelAcceptConfirmDialog(
 			offer->from->getName().to_string(), offer->from->getID(),
 			offer->map.name, offer->weaponSet.toString(player),
 			offer->roundCount, offer->defaultHealth, offer->defaultArmour),
-		_("Confirm", player), _("Cancel", player)));
+		_("Accept", player), _("Refuse", player)));
 	this->dialogManager->showDialog(player, dialog,
-		[](Core::DialogResult result)
+		[this, offer, &player](Core::DialogResult result)
 		{
 			if (!result.response())
+			{
+				this->deleteDuelOfferFromPlayer(*offer->from, true);
+				auto senderExt = Core::Player::getPlayerExt(*offer->from);
+				senderExt->sendInfoMessage(__("DUEL: {%06x}%s(%d) #RED#refused "
+											  "#WHITE#the duel!"),
+					player.getColour().RGBA() >> 8,
+					offer->to->getName().to_string(), offer->to->getID());
 				return;
-			// TODO accept duel
+			}
+			auto roomId = this->createDuelRoom(offer);
+			offer->tempRoomId = roomId;
+			auto senderJoinResult = this->coreManager.lock()->joinMode(
+				*offer->from, Mode::Duel, { { DUEL_ROOM_ID, roomId } });
+			auto receiverJoinResult = this->coreManager.lock()->joinMode(
+				player, Mode::Duel, { { DUEL_ROOM_ID, roomId } });
+			if (!senderJoinResult || !receiverJoinResult)
+			{
+				auto senderExt = Core::Player::getPlayerExt(*offer->from);
+				auto receiverExt = Core::Player::getPlayerExt(*offer->to);
+				senderExt->sendErrorMessage(
+					__("One of the players cannot join duel, try again!"));
+				receiverExt->sendErrorMessage(
+					__("One of the players cannot join duel, try again!"));
+				return;
+			}
+			this->deleteDuelOfferFromPlayer(*offer->from, false);
 		});
+}
+
+void DuelController::showDuelResults(std::shared_ptr<Room> room)
+{
+	if (!room->cachedResults)
+	{
+		spdlog::warn("result cache of room is poisoned!");
+		return;
+	}
+	for (auto player : room->players)
+	{
+		std::string header
+			= _("Player\tK : D\tRatio\tDamage inflicted\n", *player);
+		auto dialog = std::shared_ptr<Core::TabListHeadersDialog>(
+			new Core::TabListHeadersDialog(
+				fmt::sprintf(
+					DIALOG_HEADER_TITLE, _("Deathmatch statistics", *player)),
+				{ _("Player", *player), _("K : D", *player),
+					_("Ratio", *player), _("Damage inflicted", *player) },
+				room->cachedResults.value(), _("Close", *player), ""));
+		this->dialogManager->showDialog(*player, dialog,
+			[](Core::DialogResult result)
+			{
+			});
+	}
 }
 
 void DuelController::onRoomJoin(IPlayer& player, unsigned int roomId)
@@ -516,26 +596,70 @@ void DuelController::onRoundEnd(IPlayer& winner, IPlayer& loser, int weaponId)
 	this->logStatsForPlayer(loser, false, weaponId);
 
 	auto winnerData = Core::Player::getPlayerData(winner);
+	auto loserData = Core::Player::getPlayerData(loser);
 	winnerData->tempData->duel->subsequentKills++;
+
+	auto room = this->rooms.at(winnerData->tempData->duel->roomId);
+	room->roundCount--;
+	if (room->roundCount == 0)
+	{
+		winnerData->tempData->duel->duelEnd = true;
+		loserData->tempData->duel->duelEnd = true;
+		this->onDuelEnd(room);
+	}
+	winner.spawn();
 }
 
 void DuelController::onDuelEnd(std::shared_ptr<Room> duelRoom)
 {
-	// TODO show results dialog and send message to the chat
-	// then remove room from the map
+	std::vector<Deathmatch::DeathmatchResult> resultArray;
+	for (auto& player : duelRoom->players)
+	{
+		auto playerData = Core::Player::getPlayerData(*player);
+		resultArray.push_back(Deathmatch::DeathmatchResult {
+			.playerName = player->getName().to_string(),
+			.playerColor = player->getColour(),
+			.kills = playerData->tempData->duel->kills,
+			.deaths = playerData->tempData->duel->deaths,
+			.ratio = playerData->tempData->duel->ratio,
+			.damageInflicted = playerData->tempData->duel->damageInflicted });
+	}
+	std::sort(resultArray.begin(), resultArray.end(),
+		[](Deathmatch::DeathmatchResult x1, Deathmatch::DeathmatchResult x2)
+		{
+			return x1.kills > x2.kills;
+		});
+
+	std::vector<std::vector<std::string>> results;
+	for (std::size_t i = 0; i < resultArray.size(); i++)
+	{
+		auto playerResult = resultArray.at(i);
+		results.push_back({ fmt::sprintf("{%06x}%d. %s",
+								playerResult.playerColor.RGBA() >> 8, i + 1,
+								playerResult.playerName),
+			fmt::sprintf("%d : %d", playerResult.kills, playerResult.deaths),
+			fmt::sprintf("%.2f", playerResult.ratio),
+			fmt::sprintf("%.2f", playerResult.damageInflicted) });
+	}
+	duelRoom->cachedResults = results;
+	this->showDuelResults(duelRoom);
 }
 
-void DuelController::deleteDuelOffersFromPlayer(IPlayer& player)
+void DuelController::deleteDuelOfferFromPlayer(IPlayer& player, bool deleteRoom)
 {
-	auto playerData = Core::Player::getPlayerData(player);
-	for (auto offer : playerData->tempData->core->duelOffersSent)
+	auto senderData = Core::Player::getPlayerData(player);
+	if (auto offerOpt = senderData->tempData->core->duelOfferSent)
 	{
-		auto playerData = Core::Player::getPlayerData(*offer->to);
-		std::erase_if(playerData->tempData->core->duelOffersReceived,
-			[&player](std::shared_ptr<Modes::Duel::DuelOffer> x)
-			{
-				return x->from->getID() == player.getID();
-			});
+		auto offer = *offerOpt;
+		if (deleteRoom && offer->tempRoomId)
+		{
+			this->deleteDuel(offer->tempRoomId.value());
+		}
+		auto receivingPlayerData = Core::Player::getPlayerData(*offer->to);
+		auto senderExt = Core::Player::getPlayerExt(player);
+		receivingPlayerData->tempData->core->duelOffersReceived.erase(
+			player.getID());
+		senderData->tempData->core->duelOfferSent = {};
 	}
 }
 
@@ -559,14 +683,12 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
 	auto playerExt = Core::Player::getPlayerExt(player);
-	if (!playerExt->isInMode(Mode::X1))
+	if (!playerExt->isInMode(Mode::Duel))
 		return;
 	auto playerData = Core::Player::getPlayerData(player);
 	auto room = this->rooms.at(playerData->tempData->duel->roomId);
 	if (room->players.size() < 2)
 		return;
-
-	this->logStatsForPlayer(player, false, reason);
 
 	IPlayer* loser;
 	IPlayer* winner;
@@ -583,28 +705,57 @@ void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 
 	// auto loserPos = loser->getPosition();
 	// auto winnerPos = winner->getPosition();
-	// this->bus->fire_event(Core::Utils::Events::DuelWin { .winner = *winner,
-	// 	.loser = *loser,
-	// 	.armourLeft = winner->getArmour(),
+	// this->bus->fire_event(Core::Utils::Events::DuelWin { .winner =
+	// *winner, 	.loser = *loser, 	.armourLeft = winner->getArmour(),
 	// 	.healthLeft = winner->getHealth(),
 	// 	.weapon = reason,
 	// 	.distance = glm::distance(loserPos, winnerPos),
 	// 	.fightDuration
-	// 	= std::chrono::duration_cast<std::chrono::seconds>(fightDuration) });
+	// 	= std::chrono::duration_cast<std::chrono::seconds>(fightDuration)
+	// });
 	this->onRoundEnd(*winner, *loser, reason);
+}
+
+void DuelController::onPlayerGiveDamage(IPlayer& player, IPlayer& to,
+	float amount, unsigned int weapon, BodyPart part)
+{
+	auto playerExt = Core::Player::getPlayerExt(player);
+	auto playerData = playerExt->getPlayerData();
+	if (!playerExt->isInMode(Modes::Mode::Duel))
+		return;
+	playerData->tempData->duel->damageInflicted += amount;
 }
 
 void DuelController::onPlayerDisconnect(
 	IPlayer& player, PeerDisconnectReason reason)
 {
-	this->deleteDuelOffersFromPlayer(player);
+	auto playerData = Core::Player::getPlayerData(player);
+	for (auto [id, offer] : playerData->tempData->core->duelOffersReceived)
+	{
+		if (offer->tempRoomId)
+		{
+			this->deleteDuel(offer->tempRoomId.value());
+		}
+		auto senderData = Core::Player::getPlayerData(*offer->from);
+		auto senderExt = Core::Player::getPlayerExt(*offer->from);
+		senderExt->sendInfoMessage(
+			__("DUEL: {%06x}%s(%d) #WHITE#declined offer: "
+			   "disconnected from the server!"),
+			player.getColour().RGBA() >> 8, player.getName().to_string(),
+			player.getID());
+		senderData->tempData->core->duelOfferSent = {};
+	}
+	if (auto offerOpt = playerData->tempData->core->duelOfferSent)
+	{
+		this->deleteDuelOfferFromPlayer(player, true);
+	}
 }
 
 DuelController::DuelController(std::weak_ptr<Core::CoreManager> coreManager,
 	std::shared_ptr<Core::Commands::CommandManager> commandManager,
 	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
 	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
-	: super(Mode::X1, bus, playerPool)
+	: super(Mode::Duel, bus, playerPool)
 	, roomIdPool(std::make_unique<Core::Utils::IDPool>())
 	, coreManager(coreManager)
 	, commandManager(commandManager)
@@ -655,7 +806,7 @@ void DuelController::initCommands()
 			if (id < 0 || id >= this->playerPool->players().size())
 			{
 				Core::Player::getPlayerExt(player)->sendErrorMessage(
-					_("Invalid player ID", player));
+					__("Invalid player ID"));
 				return;
 			}
 			this->showDuelStatsDialog(player, id);
@@ -678,18 +829,32 @@ void DuelController::onModeSelect(IPlayer& player) { }
 void DuelController::onModeJoin(IPlayer& player, JoinData joinData)
 {
 	super::onModeJoin(player, joinData);
-	// auto roomIndex = std::get<unsigned int>(joinData[DUEL_ROOM_INDEX]);
-	// TODO create room
-	// this->onRoomJoin(player, roomIndex);
+	auto playerData = Core::Player::getPlayerData(player);
+	if (!joinData.contains(DUEL_ROOM_ID)
+		&& !playerData->tempData->core->duelOfferSent)
+	{
+		this->coreManager.lock()->joinMode(player, Mode::Freeroam, {});
+		Core::Player::getPlayerExt(player)->sendErrorMessage(
+			__("Invalid duel settings!"));
+		return;
+	}
+	auto roomId = std::get<unsigned int>(joinData[DUEL_ROOM_ID]);
+	playerData->tempData->duel
+		= std::unique_ptr<PlayerTempData>(new PlayerTempData());
+	this->onRoomJoin(player, roomId);
 }
 
 void DuelController::onModeLeave(IPlayer& player)
 {
 	auto pData = Core::Player::getPlayerData(player);
-	auto roomId = pData->tempData->x1->roomId;
-	auto room = this->rooms.at(roomId);
-	room->players.erase(&player);
-	pData->tempData->x1.reset();
+	auto roomId = pData->tempData->duel->roomId;
+	if (this->rooms.contains(roomId))
+	{
+		auto room = this->rooms.at(roomId);
+		room->players.erase(&player);
+		this->deleteDuel(roomId);
+		pData->tempData->duel.reset();
+	}
 
 	super::onModeLeave(player);
 }
@@ -723,7 +888,7 @@ void DuelController::onPlayerLoad(
 	auto result = txn.exec_params(
 		Core::SQLQueryManager::Get()
 			->getQueryByName(
-				Core::Utils::SQL::Queries::LOAD_X1_STATS_FOR_PLAYER)
+				Core::Utils::SQL::Queries::LOAD_DUEL_STATS_FOR_PLAYER)
 			.value(),
 		data->userId);
 	data->duelStats->updateFromRow(result[0]);
@@ -734,15 +899,16 @@ void DuelController::onPlayerSave(
 {
 	txn.exec_params(
 		Core::SQLQueryManager::Get()
-			->getQueryByName(Core::Utils::SQL::Queries::UPDATE_X1_STATS)
+			->getQueryByName(Core::Utils::SQL::Queries::UPDATE_DUEL_STATS)
 			.value(),
-		data->duelStats->score, data->x1Stats->highestKillStreak,
-		data->duelStats->kills, data->x1Stats->deaths, data->x1Stats->handKills,
-		data->duelStats->handheldWeaponKills, data->x1Stats->meleeKills,
-		data->duelStats->handgunKills, data->x1Stats->shotgunKills,
-		data->duelStats->smgKills, data->x1Stats->assaultRiflesKills,
-		data->duelStats->riflesKills, data->x1Stats->heavyWeaponKills,
-		data->duelStats->explosivesKills, data->userId);
+		data->duelStats->score, data->duelStats->highestKillStreak,
+		data->duelStats->kills, data->duelStats->deaths,
+		data->x1Stats->handKills, data->duelStats->handheldWeaponKills,
+		data->duelStats->meleeKills, data->duelStats->handgunKills,
+		data->duelStats->shotgunKills, data->duelStats->smgKills,
+		data->duelStats->assaultRiflesKills, data->duelStats->riflesKills,
+		data->duelStats->heavyWeaponKills, data->duelStats->explosivesKills,
+		data->userId);
 }
 
 DuelController* DuelController::create(

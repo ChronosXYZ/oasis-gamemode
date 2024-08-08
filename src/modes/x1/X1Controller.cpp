@@ -24,25 +24,21 @@ void X1Controller::initRooms()
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(0),
 			.allowedWeapons = runWeaponSet.getWeapons(),
 			.weaponSet = runWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 0,
 			.defaultArmor = 100.0 }));
 	this->createRoom(
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(1),
 			.allowedWeapons = runWeaponSet.getWeapons(),
 			.weaponSet = runWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 1,
 			.defaultArmor = 100.0 }));
 	this->createRoom(
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(3),
 			.allowedWeapons = runWeaponSet.getWeapons(),
 			.weaponSet = runWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 2,
 			.defaultArmor = 100.0 }));
 	this->createRoom(
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(11),
 			.allowedWeapons = runWeaponSet.getWeapons(),
 			.weaponSet = runWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 3,
 			.defaultArmor = 100.0 }));
 
 	// deagle
@@ -50,31 +46,27 @@ void X1Controller::initRooms()
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(0),
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 4,
 			.defaultArmor = 100.0 }));
 	this->createRoom(
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(1),
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 5,
 			.defaultArmor = 100.0 }));
 	this->createRoom(
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(3),
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 6,
 			.defaultArmor = 100.0 }));
 	this->createRoom(
 		std::shared_ptr<Room>(new Room { .map = Deathmatch::MAPS.at(11),
 			.allowedWeapons = dssWeaponSet.getWeapons(),
 			.weaponSet = dssWeaponSet,
-			.virtualWorld = X1_VIRTUAL_WORLD_PREFIX + 7,
 			.defaultArmor = 100.0 }));
 }
 
 void X1Controller::createRoom(std::shared_ptr<Room> room)
 {
-	room->virtualWorld = X1_VIRTUAL_WORLD_PREFIX + this->rooms.size();
+	room->virtualWorld = this->coreManager.lock()->allocateVirtualWorldId();
 	auto roomId = this->roomIdPool->allocateId();
 	this->rooms[roomId] = room;
 }
@@ -245,7 +237,7 @@ void X1Controller::showArenaSelectionDialog(IPlayer& player)
 				if (room->players.size() == 2)
 				{
 					playerExt->sendErrorMessage(
-						_("This arena is #RED#full#WHITE#!", player));
+						__("This arena is #RED#full#WHITE#!"));
 					this->showArenaSelectionDialog(player);
 					return;
 				}
@@ -445,7 +437,7 @@ void X1Controller::initCommands()
 			if (id < 0 || id >= this->playerPool->players().size())
 			{
 				Core::Player::getPlayerExt(player)->sendErrorMessage(
-					_("Invalid player ID", player));
+					__("Invalid player ID"));
 				return;
 			}
 			this->showX1StatsDialog(player, id);

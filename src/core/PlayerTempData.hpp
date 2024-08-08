@@ -4,6 +4,8 @@
 #include "../modes/duel/DuelOffer.hpp"
 
 #include <memory>
+#include <optional>
+#include <unordered_map>
 #include <vector>
 
 namespace Core
@@ -18,8 +20,9 @@ struct PlayerTempData
 
 	unsigned int subsequentKills = 0;
 
-	std::vector<std::shared_ptr<Modes::Duel::DuelOffer>> duelOffersSent;
-	std::vector<std::shared_ptr<Modes::Duel::DuelOffer>> duelOffersReceived;
+	std::optional<std::shared_ptr<Modes::Duel::DuelOffer>> duelOfferSent;
+	std::unordered_map<int, std::shared_ptr<Modes::Duel::DuelOffer>>
+		duelOffersReceived;
 
 	std::optional<std::shared_ptr<Modes::Duel::DuelOffer>>
 		temporaryDuelSettings;

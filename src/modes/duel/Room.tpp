@@ -9,7 +9,7 @@ void Room::sendMessageToAll(const std::string& message, const T&... args)
 	for (auto player : this->players)
 	{
 		auto playerExt = Core::Player::getPlayerExt(*player);
-		playerExt->sendTranslatedMessageFormatted(message, args...);
+		playerExt->sendTranslatedMessage(message, args...);
 	}
 }
 }

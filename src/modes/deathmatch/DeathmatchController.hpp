@@ -20,7 +20,6 @@
 
 namespace Modes::Deathmatch
 {
-inline const unsigned int VIRTUAL_WORLD_PREFIX = 100;
 inline const std::string MODE_NAME = "deathmatch";
 inline const auto DEFAULT_WEAPON_SET = WeaponSet(WeaponSet::Value::Run);
 inline const std::string ROOM_INDEX = "roomIndex";

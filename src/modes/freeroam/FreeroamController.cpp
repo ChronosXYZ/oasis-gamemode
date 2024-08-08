@@ -34,6 +34,7 @@ FreeroamController::FreeroamController(
 	using namespace std::placeholders;
 	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
+	this->virtualWorldId = this->_coreManager.lock()->allocateVirtualWorldId();
 }
 
 FreeroamController::~FreeroamController()
@@ -92,17 +93,17 @@ void FreeroamController::initCommands()
 			if (!playerExt->isInMode(Mode::Freeroam))
 			{
 				playerExt->sendErrorMessage(
-					_("You can spawn vehicles only in Freeroam mode!", player));
+					__("You can spawn vehicles only in Freeroam mode!"));
 				return;
 			}
 			if (modelId < 400 || modelId > 611)
 			{
-				playerExt->sendErrorMessage(_("Invalid car model ID!", player));
+				playerExt->sendErrorMessage(__("Invalid car model ID!"));
 				return;
 			}
 			if (color1 < 0 || color1 > 255 || color2 < 0 || color2 > 255)
 			{
-				playerExt->sendErrorMessage(_("Invalid color ID!", player));
+				playerExt->sendErrorMessage(__("Invalid color ID!"));
 				return;
 			}
 
@@ -133,7 +134,7 @@ void FreeroamController::initCommands()
 			if (!playerExt->isInMode(Mode::Freeroam))
 			{
 				playerExt->sendErrorMessage(
-					_("You can spawn vehicles only in Freeroam mode!", player));
+					__("You can spawn vehicles only in Freeroam mode!"));
 				return;
 			}
 			this->showVehicleSpawningDialog(player);
@@ -161,7 +162,7 @@ void FreeroamController::initCommands()
 			auto playerExt = Core::Player::getPlayerExt(player);
 			if (skinId < 0 || skinId > 311)
 			{
-				playerExt->sendErrorMessage(_("Invalid skin ID!", player));
+				playerExt->sendErrorMessage(__("Invalid skin ID!"));
 				return;
 			}
 			player.get().setSkin(skinId);
@@ -196,7 +197,7 @@ void FreeroamController::initVehicles()
 				.colour2 = v.color2,
 
 			});
-			vehicle->setVirtualWorld(VIRTUAL_WORLD_ID);
+			vehicle->setVirtualWorld(this->virtualWorldId);
 			vehicle->setPlate(
 				fmt::sprintf("oasis{44AA33}%d", vehicle->getID()));
 		}
@@ -216,7 +217,7 @@ void FreeroamController::onPlayerDeath(
 
 void FreeroamController::setupSpawn(IPlayer& player)
 {
-	player.setVirtualWorld(VIRTUAL_WORLD_ID);
+	player.setVirtualWorld(this->virtualWorldId);
 	player.setInterior(0);
 	auto classData = queryExtension<IPlayerClassData>(player);
 	classData->setSpawnInfo(

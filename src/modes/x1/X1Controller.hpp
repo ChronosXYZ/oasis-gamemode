@@ -16,7 +16,6 @@
 
 namespace Modes::X1
 {
-inline const unsigned int X1_VIRTUAL_WORLD_PREFIX = 200;
 inline const std::string X1_ROOM_INDEX = "roomIndex";
 inline const std::string X1_MODE_NAME = "X1";
 class X1Controller : public ModeBase, public PlayerSpawnEventHandler

@@ -3,6 +3,7 @@
 #include "../deathmatch/Maps.hpp"
 #include "../deathmatch/WeaponSet.hpp"
 
+#include <optional>
 #include <player.hpp>
 
 #include <vector>
@@ -19,5 +20,6 @@ struct DuelOffer
 	float defaultArmour;
 	IPlayer* from;
 	IPlayer* to;
+	std::optional<unsigned int> tempRoomId;
 };
 }

@@ -18,7 +18,7 @@
 
 namespace Modes::Duel
 {
-inline const std::string DUEL_ROOM_INDEX = "roomIndex";
+inline const std::string DUEL_ROOM_ID = "roomId";
 inline const std::string DUEL_MODE_NAME = "Duel";
 class DuelController : public ModeBase,
 					   public PlayerSpawnEventHandler,
@@ -44,15 +44,18 @@ class DuelController : public ModeBase,
 	void showDuelAcceptListDialog(IPlayer& player);
 	void showDuelAcceptConfirmDialog(
 		IPlayer& player, std::shared_ptr<DuelOffer> offer);
+	void showDuelResults(std::shared_ptr<Room> room);
 
 	// Commands
 	void createDuel(IPlayer& player, int id);
+	unsigned int createDuelRoom(std::shared_ptr<DuelOffer> offer);
+	void deleteDuel(unsigned int id);
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
 	void onRoundEnd(IPlayer& winner, IPlayer& loser, int weaponId);
 	void onDuelEnd(std::shared_ptr<Room> duelRoom);
 
-	void deleteDuelOffersFromPlayer(IPlayer& player);
+	void deleteDuelOfferFromPlayer(IPlayer& player, bool deleteRoom);
 
 	std::map<unsigned int, std::shared_ptr<Room>> rooms;
 	std::unique_ptr<Core::Utils::IDPool> roomIdPool;
@@ -68,6 +71,8 @@ public:
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
+	void onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
+		unsigned int weapon, BodyPart part) override;
 	void onPlayerDisconnect(
 		IPlayer& player, PeerDisconnectReason reason) override;
 

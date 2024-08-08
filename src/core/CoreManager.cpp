@@ -235,6 +235,10 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 	// save X1 info
 	this->_modes->resolve<Modes::X1::X1Controller>()->onPlayerSave(data, txn);
 
+	// save duel info
+	this->_modes->resolve<Modes::Duel::DuelController>()->onPlayerSave(
+		data, txn);
+
 	txn.commit();
 	spdlog::info("Player {} has been successfully saved", data->name);
 }
@@ -311,7 +315,7 @@ bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 	if (!pData->tempData->core->isLoggedIn)
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(
-			_("You are not logged in yet!", player));
+			__("You are not logged in yet!"));
 		return false;
 	}
 	if (pData->tempData->core->skinSelectionMode)
@@ -357,6 +361,16 @@ void CoreManager::showModeSelectionDialog(IPlayer& player)
 		});
 }
 
+unsigned int CoreManager::allocateVirtualWorldId()
+{
+	return this->virtualWorldIdPool.allocateId();
+}
+
+void CoreManager::freeVirtualWorldId(unsigned int id)
+{
+	this->virtualWorldIdPool.freeId(id);
+}
+
 void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 {
 	switch (mode)
@@ -381,23 +395,22 @@ void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
 	default:
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(
-			_("Mode is not implemented yet!", player));
+			__("Mode is not implemented yet"));
 		this->showModeSelectionDialog(player);
 		break;
 	}
 	}
 }
 
-void CoreManager::joinMode(IPlayer& player, Modes::Mode mode,
+bool CoreManager::joinMode(IPlayer& player, Modes::Mode mode,
 	std::unordered_map<std::string, Core::PrimitiveType> joinData)
 {
 	auto pData = Player::getPlayerData(player);
 	auto playerExt = Player::getPlayerExt(player);
 	if (pData->tempData->core->isDying)
 	{
-		playerExt->sendErrorMessage(
-			_("You cannot join a mode while dying", player));
-		return;
+		playerExt->sendErrorMessage(__("You cannot join a mode while dying"));
+		return false;
 	}
 	this->removePlayerFromCurrentMode(player);
 
@@ -425,17 +438,24 @@ void CoreManager::joinMode(IPlayer& player, Modes::Mode mode,
 			this->_modes->resolve<Modes::X1::X1Controller>());
 		break;
 	}
+	case Modes::Mode::Duel:
+	{
+		modeBase = static_pointer_cast<Modes::ModeBase>(
+			this->_modes->resolve<Modes::Duel::DuelController>());
+		break;
+	}
 	default:
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(
-			_("Mode is not implemented yet!", player));
+			__("Mode is not implemented yet!"));
 		this->showModeSelectionDialog(player);
 		break;
 	}
 	}
 	if (modeBase.get() == nullptr)
-		return;
+		return false;
 	modeBase->onModeJoin(player, joinData);
+	return true;
 }
 
 void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
@@ -462,6 +482,12 @@ void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
 	{
 		modeBase = static_pointer_cast<Modes::ModeBase>(
 			this->_modes->resolve<Modes::X1::X1Controller>());
+		break;
+	}
+	case Modes::Mode::Duel:
+	{
+		modeBase = static_pointer_cast<Modes::ModeBase>(
+			this->_modes->resolve<Modes::Duel::DuelController>());
 		break;
 	}
 	default:

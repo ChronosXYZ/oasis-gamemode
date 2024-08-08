@@ -362,14 +362,13 @@ void DeathmatchController::initCommand()
 			if (playerData->tempData->core->isDying)
 			{
 				playerExt->sendErrorMessage(
-					_("You cannot join a mode while dying", player));
+					__("You cannot join a mode while dying"));
 				return;
 			}
 
 			if (!this->rooms.contains((unsigned int)id - 1) || id <= 0)
 			{
-				playerExt->sendErrorMessage(
-					_("Such room doesn't exist!", player));
+				playerExt->sendErrorMessage(__("Such room doesn't exist!"));
 				return;
 			}
 			this->coreManager.lock()->joinMode(player, Mode::Deathmatch,
@@ -387,7 +386,7 @@ void DeathmatchController::initCommand()
 			if (playerData->tempData->core->isDying)
 			{
 				playerExt->sendErrorMessage(
-					_("You cannot join a mode while dying", player));
+					__("You cannot join a mode while dying"));
 				return;
 			}
 			this->coreManager.lock()->selectMode(player, Mode::Deathmatch);
@@ -402,7 +401,7 @@ void DeathmatchController::initCommand()
 			if (id < 0 || id >= this->_playerPool->players().size())
 			{
 				Core::Player::getPlayerExt(player)->sendErrorMessage(
-					_("Invalid player ID", player));
+					__("Invalid player ID"));
 				return;
 			}
 			this->showDeathmatchStatsDialog(player, id);
@@ -427,7 +426,8 @@ void DeathmatchController::initRooms()
 				.allowedWeapons = runWeaponSet.getWeapons(),
 				.weaponSet = runWeaponSet,
 				.host = {},
-				.virtualWorld = VIRTUAL_WORLD_PREFIX + 0,
+				.virtualWorld
+				= this->coreManager.lock()->allocateVirtualWorldId(),
 				.cbugEnabled = true,
 				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 				.defaultTime
@@ -440,7 +440,8 @@ void DeathmatchController::initRooms()
 				.allowedWeapons = dssWeaponSet.getWeapons(),
 				.weaponSet = dssWeaponSet,
 				.host = {},
-				.virtualWorld = VIRTUAL_WORLD_PREFIX + 1,
+				.virtualWorld
+				= this->coreManager.lock()->allocateVirtualWorldId(),
 				.cbugEnabled = true,
 				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 				.defaultTime
@@ -453,7 +454,8 @@ void DeathmatchController::initRooms()
 				.allowedWeapons = dssWeaponSet.getWeapons(),
 				.weaponSet = dssWeaponSet,
 				.host = {},
-				.virtualWorld = VIRTUAL_WORLD_PREFIX + 2,
+				.virtualWorld
+				= this->coreManager.lock()->allocateVirtualWorldId(),
 				.cbugEnabled = false,
 				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 				.defaultTime
@@ -892,9 +894,9 @@ void DeathmatchController::showRoomSetRoundTimeDialog(IPlayer& player)
 
 				if (minutes <= 0 || minutes > 60)
 				{
-					playerExt->sendErrorMessage(_("Invalid number of minutes! "
-												  "(available values are 1-60)",
-						player));
+					playerExt->sendErrorMessage(
+						__("Invalid number of minutes! "
+						   "(available values are 1-60)"));
 					this->showRoomSetRoundTimeDialog(player);
 					return;
 				}
@@ -955,9 +957,8 @@ void DeathmatchController::showRoomSetHealthDialog(IPlayer& player)
 				if (hp <= 0 || hp > 100)
 				{
 					playerExt->sendErrorMessage(
-						_("Invalid HP value! "
-						  "(available values are 1-100)",
-							player));
+						__("Invalid HP value! "
+						   "(available values are 1-100)"));
 					this->showRoomSetHealthDialog(player);
 					return;
 				}
@@ -1015,9 +1016,8 @@ void DeathmatchController::showRoomSetArmorDialog(IPlayer& player)
 				if (armor <= 0 || armor > 100)
 				{
 					playerExt->sendErrorMessage(
-						_("Invalid armor value! "
-						  "(available values are 1-100)",
-							player));
+						__("Invalid armor value! "
+						   "(available values are 1-100)"));
 					this->showRoomSetArmorDialog(player);
 					return;
 				}
@@ -1133,7 +1133,7 @@ void DeathmatchController::createRoom(IPlayer& player)
 		return;
 
 	auto room = playerData->tempData->deathmatch->temporaryRoomSettings;
-	room->virtualWorld = VIRTUAL_WORLD_PREFIX + this->rooms.size();
+	room->virtualWorld = this->coreManager.lock()->allocateVirtualWorldId();
 	auto roomId = this->roomIdPool->allocateId();
 	this->rooms[roomId] = std::make_shared<Room>(*room);
 	this->coreManager.lock()->joinMode(
@@ -1149,6 +1149,7 @@ void DeathmatchController::deleteRoom(unsigned int roomId)
 		room->roundStartTimer.value()->kill();
 	this->rooms.erase(roomId);
 	this->roomIdPool->freeId(roomId);
+	this->coreManager.lock()->freeVirtualWorldId(room->virtualWorld);
 }
 
 std::shared_ptr<TextDraws::DeathmatchTimer>

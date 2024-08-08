@@ -5,6 +5,7 @@
 #include "commands/CommandManager.hpp"
 #include "player/PlayerModel.hpp"
 #include "../modes/Modes.hpp"
+#include "utils/IDPool.hpp"
 #include "utils/ServiceLocator.hpp"
 
 #include <Server/Components/Classes/classes.hpp>
@@ -50,9 +51,12 @@ public:
 
 	bool refreshPlayerData(IPlayer& player);
 	void selectMode(IPlayer& player, Modes::Mode mode);
-	void joinMode(IPlayer& player, Modes::Mode mode,
+	bool joinMode(IPlayer& player, Modes::Mode mode,
 		std::unordered_map<std::string, Core::PrimitiveType> joinData);
 	void showModeSelectionDialog(IPlayer& player);
+
+	unsigned int allocateVirtualWorldId();
+	void freeVirtualWorldId(unsigned int id);
 
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(
@@ -91,6 +95,7 @@ private:
 	std::map<unsigned int, std::shared_ptr<PlayerModel>> _playerData;
 	std::thread saveThread;
 	std::promise<void> saveThreadExitSignal;
+	Utils::IDPool virtualWorldIdPool;
 
 	// Controllers
 	std::unique_ptr<Auth::AuthController> _authController;
