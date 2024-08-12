@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <cstdio>
 #include <fmt/printf.h>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
@@ -30,6 +31,7 @@
 #include <unordered_map>
 #include <uuid.h>
 #include <eventbus/event_bus.hpp>
+#include <scn/scan.h>
 
 #include <optional>
 #include <vector>
@@ -354,58 +356,68 @@ void DeathmatchController::initCommand()
 {
 	this->commandManager->addCommand(
 		"dm",
-		[&](std::reference_wrapper<IPlayer> player, int id)
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			auto scanResult = scn::scan<int>(args, "{}");
+
 			auto playerExt = Core::Player::getPlayerExt(player.get());
 			auto playerData = Core::Player::getPlayerData(player.get());
+
+			if (!scanResult)
+			{
+				if (playerData->tempData->core->isDying)
+				{
+					playerExt->sendErrorMessage(
+						__("You cannot join a mode while dying"));
+					return true;
+				}
+				this->coreManager.lock()->selectMode(player, Mode::Deathmatch);
+				return true;
+			}
+			auto [id] = scanResult->values();
 
 			if (playerData->tempData->core->isDying)
 			{
 				playerExt->sendErrorMessage(
-					_("You cannot join a mode while dying", player));
-				return;
+					__("You cannot join a mode while dying"));
+				return true;
 			}
 
 			if (!this->rooms.contains((unsigned int)id - 1) || id <= 0)
 			{
-				playerExt->sendErrorMessage(
-					_("Such room doesn't exist!", player));
-				return;
+				playerExt->sendErrorMessage(__("Such room doesn't exist!"));
+				return true;
 			}
 			this->coreManager.lock()->joinMode(player, Mode::Deathmatch,
 				{ { ROOM_INDEX, (unsigned int)id - 1 } });
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") },
 			.description = __("Enter DM room"),
 			.category = MODE_NAME });
 	this->commandManager->addCommand(
-		"dm",
-		[&](std::reference_wrapper<IPlayer> player)
-		{
-			auto playerExt = Core::Player::getPlayerExt(player.get());
-			auto playerData = Core::Player::getPlayerData(player.get());
-			if (playerData->tempData->core->isDying)
-			{
-				playerExt->sendErrorMessage(
-					_("You cannot join a mode while dying", player));
-				return;
-			}
-			this->coreManager.lock()->selectMode(player, Mode::Deathmatch);
-		},
-		Core::Commands::CommandInfo { .args = {},
-			.description = __("Enter DM mode"),
-			.category = MODE_NAME });
-	this->commandManager->addCommand(
 		"dmstats",
-		[this](std::reference_wrapper<IPlayer> player, int id)
+		[this](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			int id;
+			auto scanResult = scn::scan<int>(args, "{}");
+			if (!scanResult)
+			{
+				id = player.get().getID();
+			}
+			else
+			{
+				id = scanResult->value();
+			}
+
 			if (id < 0 || id >= this->_playerPool->players().size())
 			{
 				Core::Player::getPlayerExt(player)->sendErrorMessage(
-					_("Invalid player ID", player));
-				return;
+					__("Invalid player ID"));
+				return true;
 			}
 			this->showDeathmatchStatsDialog(player, id);
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = { "player id" },
 			.description = __("Show DM stats"),
@@ -427,7 +439,8 @@ void DeathmatchController::initRooms()
 				.allowedWeapons = runWeaponSet.getWeapons(),
 				.weaponSet = runWeaponSet,
 				.host = {},
-				.virtualWorld = VIRTUAL_WORLD_PREFIX + 0,
+				.virtualWorld
+				= this->coreManager.lock()->allocateVirtualWorldId(),
 				.cbugEnabled = true,
 				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 				.defaultTime
@@ -440,7 +453,8 @@ void DeathmatchController::initRooms()
 				.allowedWeapons = dssWeaponSet.getWeapons(),
 				.weaponSet = dssWeaponSet,
 				.host = {},
-				.virtualWorld = VIRTUAL_WORLD_PREFIX + 1,
+				.virtualWorld
+				= this->coreManager.lock()->allocateVirtualWorldId(),
 				.cbugEnabled = true,
 				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 				.defaultTime
@@ -453,7 +467,8 @@ void DeathmatchController::initRooms()
 				.allowedWeapons = dssWeaponSet.getWeapons(),
 				.weaponSet = dssWeaponSet,
 				.host = {},
-				.virtualWorld = VIRTUAL_WORLD_PREFIX + 2,
+				.virtualWorld
+				= this->coreManager.lock()->allocateVirtualWorldId(),
 				.cbugEnabled = false,
 				.countdown = std::chrono::minutes(DEFAULT_ROOM_ROUND_TIME_MIN),
 				.defaultTime
@@ -892,9 +907,9 @@ void DeathmatchController::showRoomSetRoundTimeDialog(IPlayer& player)
 
 				if (minutes <= 0 || minutes > 60)
 				{
-					playerExt->sendErrorMessage(_("Invalid number of minutes! "
-												  "(available values are 1-60)",
-						player));
+					playerExt->sendErrorMessage(
+						__("Invalid number of minutes! "
+						   "(available values are 1-60)"));
 					this->showRoomSetRoundTimeDialog(player);
 					return;
 				}
@@ -955,9 +970,8 @@ void DeathmatchController::showRoomSetHealthDialog(IPlayer& player)
 				if (hp <= 0 || hp > 100)
 				{
 					playerExt->sendErrorMessage(
-						_("Invalid HP value! "
-						  "(available values are 1-100)",
-							player));
+						__("Invalid HP value! "
+						   "(available values are 1-100)"));
 					this->showRoomSetHealthDialog(player);
 					return;
 				}
@@ -1015,9 +1029,8 @@ void DeathmatchController::showRoomSetArmorDialog(IPlayer& player)
 				if (armor <= 0 || armor > 100)
 				{
 					playerExt->sendErrorMessage(
-						_("Invalid armor value! "
-						  "(available values are 1-100)",
-							player));
+						__("Invalid armor value! "
+						   "(available values are 1-100)"));
 					this->showRoomSetArmorDialog(player);
 					return;
 				}
@@ -1133,7 +1146,7 @@ void DeathmatchController::createRoom(IPlayer& player)
 		return;
 
 	auto room = playerData->tempData->deathmatch->temporaryRoomSettings;
-	room->virtualWorld = VIRTUAL_WORLD_PREFIX + this->rooms.size();
+	room->virtualWorld = this->coreManager.lock()->allocateVirtualWorldId();
 	auto roomId = this->roomIdPool->allocateId();
 	this->rooms[roomId] = std::make_shared<Room>(*room);
 	this->coreManager.lock()->joinMode(
@@ -1149,6 +1162,7 @@ void DeathmatchController::deleteRoom(unsigned int roomId)
 		room->roundStartTimer.value()->kill();
 	this->rooms.erase(roomId);
 	this->roomIdPool->freeId(roomId);
+	this->coreManager.lock()->freeVirtualWorldId(room->virtualWorld);
 }
 
 std::shared_ptr<TextDraws::DeathmatchTimer>

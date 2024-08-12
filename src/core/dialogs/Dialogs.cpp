@@ -1,6 +1,6 @@
 #include "Dialogs.hpp"
 
-#include "../utils/Common.hpp"
+#include "../utils/Strings.hpp"
 
 #include <Server/Components/Dialogs/dialogs.hpp>
 
@@ -28,7 +28,7 @@ ListDialog::ListDialog(const std::string& title,
 	std::string body;
 	for (const auto& item : items)
 	{
-		body += Utils::trim_copy(item) + "\n";
+		body += Utils::Strings::trim_copy(item) + "\n";
 	}
 	this->title = title;
 	this->content = body;
@@ -57,7 +57,7 @@ TabListHeadersDialog::TabListHeadersDialog(const std::string& title,
 	std::string body;
 	for (const auto& column : columns)
 	{
-		body += Utils::trim_copy(column) + "\t";
+		body += Utils::Strings::trim_copy(column) + "\t";
 	}
 	body.erase(body.length() - 1);
 	body += "\n";
@@ -65,7 +65,7 @@ TabListHeadersDialog::TabListHeadersDialog(const std::string& title,
 	{
 		for (const auto& value : row)
 		{
-			body += Utils::trim_copy(value) + "\t";
+			body += Utils::Strings::trim_copy(value) + "\t";
 		}
 		body.erase(body.length() - 1);
 		body += "\n";
@@ -89,7 +89,7 @@ TabListDialog::TabListDialog(const std::string& title,
 	{
 		for (const auto& value : row)
 		{
-			body += Utils::trim_copy(value) + "\t";
+			body += Utils::Strings::trim_copy(value) + "\t";
 		}
 		body.erase(body.length() - 1);
 		body += "\n";

@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <algorithm>
+#include <cctype>
+#include <locale>
 
 namespace Core::Utils
 {
@@ -27,17 +30,19 @@ namespace Strings
 		return separatedStrings;
 	};
 
-	template <typename Numeric>
-	inline bool isNumber(const std::string& s)
+	template <typename Numeric> inline bool isNumber(const std::string& s)
 	{
 		std::istringstream iss(s);
 		Numeric f;
-		iss >> std::noskipws >> f; // noskipws considers leading whitespace invalid
-		// Check the entire string was consumed and if either failbit or badbit is set
+		iss >> std::noskipws
+			>> f; // noskipws considers leading whitespace invalid
+		// Check the entire string was consumed and if either failbit or badbit
+		// is set
 		return iss.eof() && !iss.fail();
 	}
 
-	inline std::vector<std::smatch> findAllMatches(const std::regex& regexp, const std::string& str)
+	inline std::vector<std::smatch> findAllMatches(
+		const std::regex& regexp, const std::string& str)
 	{
 		std::vector<std::smatch> matches;
 		std::sregex_iterator iter(str.begin(), str.end(), regexp);
@@ -47,6 +52,57 @@ namespace Strings
 			matches.push_back(*i);
 		}
 		return matches;
+	}
+
+	// trim from start (in place)
+	inline void ltrim(std::string& s)
+	{
+		s.erase(s.begin(),
+			std::find_if(s.begin(), s.end(),
+				[](unsigned char ch)
+				{
+					return !std::isspace(ch);
+				}));
+	}
+
+	// trim from end (in place)
+	inline void rtrim(std::string& s)
+	{
+		s.erase(std::find_if(s.rbegin(), s.rend(),
+					[](unsigned char ch)
+					{
+						return !std::isspace(ch);
+					})
+					.base(),
+			s.end());
+	}
+
+	// trim from both ends (in place)
+	inline void trim(std::string& s)
+	{
+		rtrim(s);
+		ltrim(s);
+	}
+
+	// trim from start (copying)
+	inline std::string ltrim_copy(std::string s)
+	{
+		ltrim(s);
+		return s;
+	}
+
+	// trim from end (copying)
+	inline std::string rtrim_copy(std::string s)
+	{
+		rtrim(s);
+		return s;
+	}
+
+	// trim from both ends (copying)
+	inline std::string trim_copy(std::string s)
+	{
+		trim(s);
+		return s;
 	}
 }
 }

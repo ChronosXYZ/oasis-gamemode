@@ -41,14 +41,29 @@ public:
 
 	void delayedKick();
 	void setFacingAngle(float angle);
-	void sendErrorMessage(const std::string& message);
 	void sendInfoMessage(const std::string& message);
-	void sendTranslatedMessage(const std::string& message);
+
+	template <typename... T>
+	inline void sendInfoMessage(const std::string& message, const T&... args)
+	{
+		_player.sendClientMessage(Colour::White(),
+			fmt::sprintf("%s %s", _("#LIME#>>#WHITE#", _player),
+				fmt::sprintf(_(message, _player), args...)));
+	}
+
+	template <typename... T>
+	inline void sendErrorMessage(const std::string& message, const T&... args)
+	{
+		_player.sendClientMessage(Colour::White(),
+			fmt::format("{} {}", _("#RED#[ERROR]#WHITE#", _player),
+				fmt::sprintf(_(message, _player), args...)));
+	}
+
 	void showNotification(const std::string& notification,
 		TextDraws::NotificationPosition position, unsigned int seconds = 3,
 		unsigned int notificationSound = 0);
 	template <typename... T>
-	inline void sendTranslatedMessageFormatted(
+	inline void sendTranslatedMessage(
 		const std::string& message, const T&... args)
 	{
 		_player.sendClientMessage(

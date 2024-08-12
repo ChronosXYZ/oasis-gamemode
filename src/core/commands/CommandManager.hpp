@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CommandCallbackWrapper.hpp"
 #include "CommandInfo.hpp"
 
+#include <functional>
 #include <player.hpp>
 
 #include <memory>
@@ -11,10 +11,35 @@
 
 namespace Core::Commands
 {
+
+// Define a concept that checks if a callable matches the signature int(int,
+// double)
+template <typename F>
+concept MatchesSignature
+	= std::is_same_v<bool (F::*)(std::reference_wrapper<IPlayer>, std::string)
+						 const,
+		  decltype(&F::operator())>
+	|| std::is_same_v<bool (*)(std::reference_wrapper<IPlayer>, std::string),
+		F>;
+
+// Specialization for free functions
+template <typename R, typename... Args>
+concept MatchesFreeFunctionSignature = requires(R (*f)(Args...)) {
+	{
+		f
+	} -> std::same_as<R (*)(Args...)>;
+};
+
+using HandlerSignature = bool(std::reference_wrapper<IPlayer>, std::string);
+
+struct common_tag
+{
+};
+
 class CommandManager : public PlayerTextEventHandler
 {
 	std::unordered_map<std::string,
-		std::vector<std::unique_ptr<CommandCallbackWrapper>>>
+		std::vector<std::function<HandlerSignature>>>
 		_commandHandlers;
 	std::unordered_map<std::string, std::vector<std::shared_ptr<CommandInfo>>>
 		_commandInfo;
@@ -22,22 +47,32 @@ class CommandManager : public PlayerTextEventHandler
 		_commandCategories;
 	IPlayerPool* _playerPool;
 
-	void callCommandHandler(
-		const std::string& cmdName, CommandCallbackValues args);
+	void callCommandHandler(IPlayer& player, const std::string& cmdName,
+		std::string preparedCommandArgs);
 	void sendCommandUsage(IPlayer& player, const std::string& name);
 
 public:
 	CommandManager(IPlayerPool* playerPool);
 	~CommandManager();
 
-	template <typename F>
-		requires CommandCallbackFunction<F, std::reference_wrapper<IPlayer>,
-			double, int, std::string>
+	template <MatchesSignature F>
 	void addCommand(std::string name, F handler, CommandInfo info)
 	{
+		this->addCommand(name, handler, info, common_tag {});
+	};
+
+	template <MatchesFreeFunctionSignature<HandlerSignature> F>
+	void addCommand(std::string name, F handler, CommandInfo info)
+	{
+		this->addCommand(name, handler, info, common_tag {});
+	};
+
+	template <typename F>
+	void addCommand(
+		std::string name, F handler, CommandInfo info, common_tag tag)
+	{
 		this->_commandHandlers[name].push_back(
-			std::unique_ptr<CommandCallbackWrapper>(
-				new CommandCallbackWrapper(handler)));
+			(std::function<HandlerSignature>(handler)));
 		auto infoPtr = std::make_shared<CommandInfo>(info);
 		this->_commandInfo[name].push_back(infoPtr);
 		this->_commandCategories.insert(

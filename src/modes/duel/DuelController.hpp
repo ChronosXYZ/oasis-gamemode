@@ -5,38 +5,57 @@
 #include "../../core/commands/CommandManager.hpp"
 #include "../../core/dialogs/DialogManager.hpp"
 #include "../../core/utils/IDPool.hpp"
+#include "DuelOffer.hpp"
 #include "Room.hpp"
 #include "Room.tpp"
 
+#include <functional>
 #include <player.hpp>
 
 #include <map>
 #include <memory>
 #include <string>
 
-namespace Modes::X1
+namespace Modes::Duel
 {
-inline const std::string X1_ROOM_INDEX = "roomIndex";
-inline const std::string X1_MODE_NAME = "X1";
-class X1Controller : public ModeBase, public PlayerSpawnEventHandler
+inline const std::string DUEL_ROOM_ID = "roomId";
+inline const std::string DUEL_MODE_NAME = "Duel";
+class DuelController : public ModeBase,
+					   public PlayerSpawnEventHandler,
+					   public PlayerConnectEventHandler
 {
-	X1Controller(std::weak_ptr<Core::CoreManager> coreManager,
+	DuelController(std::weak_ptr<Core::CoreManager> coreManager,
 		std::shared_ptr<Core::Commands::CommandManager> commandManager,
 		std::shared_ptr<Core::DialogManager> dialogManager,
 		IPlayerPool* playerPool, ITimersComponent* timersComponent,
 		std::shared_ptr<dp::event_bus> bus);
 
 	void initCommands();
-	void initRooms();
-	void createRoom(std::shared_ptr<Room> room);
 	void setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
 	void logStatsForPlayer(IPlayer& player, bool winner, int weapon);
+	void createDuelOffer(IPlayer& player);
 
-	void showArenaSelectionDialog(IPlayer& player);
-	void showX1StatsDialog(IPlayer& player, unsigned int id);
+	void showDuelStatsDialog(IPlayer& player, unsigned int id);
+	void showDuelCreationDialog(IPlayer& player);
+	void showDuelMapSelectionDialog(IPlayer& player);
+	void showDuelWeaponSelectionDialog(IPlayer& player);
+	void showDuelRoundCountSettingDialog(IPlayer& player);
+	void showDuelAcceptListDialog(IPlayer& player);
+	void showDuelAcceptConfirmDialog(
+		IPlayer& player, std::shared_ptr<DuelOffer> offer);
+	void showDuelResults(std::shared_ptr<Room> room);
+
+	// Commands
+	void createDuel(IPlayer& player, int id);
+	unsigned int createDuelRoom(std::shared_ptr<DuelOffer> offer);
+	void deleteDuel(unsigned int id);
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
+	void onRoundEnd(IPlayer& winner, IPlayer& loser, int weaponId);
+	void onDuelEnd(std::shared_ptr<Room> duelRoom);
+
+	void deleteDuelOfferFromPlayer(IPlayer& player, bool deleteRoom);
 
 	std::map<unsigned int, std::shared_ptr<Room>> rooms;
 	std::unique_ptr<Core::Utils::IDPool> roomIdPool;
@@ -48,10 +67,14 @@ class X1Controller : public ModeBase, public PlayerSpawnEventHandler
 	ITimersComponent* timersComponent;
 
 public:
-	virtual ~X1Controller();
+	virtual ~DuelController();
 
 	void onPlayerSpawn(IPlayer& player) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
+	void onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
+		unsigned int weapon, BodyPart part) override;
+	void onPlayerDisconnect(
+		IPlayer& player, PeerDisconnectReason reason) override;
 
 	void onModeSelect(IPlayer& player) override;
 	void onModeJoin(IPlayer& player, JoinData joinData) override;
@@ -64,7 +87,7 @@ public:
 	void onPlayerSave(
 		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn) override;
 
-	static X1Controller* create(std::weak_ptr<Core::CoreManager> coreManager,
+	static DuelController* create(std::weak_ptr<Core::CoreManager> coreManager,
 		std::shared_ptr<Core::Commands::CommandManager> commandManager,
 		std::shared_ptr<Core::DialogManager> dialogManager,
 		IPlayerPool* playerPool, ITimersComponent* timersComponent,

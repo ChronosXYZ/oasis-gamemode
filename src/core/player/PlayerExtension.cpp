@@ -54,22 +54,11 @@ void OasisPlayerExt::reset()
 	_textDrawManager.reset();
 }
 
-void OasisPlayerExt::sendErrorMessage(const std::string& message)
-{
-	_player.sendClientMessage(Colour::White(),
-		fmt::format("{} {}", _("#RED#[ERROR]#WHITE#", _player), message));
-}
-
 void OasisPlayerExt::sendInfoMessage(const std::string& message)
 {
 	_player.sendClientMessage(Colour::White(),
 		fmt::sprintf(
 			"%s %s", _("#LIME#>>#WHITE#", _player), _(message, _player)));
-}
-
-void OasisPlayerExt::sendTranslatedMessage(const std::string& message)
-{
-	_player.sendClientMessage(Colour::White(), _(message, _player));
 }
 
 void OasisPlayerExt::showNotification(const std::string& notification,

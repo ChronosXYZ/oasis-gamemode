@@ -47,7 +47,7 @@ struct ModeBase : public PlayerDamageEventHandler
 		for (auto player : this->players)
 		{
 			auto playerExt = Core::Player::getPlayerExt(*player);
-			playerExt->sendTranslatedMessageFormatted(message, args...);
+			playerExt->sendTranslatedMessage(message, args...);
 		}
 	}
 

@@ -1,7 +1,7 @@
 #include "Room.hpp"
 #include "../../core/player/PlayerExtension.hpp"
 
-namespace Modes::Deathmatch
+namespace Modes::Duel
 {
 template <typename... T>
 void Room::sendMessageToAll(const std::string& message, const T&... args)

@@ -16,6 +16,16 @@ struct Map
 	WeaponSet weaponSet;
 	std::vector<Vector4> spawnPoints;
 	unsigned int interiorID;
+
+	inline Vector4 getRandomSpawn()
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> dis(0, this->spawnPoints.size() - 1);
+
+		int spawnPointIndex = dis(rd);
+		return this->spawnPoints[spawnPointIndex];
+	}
 };
 
 inline const std::vector<Map> MAPS
