@@ -14,6 +14,7 @@
 
 #include <functional>
 #include <memory>
+#include <scn/scan.h>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
@@ -76,9 +77,12 @@ void FreeroamController::initCommands()
 {
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"fr",
-		[&](std::reference_wrapper<IPlayer> player)
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			if (!args.empty())
+				return false;
 			this->_coreManager.lock()->selectMode(player, Mode::Freeroam);
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = {},
 			.description = __("Teleports player to the Freeroam mode"),
@@ -86,25 +90,30 @@ void FreeroamController::initCommands()
 
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"v",
-		[&](std::reference_wrapper<IPlayer> player, int modelId, int color1,
-			int color2)
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			auto result = scn::scan<int, int, int>(args, "{} {} {}");
+			if (!result)
+				return false;
+
+			auto [modelId, color1, color2] = result->values();
+
 			auto playerExt = Core::Player::getPlayerExt(player);
 			if (!playerExt->isInMode(Mode::Freeroam))
 			{
 				playerExt->sendErrorMessage(
 					__("You can spawn vehicles only in Freeroam mode!"));
-				return;
+				return true;
 			}
 			if (modelId < 400 || modelId > 611)
 			{
 				playerExt->sendErrorMessage(__("Invalid car model ID!"));
-				return;
+				return true;
 			}
 			if (color1 < 0 || color1 > 255 || color2 < 0 || color2 > 255)
 			{
 				playerExt->sendErrorMessage(__("Invalid color ID!"));
-				return;
+				return true;
 			}
 
 			if (player.get().getState() == PlayerState_Driver)
@@ -121,6 +130,8 @@ void FreeroamController::initCommands()
 				_("You have sucessfully spawned the vehicle!", player));
 			playerExt->getPlayerData()->tempData->freeroam->lastVehicleId
 				= vehicle->getID();
+
+			return true;
 		},
 		Core::Commands::CommandInfo {
 			.args = { __("vehicle model id"), __("color 1"), __("color 2") },
@@ -128,27 +139,35 @@ void FreeroamController::initCommands()
 			.category = MODE_NAME });
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"v",
-		[this](std::reference_wrapper<IPlayer> player)
+		[this](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			if (!args.empty())
+				return false;
+
 			auto playerExt = Core::Player::getPlayerExt(player);
 			if (!playerExt->isInMode(Mode::Freeroam))
 			{
 				playerExt->sendErrorMessage(
 					__("You can spawn vehicles only in Freeroam mode!"));
-				return;
+				return true;
 			}
 			this->showVehicleSpawningDialog(player);
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = {},
 			.description = __("Shows dialog with vehicle list for spawning"),
 			.category = MODE_NAME });
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"kill",
-		[](std::reference_wrapper<IPlayer> player)
+		[](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			if (!args.empty())
+				return false;
+
 			player.get().setHealth(0.0);
 			Core::Player::getPlayerExt(player.get())
 				->sendInfoMessage(__("You have killed yourself!"));
+			return true;
 		},
 		Core::Commands::CommandInfo {
 			.args = {},
@@ -157,19 +176,25 @@ void FreeroamController::initCommands()
 		});
 	this->_coreManager.lock()->getCommandManager()->addCommand(
 		"skin",
-		[&](std::reference_wrapper<IPlayer> player, int skinId)
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			auto result = scn::scan<int>(args, "{}");
+			if (!result)
+				return false;
+			auto [skinId] = result->values();
+
 			auto playerExt = Core::Player::getPlayerExt(player);
 			if (skinId < 0 || skinId > 311)
 			{
 				playerExt->sendErrorMessage(__("Invalid skin ID!"));
-				return;
+				return true;
 			}
 			player.get().setSkin(skinId);
 			auto data = Core::Player::getPlayerData(player.get());
 			data->lastSkinId = skinId;
 			playerExt->sendInfoMessage(fmt::sprintf(
 				_("You have changed your skin to ID: %d!", player), skinId));
+			return true;
 		},
 		Core::Commands::CommandInfo {
 			.args = { __("skin ID") },

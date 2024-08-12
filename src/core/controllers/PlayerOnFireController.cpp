@@ -14,8 +14,11 @@ void PlayerOnFireController::initCommands()
 {
 	this->commandManager->addCommand(
 		"onfire",
-		[this](std::reference_wrapper<IPlayer> player)
+		[this](std::reference_wrapper<IPlayer> player, std::string commandArgs)
 		{
+			if (!commandArgs.empty())
+				return false;
+
 			std::vector<std::string> items;
 			for (auto player : this->playersOnFire)
 			{
@@ -44,6 +47,8 @@ void PlayerOnFireController::initCommands()
 					{
 					});
 			}
+
+			return true;
 		},
 		Commands::CommandInfo {
 			.args = {},

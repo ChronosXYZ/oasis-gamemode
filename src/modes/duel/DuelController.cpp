@@ -19,6 +19,7 @@
 #include <player.hpp>
 #include <chrono>
 #include <fmt/printf.h>
+#include <scn/scan.h>
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -791,9 +792,16 @@ void DuelController::initCommands()
 {
 	this->commandManager->addCommand(
 		"duel",
-		[this](std::reference_wrapper<IPlayer> player, int id)
+		[this](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			auto scanResult = scn::scan<int>(args, "{}");
+			if (!scanResult)
+				return false;
+			auto [id] = scanResult->values();
+
 			this->createDuel(player, id);
+
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = { __("player id") },
 			.description = __("Create duel"),
@@ -801,24 +809,39 @@ void DuelController::initCommands()
 
 	this->commandManager->addCommand(
 		"duelstats",
-		[this](std::reference_wrapper<IPlayer> player, int id)
+		[this](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			int id;
+			auto scanResult = scn::scan<int>(args, "{}");
+			if (!scanResult)
+			{
+				id = player.get().getID();
+			}
+			else
+			{
+				id = scanResult->value();
+			}
+
 			if (id < 0 || id >= this->playerPool->players().size())
 			{
 				Core::Player::getPlayerExt(player)->sendErrorMessage(
 					__("Invalid player ID"));
-				return;
+				return true;
 			}
 			this->showDuelStatsDialog(player, id);
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = { __("player id") },
 			.description = __("Show Duel stats"),
 			.category = DUEL_MODE_NAME });
 	this->commandManager->addCommand(
 		"duela",
-		[this](std::reference_wrapper<IPlayer> player)
+		[this](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			if (!args.empty())
+				return false;
 			this->showDuelAcceptListDialog(player);
+			return true;
 		},
 		Core::Commands::CommandInfo {
 			.description = __("Accept duels"), .category = DUEL_MODE_NAME });

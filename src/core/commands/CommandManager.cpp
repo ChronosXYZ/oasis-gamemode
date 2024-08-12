@@ -3,6 +3,8 @@
 #include "../player/PlayerExtension.hpp"
 #include "CommandInfo.hpp"
 
+#include <exception>
+#include <functional>
 #include <spdlog/spdlog.h>
 #include <player.hpp>
 #include <stdexcept>
@@ -29,39 +31,24 @@ bool CommandManager::onPlayerCommandText(
 	if (!playerExt->isAuthorized())
 		return true;
 
-	auto cmdText = commandText.to_string();
-	auto cmdParts = Utils::Strings::split(cmdText, ' ');
+	auto preparedCommandText = commandText.to_string();
+	auto cmdParts = Utils::Strings::split(preparedCommandText, ' ');
 	assert(!cmdParts.empty());
 
 	// get command name and pop the first element from the vector
 	auto commandName = cmdParts.at(0);
-	cmdParts.erase(cmdParts.begin());
+	preparedCommandText.erase(0, commandName.size());
+	Utils::Strings::trim(preparedCommandText);
 	commandName.erase(0, 1); // remove '/' from command name
 
 	if (!this->_commandHandlers.contains(commandName))
 	{
 		return false;
 	}
-	CommandCallbackValues args;
-	args.push_back(player);
-	for (auto& part : cmdParts)
-	{
-		if (Utils::Strings::isNumber<int>(part))
-		{
-			args.push_back(stoi(part));
-		}
-		else if (Utils::Strings::isNumber<double>(part))
-		{
-			args.push_back(stod(part));
-		}
-		else
-		{
-			args.push_back(part);
-		}
-	}
+
 	try
 	{
-		this->callCommandHandler(commandName, args);
+		this->callCommandHandler(player, commandName, preparedCommandText);
 	}
 	catch (const std::invalid_argument& e)
 	{
@@ -76,17 +63,19 @@ bool CommandManager::onPlayerCommandText(
 	return true;
 }
 
-void CommandManager::callCommandHandler(
-	const std::string& cmdName, CommandCallbackValues args)
+void CommandManager::callCommandHandler(IPlayer& player,
+	const std::string& cmdName, std::string preparedCommandArgs)
 {
 	bool notFound = true;
 	for (const auto& handler : this->_commandHandlers[cmdName])
 	{
 		try
 		{
-			(*handler)(args);
+			auto result = handler(player, preparedCommandArgs);
+			if (!result)
+				continue;
 		}
-		catch (const std::invalid_argument& e)
+		catch (const std::exception& e)
 		{
 			spdlog::debug(e.what());
 			continue;

@@ -12,6 +12,7 @@
 #include <fmt/printf.h>
 
 #include <memory>
+#include <scn/scan.h>
 
 namespace Modes::X1
 {
@@ -422,9 +423,12 @@ void X1Controller::initCommands()
 {
 	this->commandManager->addCommand(
 		"x1",
-		[&](std::reference_wrapper<IPlayer> player)
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			if (!args.empty())
+				return false;
 			this->coreManager.lock()->selectMode(player, Mode::X1);
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = {},
 			.description = __("Enter Arena"),
@@ -432,15 +436,27 @@ void X1Controller::initCommands()
 
 	this->commandManager->addCommand(
 		"x1stats",
-		[this](std::reference_wrapper<IPlayer> player, int id)
+		[this](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			int id;
+			auto scanResult = scn::scan<int>(args, "{}");
+			if (!scanResult)
+			{
+				id = player.get().getID();
+			}
+			else
+			{
+				id = scanResult->value();
+			}
+
 			if (id < 0 || id >= this->playerPool->players().size())
 			{
 				Core::Player::getPlayerExt(player)->sendErrorMessage(
 					__("Invalid player ID"));
-				return;
+				return true;
 			}
 			this->showX1StatsDialog(player, id);
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = { "player id" },
 			.description = __("Show X1 stats"),

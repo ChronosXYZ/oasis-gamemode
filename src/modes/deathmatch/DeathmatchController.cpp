@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <cstdio>
 #include <fmt/printf.h>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
@@ -30,6 +31,7 @@
 #include <unordered_map>
 #include <uuid.h>
 #include <eventbus/event_bus.hpp>
+#include <scn/scan.h>
 
 #include <optional>
 #include <vector>
@@ -354,57 +356,68 @@ void DeathmatchController::initCommand()
 {
 	this->commandManager->addCommand(
 		"dm",
-		[&](std::reference_wrapper<IPlayer> player, int id)
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			auto scanResult = scn::scan<int>(args, "{}");
+
 			auto playerExt = Core::Player::getPlayerExt(player.get());
 			auto playerData = Core::Player::getPlayerData(player.get());
+
+			if (!scanResult)
+			{
+				if (playerData->tempData->core->isDying)
+				{
+					playerExt->sendErrorMessage(
+						__("You cannot join a mode while dying"));
+					return true;
+				}
+				this->coreManager.lock()->selectMode(player, Mode::Deathmatch);
+				return true;
+			}
+			auto [id] = scanResult->values();
 
 			if (playerData->tempData->core->isDying)
 			{
 				playerExt->sendErrorMessage(
 					__("You cannot join a mode while dying"));
-				return;
+				return true;
 			}
 
 			if (!this->rooms.contains((unsigned int)id - 1) || id <= 0)
 			{
 				playerExt->sendErrorMessage(__("Such room doesn't exist!"));
-				return;
+				return true;
 			}
 			this->coreManager.lock()->joinMode(player, Mode::Deathmatch,
 				{ { ROOM_INDEX, (unsigned int)id - 1 } });
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = { __("room number") },
 			.description = __("Enter DM room"),
 			.category = MODE_NAME });
 	this->commandManager->addCommand(
-		"dm",
-		[&](std::reference_wrapper<IPlayer> player)
-		{
-			auto playerExt = Core::Player::getPlayerExt(player.get());
-			auto playerData = Core::Player::getPlayerData(player.get());
-			if (playerData->tempData->core->isDying)
-			{
-				playerExt->sendErrorMessage(
-					__("You cannot join a mode while dying"));
-				return;
-			}
-			this->coreManager.lock()->selectMode(player, Mode::Deathmatch);
-		},
-		Core::Commands::CommandInfo { .args = {},
-			.description = __("Enter DM mode"),
-			.category = MODE_NAME });
-	this->commandManager->addCommand(
 		"dmstats",
-		[this](std::reference_wrapper<IPlayer> player, int id)
+		[this](std::reference_wrapper<IPlayer> player, std::string args)
 		{
+			int id;
+			auto scanResult = scn::scan<int>(args, "{}");
+			if (!scanResult)
+			{
+				id = player.get().getID();
+			}
+			else
+			{
+				id = scanResult->value();
+			}
+
 			if (id < 0 || id >= this->_playerPool->players().size())
 			{
 				Core::Player::getPlayerExt(player)->sendErrorMessage(
 					__("Invalid player ID"));
-				return;
+				return true;
 			}
 			this->showDeathmatchStatsDialog(player, id);
+			return true;
 		},
 		Core::Commands::CommandInfo { .args = { "player id" },
 			.description = __("Show DM stats"),
