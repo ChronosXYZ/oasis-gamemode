@@ -51,6 +51,7 @@ include(cmake/CMakeRC.cmake)
 #                       OPTIONS "boost:without_url=True"
 #                       OPTIONS "boost:without_wave=True")
 
+
 conan_cmake_configure(REQUIRES 
                             libpqxx/7.8.1
                             spdlog/1.13.0
@@ -102,6 +103,11 @@ find_package(scn REQUIRED CONFIG)
 
 add_library(${PROJECT_NAME} SHARED ${source_list})
 
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+                        -fsanitize=address
+                        -fno-omit-frame-pointer)
+target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     OMP-SDK
     tinygettext

@@ -70,11 +70,22 @@ public:
 			Colour::White(), fmt::sprintf(_(message, _player), args...));
 	}
 
+	template <typename... T>
+	inline void sendModeMessage(const std::string& message, const T&... args)
+	{
+		auto mode = this->getMode();
+		this->_player.sendClientMessage(Colour::White(),
+			fmt::sprintf("%s {%s}%s: %s", _("#LIME#>>#WHITE#", _player),
+				Modes::getModeColor(mode), Modes::getModeShortName(mode),
+				fmt::sprintf(_(message, _player), args...)));
+	}
+
 	const std::string getIP();
 	float getVehicleSpeed();
 	bool isInMode(Modes::Mode mode);
 	bool isInAnyMode();
 	bool isAuthorized();
+	unsigned int getNormalizedColor();
 	const Modes::Mode& getMode();
 
 	void freeExtension() override;

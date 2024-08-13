@@ -11,6 +11,7 @@
 #include "types.hpp"
 #include "values.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bits/chrono.h>
 #include <functional>
@@ -81,7 +82,7 @@ unsigned int DuelController::createDuelRoom(std::shared_ptr<DuelOffer> offer)
 	return roomId;
 }
 
-void DuelController::deleteDuel(unsigned int id)
+void DuelController::deleteDuel(unsigned int id, IPlayer* initiator)
 {
 	if (!this->rooms.contains(id))
 		return;
@@ -90,7 +91,19 @@ void DuelController::deleteDuel(unsigned int id)
 	{
 		auto playerData = Core::Player::getPlayerData(*player);
 		if (!playerData->tempData->duel->duelEnd)
+		{
+			if (initiator != nullptr)
+			{
+				auto playerExt = Core::Player::getPlayerExt(*player);
+				auto initiatorExt = Core::Player::getPlayerExt(*initiator);
+				playerExt->sendModeMessage(
+					__("Duel is over! {%06x}%s#WHITE# has #RED#quit#WHITE# the "
+					   "duel"),
+					initiatorExt->getNormalizedColor(),
+					initiator->getName().to_string());
+			}
 			this->coreManager.lock()->joinMode(*player, Mode::Freeroam, {});
+		}
 	}
 	if (room->roundStartTimer.has_value())
 		room->roundStartTimer.value()->kill();
@@ -696,7 +709,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 					room->players[0]->getName().to_string(),
 					room->players[1]->getName().to_string(),
 					room->currentRound + 1, room->maxRounds),
-				Seconds(3), 6);
+				Seconds(4), 6);
 		}
 		room->roundStartTimer = this->timersComponent->create(
 			new Impl::SimpleTimerHandler(
@@ -781,7 +794,7 @@ void DuelController::onPlayerDisconnect(
 	{
 		if (offer->tempRoomId)
 		{
-			this->deleteDuel(offer->tempRoomId.value());
+			this->deleteDuel(offer->tempRoomId.value(), &player);
 		}
 		auto senderData = Core::Player::getPlayerData(*offer->from);
 		auto senderExt = Core::Player::getPlayerExt(*offer->from);
@@ -920,7 +933,12 @@ void DuelController::onModeLeave(IPlayer& player)
 	if (this->rooms.contains(roomId))
 	{
 		auto room = this->rooms.at(roomId);
-		this->deleteDuel(roomId);
+		std::erase_if(room->players,
+			[&player](IPlayer* x)
+			{
+				return x->getID() == player.getID();
+			});
+		this->deleteDuel(roomId, &player);
 		pData->tempData->duel.reset();
 	}
 
