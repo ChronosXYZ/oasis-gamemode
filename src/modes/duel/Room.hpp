@@ -1,11 +1,12 @@
 #pragma once
 
 #include "../deathmatch/Maps.hpp"
+#include "Server/Components/Timers/timers.hpp"
 
 #include <chrono>
+#include <optional>
 #include <player.hpp>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 namespace Modes::Duel
@@ -19,7 +20,7 @@ struct Room
 	std::array<PlayerWeapon, MAX_WEAPON_SLOTS> allowedWeapons;
 
 	/// A list of players which joined the room.
-	std::unordered_set<IPlayer*> players;
+	std::vector<IPlayer*> players;
 
 	/// Room virtual world
 	unsigned int virtualWorld;
@@ -36,7 +37,11 @@ struct Room
 
 	std::chrono::time_point<std::chrono::system_clock> fightStarted;
 
-	unsigned int roundCount;
+	unsigned int currentRound;
+	unsigned int maxRounds;
+	std::optional<ITimer*> roundStartTimer;
+	bool roundStarted;
+	std::optional<IPlayer*> lastWinner;
 
 	std::optional<std::vector<std::vector<std::string>>> cachedResults;
 

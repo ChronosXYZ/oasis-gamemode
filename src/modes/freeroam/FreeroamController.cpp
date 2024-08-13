@@ -242,6 +242,7 @@ void FreeroamController::onPlayerDeath(
 
 void FreeroamController::setupSpawn(IPlayer& player)
 {
+	player.setControllable(true);
 	player.setVirtualWorld(this->virtualWorldId);
 	player.setInterior(0);
 	auto classData = queryExtension<IPlayerClassData>(player);

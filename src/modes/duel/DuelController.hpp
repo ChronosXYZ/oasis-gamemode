@@ -9,17 +9,28 @@
 #include "Room.hpp"
 #include "Room.tpp"
 
+#include <array>
 #include <functional>
 #include <player.hpp>
 
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace Modes::Duel
 {
 inline const std::string DUEL_ROOM_ID = "roomId";
 inline const std::string DUEL_MODE_NAME = "Duel";
+
+inline const std::array<std::string, 21> ROUND_START_TEXT
+	= { __("Kill him!"), __("Blast his ass!"), __("Humiliate him!"),
+		  __("Kickass!"), __("GOOO!"), __("Drop him!"), __("Slaughter!"),
+		  __("BAMBOOZLE HIM!"), __("REKT HIM!"), __("SHREKT HIM!"),
+		  __("Murder!"), __("Kill him!"), __("Get him!"), __("Waste his ass!"),
+		  __("Smash him!"), __("Smoke him!"), __("RAGE!"), __("NO MERCY!"),
+		  __("ITS WAR!"), __("PUMP HIM!"), __("Show him who's boss!") };
+
 class DuelController : public ModeBase,
 					   public PlayerSpawnEventHandler,
 					   public PlayerConnectEventHandler
@@ -52,7 +63,7 @@ class DuelController : public ModeBase,
 	void deleteDuel(unsigned int id);
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
-	void onRoundEnd(IPlayer& winner, IPlayer& loser, int weaponId);
+	void onRoundEnd(IPlayer* winner, IPlayer* loser, int weaponId);
 	void onDuelEnd(std::shared_ptr<Room> duelRoom);
 
 	void deleteDuelOfferFromPlayer(IPlayer& player, bool deleteRoom);

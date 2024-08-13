@@ -51,8 +51,8 @@ public:
 
 	bool refreshPlayerData(IPlayer& player);
 	void selectMode(IPlayer& player, Modes::Mode mode);
-	bool joinMode(IPlayer& player, Modes::Mode mode,
-		std::unordered_map<std::string, Core::PrimitiveType> joinData);
+	bool joinMode(
+		IPlayer& player, Modes::Mode mode, Modes::JoinData joinData = {});
 	void showModeSelectionDialog(IPlayer& player);
 
 	unsigned int allocateVirtualWorldId();
