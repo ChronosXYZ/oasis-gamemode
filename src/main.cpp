@@ -1,5 +1,4 @@
 #include "core/CoreManager.hpp"
-#include "core/SQLQueryManager.hpp"
 #include "core/utils/dotenv.h"
 #include "core/utils/Localization.hpp"
 
@@ -15,7 +14,8 @@
 #define OASIS_GM_UID 0xF09FC558499EF9D7
 #define OASIS_GAMEMODE_NAME "Oasis Freeroam"
 
-class OasisGamemodeComponent final : public IComponent, public PlayerTextEventHandler
+class OasisGamemodeComponent final : public IComponent,
+									 public PlayerTextEventHandler
 {
 private:
 	ICore* _core = nullptr;
@@ -27,16 +27,12 @@ private:
 public:
 	PROVIDE_UID(OASIS_GM_UID);
 
-	// When this component is destroyed we need to tell any linked components this it is gone.
-	~OasisGamemodeComponent()
-	{
-	}
+	// When this component is destroyed we need to tell any linked components
+	// this it is gone.
+	~OasisGamemodeComponent() { }
 
 	// Implement the main component API.
-	StringView componentName() const override
-	{
-		return "Oasis Gamemode";
-	}
+	StringView componentName() const override { return "Oasis Gamemode"; }
 
 	SemanticVersion componentVersion() const override
 	{
@@ -55,7 +51,8 @@ public:
 
 	void initTinygettext()
 	{
-		Localization::gDictionaryManager.reset(new tinygettext::DictionaryManager());
+		Localization::gDictionaryManager.reset(
+			new tinygettext::DictionaryManager());
 		Localization::gDictionaryManager->add_directory("locale/po");
 	}
 
@@ -64,7 +61,8 @@ public:
 		dotenv::init();
 		spdlog::set_level(spdlog::level::debug);
 
-		this->coreManager = Core::CoreManager::create(components, _core, playerPool);
+		this->coreManager
+			= Core::CoreManager::create(components, _core, playerPool);
 
 		srand(time(NULL));
 	}
@@ -94,7 +92,4 @@ public:
 };
 
 // Automatically called when the compiled binary is loaded.
-COMPONENT_ENTRY_POINT()
-{
-	return new OasisGamemodeComponent();
-}
+COMPONENT_ENTRY_POINT() { return new OasisGamemodeComponent(); }

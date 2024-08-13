@@ -37,10 +37,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG OPEN_MP_VERSION=1.2.0.2670
 COPY --from=builder /app/server /app
 COPY --from=builder /app/migrations /app/migrations
+COPY --from=builder /app/docker/image/entrypoint.sh /
 WORKDIR /app
 RUN dpkg --add-architecture i386 && \
     apt update && \
-    apt install -y git wget curl libc6:i386 libstdc++6:i386
+    apt install -y git wget curl libc6:i386 libstdc++6:i386 lib32asan8
 RUN curl -s https://api.github.com/repos/Southclaws/sampctl/releases/latest | \
     grep "browser_download_url.*amd64\.deb" | \
     cut -d : -f 2,3 | \
@@ -59,4 +60,4 @@ RUN wget -q https://github.com/golang-migrate/migrate/releases/download/v4.17.0/
     rm tmp.deb && \
     rm server.cfg
 
-CMD [ "./omp-server" ]
+CMD /app/entrypoint.sh

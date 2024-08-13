@@ -252,6 +252,9 @@ void CoreManager::onFree(IComponent* component)
 {
 	if (component->getUID() == DialogsComponent_UID)
 	{
+		// this->_authController.reset();
+		// this->_modes->clear();
+		// this->_playerControllers->clear();
 		this->_dialogManager.reset();
 	}
 }

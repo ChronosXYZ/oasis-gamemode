@@ -60,7 +60,7 @@ class DuelController : public ModeBase,
 	// Commands
 	void createDuel(IPlayer& player, int id);
 	unsigned int createDuelRoom(std::shared_ptr<DuelOffer> offer);
-	void deleteDuel(unsigned int id);
+	void deleteDuel(unsigned int id, IPlayer* initiator = nullptr);
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
 	void onRoundEnd(IPlayer* winner, IPlayer* loser, int weaponId);

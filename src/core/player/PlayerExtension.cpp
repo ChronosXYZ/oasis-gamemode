@@ -121,4 +121,9 @@ bool OasisPlayerExt::isAuthorized()
 {
 	return this->_playerData->tempData->core->isLoggedIn;
 }
+
+unsigned int OasisPlayerExt::getNormalizedColor()
+{
+	return this->_player.getColour().RGBA() >> 8;
+}
 }
