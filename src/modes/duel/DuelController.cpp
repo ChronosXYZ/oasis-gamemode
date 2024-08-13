@@ -20,6 +20,7 @@
 #include <chrono>
 #include <fmt/printf.h>
 #include <scn/scan.h>
+#include <Server/Components/Timers/Impl/timers_impl.hpp>
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -75,7 +76,7 @@ unsigned int DuelController::createDuelRoom(std::shared_ptr<DuelOffer> offer)
 		.map = offer->map,
 		.allowedWeapons = offer->weaponSet.getWeapons(),
 		.virtualWorld = this->coreManager.lock()->allocateVirtualWorldId(),
-		.roundCount = offer->roundCount,
+		.maxRounds = offer->roundCount,
 	});
 	return roomId;
 }
@@ -91,8 +92,8 @@ void DuelController::deleteDuel(unsigned int id)
 		if (!playerData->tempData->duel->duelEnd)
 			this->coreManager.lock()->joinMode(*player, Mode::Freeroam, {});
 	}
-	// if (room->roundStartTimer.has_value())
-	// 	room->roundStartTimer.value()->kill();
+	if (room->roundStartTimer.has_value())
+		room->roundStartTimer.value()->kill();
 	this->rooms.erase(id);
 	this->roomIdPool->freeId(id);
 	this->coreManager.lock()->freeVirtualWorldId(room->virtualWorld);
@@ -574,7 +575,7 @@ void DuelController::onRoomJoin(IPlayer& player, unsigned int roomId)
 	auto playerExt = Core::Player::getPlayerExt(player);
 
 	playerData->tempData->duel->roomId = roomId;
-	room->players.emplace(&player);
+	room->players.push_back(&player);
 	player.setHealth(room->defaultHealth);
 	player.setArmour(room->defaultArmor);
 	player.resetWeapons();
@@ -591,24 +592,24 @@ void DuelController::onRoomJoin(IPlayer& player, unsigned int roomId)
 	}
 }
 
-void DuelController::onRoundEnd(IPlayer& winner, IPlayer& loser, int weaponId)
+void DuelController::onRoundEnd(IPlayer* winner, IPlayer* loser, int weaponId)
 {
-	this->logStatsForPlayer(winner, true, weaponId);
-	this->logStatsForPlayer(loser, false, weaponId);
+	this->logStatsForPlayer(*winner, true, weaponId);
+	this->logStatsForPlayer(*loser, false, weaponId);
 
-	auto winnerData = Core::Player::getPlayerData(winner);
-	auto loserData = Core::Player::getPlayerData(loser);
+	auto winnerData = Core::Player::getPlayerData(*winner);
+	auto loserData = Core::Player::getPlayerData(*loser);
 	winnerData->tempData->duel->subsequentKills++;
 
 	auto room = this->rooms.at(winnerData->tempData->duel->roomId);
-	room->roundCount--;
-	if (room->roundCount == 0)
+	room->currentRound++;
+	if (room->currentRound == room->maxRounds)
 	{
 		winnerData->tempData->duel->duelEnd = true;
 		loserData->tempData->duel->duelEnd = true;
+		winner->spawn();
 		this->onDuelEnd(room);
 	}
-	winner.spawn();
 }
 
 void DuelController::onDuelEnd(std::shared_ptr<Room> duelRoom)
@@ -678,7 +679,48 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 	auto roomId = pData->tempData->duel->roomId;
 	auto room = this->rooms.at(roomId);
 	this->setupRoomForPlayer(player, room);
-	// TODO implement freezing the player while start countdown is ticking
+
+	player.setControllable(false);
+
+	if (!room->roundStartTimer.has_value())
+	{
+		if (room->lastWinner)
+		{
+			room->lastWinner.value()->spawn();
+		}
+		auto startSecs = std::make_shared<unsigned int>(3);
+		for (auto player : room->players)
+		{
+			player->sendGameText(
+				fmt::sprintf("~r~DUEL~n~~w~%s~n~~r~VS.~n~~w~%s~n~Round %d/%d",
+					room->players[0]->getName().to_string(),
+					room->players[1]->getName().to_string(),
+					room->currentRound + 1, room->maxRounds),
+				Seconds(3), 6);
+		}
+		room->roundStartTimer = this->timersComponent->create(
+			new Impl::SimpleTimerHandler(
+				[this, room, startSecs]()
+				{
+					if ((*startSecs)-- == 0)
+					{
+						room->roundStartTimer.value()->kill();
+						room->roundStartTimer.reset();
+						for (auto player : room->players)
+						{
+							player->sendGameText("~g~"
+									+ _(fmt::sprintf("%s",
+											ROUND_START_TEXT[random()
+												% ROUND_START_TEXT.size()]),
+										*player),
+								Seconds(1), 6);
+							player->setControllable(true);
+						}
+					}
+				}),
+			Seconds(1), true);
+		room->roundStartTimer.value()->trigger();
+	}
 }
 
 void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
@@ -701,9 +743,14 @@ void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 			winner = roomPlayer;
 	}
 
-	auto now = std::chrono::system_clock::now();
-	auto fightDuration = now - room->fightStarted;
+	room->lastWinner = winner;
 
+	this->setRandomSpawnPoint(*winner, room);
+	this->setRandomSpawnPoint(*loser, room);
+
+	this->onRoundEnd(winner, loser, reason);
+	// auto now = std::chrono::system_clock::now();
+	// auto fightDuration = now - room->fightStarted;
 	// auto loserPos = loser->getPosition();
 	// auto winnerPos = winner->getPosition();
 	// this->bus->fire_event(Core::Utils::Events::DuelWin { .winner =
@@ -714,7 +761,6 @@ void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 	// 	.fightDuration
 	// 	= std::chrono::duration_cast<std::chrono::seconds>(fightDuration)
 	// });
-	this->onRoundEnd(*winner, *loser, reason);
 }
 
 void DuelController::onPlayerGiveDamage(IPlayer& player, IPlayer& to,
@@ -856,7 +902,7 @@ void DuelController::onModeJoin(IPlayer& player, JoinData joinData)
 	if (!joinData.contains(DUEL_ROOM_ID)
 		&& !playerData->tempData->core->duelOfferSent)
 	{
-		this->coreManager.lock()->joinMode(player, Mode::Freeroam, {});
+		this->coreManager.lock()->joinMode(player, Mode::Freeroam);
 		Core::Player::getPlayerExt(player)->sendErrorMessage(
 			__("Invalid duel settings!"));
 		return;
@@ -874,7 +920,6 @@ void DuelController::onModeLeave(IPlayer& player)
 	if (this->rooms.contains(roomId))
 	{
 		auto room = this->rooms.at(roomId);
-		room->players.erase(&player);
 		this->deleteDuel(roomId);
 		pData->tempData->duel.reset();
 	}

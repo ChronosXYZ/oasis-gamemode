@@ -107,7 +107,6 @@ struct Room
 	PrivacyMode privacyMode = PrivacyMode(PrivacyMode::Value::Everyone);
 
 	std::optional<ITimer*> roundStartTimer;
-	unsigned int roundStartTimerCount;
 
 	template <typename... T>
 	void sendMessageToAll(const std::string& message, const T&... args);

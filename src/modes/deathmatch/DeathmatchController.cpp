@@ -1284,18 +1284,17 @@ void DeathmatchController::onNewRound(std::shared_ptr<Room> room)
 		player->setControllable(false);
 	}
 
-	room->roundStartTimerCount = 3;
+	auto startSecs = std::make_shared<unsigned int>(3);
 	room->roundStartTimer = this->_timersComponent->create(
 		new Impl::SimpleTimerHandler(
-			[this, room]()
+			[this, room, startSecs]()
 			{
 				for (auto player : room->players)
 				{
 					player->sendGameText(
-						fmt::sprintf("~w~%d", room->roundStartTimerCount),
-						Seconds(1), 6);
+						fmt::sprintf("~w~%d", *startSecs), Seconds(1), 6);
 				}
-				if (room->roundStartTimerCount-- == 0)
+				if ((*startSecs)-- == 0)
 				{
 					room->roundStartTimer.value()->kill();
 					room->roundStartTimer.reset();
