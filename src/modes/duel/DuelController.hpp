@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ModeBase.hpp"
-#include "../../core/CoreManager.hpp"
+#include "../../core/ModeManager.hpp"
 #include "../../core/commands/CommandManager.hpp"
 #include "../../core/dialogs/DialogManager.hpp"
 #include "../../core/utils/IDPool.hpp"
@@ -35,12 +35,6 @@ class DuelController : public ModeBase,
 					   public PlayerSpawnEventHandler,
 					   public PlayerConnectEventHandler
 {
-	DuelController(std::weak_ptr<Core::CoreManager> coreManager,
-		std::shared_ptr<Core::Commands::CommandManager> commandManager,
-		std::shared_ptr<Core::DialogManager> dialogManager,
-		IPlayerPool* playerPool, ITimersComponent* timersComponent,
-		std::shared_ptr<dp::event_bus> bus);
-
 	void initCommands();
 	void setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
@@ -71,13 +65,20 @@ class DuelController : public ModeBase,
 	std::map<unsigned int, std::shared_ptr<Room>> rooms;
 	std::unique_ptr<Core::Utils::IDPool> roomIdPool;
 
-	std::weak_ptr<Core::CoreManager> coreManager;
+	std::weak_ptr<Core::ModeManager> modeManager;
 	std::shared_ptr<Core::Commands::CommandManager> commandManager;
 	std::shared_ptr<Core::DialogManager> dialogManager;
+	std::shared_ptr<Core::Utils::IDPool> virtualWorldIdPool;
 	IPlayerPool* playerPool;
 	ITimersComponent* timersComponent;
 
 public:
+	DuelController(std::weak_ptr<Core::ModeManager> modeManager,
+		std::shared_ptr<Core::Commands::CommandManager> commandManager,
+		std::shared_ptr<Core::DialogManager> dialogManager,
+		IPlayerPool* playerPool, ITimersComponent* timersComponent,
+		std::shared_ptr<dp::event_bus> bus,
+		std::shared_ptr<Core::Utils::IDPool> virtualWorldIdPool);
 	virtual ~DuelController();
 
 	void onPlayerSpawn(IPlayer& player) override;
@@ -97,11 +98,5 @@ public:
 		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn) override;
 	void onPlayerSave(
 		std::shared_ptr<Core::PlayerModel> data, pqxx::work& txn) override;
-
-	static DuelController* create(std::weak_ptr<Core::CoreManager> coreManager,
-		std::shared_ptr<Core::Commands::CommandManager> commandManager,
-		std::shared_ptr<Core::DialogManager> dialogManager,
-		IPlayerPool* playerPool, ITimersComponent* timersComponent,
-		std::shared_ptr<dp::event_bus> bus);
 };
 }

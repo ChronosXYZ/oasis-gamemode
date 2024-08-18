@@ -22,7 +22,7 @@ private:
 	IPlayerPool* playerPool = nullptr;
 	bool _savedPlayerData = false;
 
-	std::shared_ptr<Core::CoreManager> coreManager;
+	std::unique_ptr<Core::CoreManager> coreManager;
 
 public:
 	PROVIDE_UID(OASIS_GM_UID);
@@ -44,7 +44,7 @@ public:
 		// Cache core, player pool here
 		_core = c;
 		playerPool = &_core->getPlayers();
-		_core->printLn("Oasis Gamemode loaded.");
+		_core->printLn("Oasis Gamemode has loaded");
 
 		this->initTinygettext();
 	}
@@ -61,10 +61,18 @@ public:
 		dotenv::init();
 		spdlog::set_level(spdlog::level::debug);
 
-		this->coreManager
-			= Core::CoreManager::create(components, _core, playerPool);
+		auto db_connection_string = getenv("DB_CONNECTION_STRING");
+		if (db_connection_string == NULL)
+		{
+			throw std::runtime_error(
+				"DB_CONNECTION_STRING environment variable is not set!");
+		}
+
+		this->coreManager = Core::CoreManager::create(
+			components, _core, playerPool, db_connection_string);
 
 		srand(time(NULL));
+		_core->printLn("Oasis Gamemode has initialized");
 	}
 
 	void onReady() override
@@ -76,7 +84,10 @@ public:
 
 	void onFree(IComponent* component) override
 	{
-		this->coreManager->onFree(component);
+		if (this->coreManager)
+		{
+			this->coreManager.reset();
+		}
 	}
 
 	void free() override

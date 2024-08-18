@@ -22,6 +22,7 @@
 #include <fmt/printf.h>
 #include <scn/scan.h>
 #include <Server/Components/Timers/Impl/timers_impl.hpp>
+#include <Server/Components/Classes/classes.hpp>
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -76,7 +77,7 @@ unsigned int DuelController::createDuelRoom(std::shared_ptr<DuelOffer> offer)
 	this->rooms[roomId] = std::shared_ptr<Room>(new Room {
 		.map = offer->map,
 		.allowedWeapons = offer->weaponSet.getWeapons(),
-		.virtualWorld = this->coreManager.lock()->allocateVirtualWorldId(),
+		.virtualWorld = this->virtualWorldIdPool->allocateId(),
 		.maxRounds = offer->roundCount,
 	});
 	return roomId;
@@ -102,14 +103,14 @@ void DuelController::deleteDuel(unsigned int id, IPlayer* initiator)
 					initiatorExt->getNormalizedColor(),
 					initiator->getName().to_string());
 			}
-			this->coreManager.lock()->joinMode(*player, Mode::Freeroam, {});
+			this->modeManager.lock()->joinMode(*player, Mode::Freeroam, {});
 		}
 	}
 	if (room->roundStartTimer.has_value())
 		room->roundStartTimer.value()->kill();
 	this->rooms.erase(id);
 	this->roomIdPool->freeId(id);
-	this->coreManager.lock()->freeVirtualWorldId(room->virtualWorld);
+	this->virtualWorldIdPool->freeId(room->virtualWorld);
 }
 
 void DuelController::setRandomSpawnPoint(
@@ -538,9 +539,9 @@ void DuelController::showDuelAcceptConfirmDialog(
 			}
 			auto roomId = this->createDuelRoom(offer);
 			offer->tempRoomId = roomId;
-			auto senderJoinResult = this->coreManager.lock()->joinMode(
+			auto senderJoinResult = this->modeManager.lock()->joinMode(
 				*offer->from, Mode::Duel, { { DUEL_ROOM_ID, roomId } });
-			auto receiverJoinResult = this->coreManager.lock()->joinMode(
+			auto receiverJoinResult = this->modeManager.lock()->joinMode(
 				player, Mode::Duel, { { DUEL_ROOM_ID, roomId } });
 			if (!senderJoinResult || !receiverJoinResult)
 			{
@@ -686,7 +687,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 	auto pData = Core::Player::getPlayerData(player);
 	if (pData->tempData->duel->duelEnd)
 	{
-		this->coreManager.lock()->joinMode(player, Mode::Freeroam, {});
+		this->modeManager.lock()->joinMode(player, Mode::Freeroam, {});
 		return;
 	}
 	auto roomId = pData->tempData->duel->roomId;
@@ -811,17 +812,19 @@ void DuelController::onPlayerDisconnect(
 	}
 }
 
-DuelController::DuelController(std::weak_ptr<Core::CoreManager> coreManager,
+DuelController::DuelController(std::weak_ptr<Core::ModeManager> modeManager,
 	std::shared_ptr<Core::Commands::CommandManager> commandManager,
 	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
-	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
+	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus,
+	std::shared_ptr<Core::Utils::IDPool> virtualWorldIdPool)
 	: super(Mode::Duel, bus, playerPool)
 	, roomIdPool(std::make_unique<Core::Utils::IDPool>())
-	, coreManager(coreManager)
+	, modeManager(modeManager)
 	, commandManager(commandManager)
 	, dialogManager(dialogManager)
 	, playerPool(playerPool)
 	, timersComponent(timersComponent)
+	, virtualWorldIdPool(virtualWorldIdPool)
 {
 	this->playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
 	this->playerPool->getPlayerDamageDispatcher().addEventHandler(this);
@@ -839,6 +842,8 @@ DuelController::DuelController(std::weak_ptr<Core::CoreManager> coreManager,
 		= this->hookEvent<Core::Utils::Events::PlayerOnFireBeenKilled>(
 			this->playerOnFireBeenKilledRegistration, this,
 			&DuelController::onPlayerOnFireBeenKilled);
+
+	this->initCommands();
 }
 
 DuelController::~DuelController()
@@ -915,7 +920,7 @@ void DuelController::onModeJoin(IPlayer& player, JoinData joinData)
 	if (!joinData.contains(DUEL_ROOM_ID)
 		&& !playerData->tempData->core->duelOfferSent)
 	{
-		this->coreManager.lock()->joinMode(player, Mode::Freeroam);
+		this->modeManager.lock()->joinMode(player, Mode::Freeroam);
 		Core::Player::getPlayerExt(player)->sendErrorMessage(
 			__("Invalid duel settings!"));
 		return;
@@ -995,17 +1000,5 @@ void DuelController::onPlayerSave(
 		data->duelStats->assaultRiflesKills, data->duelStats->riflesKills,
 		data->duelStats->heavyWeaponKills, data->duelStats->explosivesKills,
 		data->userId);
-}
-
-DuelController* DuelController::create(
-	std::weak_ptr<Core::CoreManager> coreManager,
-	std::shared_ptr<Core::Commands::CommandManager> commandManager,
-	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
-	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
-{
-	auto controller = new DuelController(coreManager, commandManager,
-		dialogManager, playerPool, timersComponent, bus);
-	controller->initCommands();
-	return controller;
 }
 }
