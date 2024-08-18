@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   builder:
     image: oasis/builder
