@@ -49,7 +49,6 @@ CoreManager::CoreManager(IComponentList* components, ICore* core,
 		  new Commands::CommandManager(playerPool)))
 	, _classesComponent(components->queryComponent<IClassesComponent>())
 	, _playerControllers(std::make_unique<ServiceLocator>())
-	, _modes(std::make_unique<ServiceLocator>())
 	, bus(std::make_shared<dp::event_bus>())
 	, connectionPool(connection_string, 8)
 	, virtualWorldIdPool(std::make_shared<Utils::IDPool>())
@@ -97,6 +96,7 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 	auto data = std::shared_ptr<PlayerModel>(new PlayerModel());
 	auto playerExt = new Player::OasisPlayerExt(
 		data, player, components->queryComponent<ITimersComponent>());
+	this->playerData[player.getID()] = data;
 	player.addExtension(playerExt, true);
 
 	player.setColour(Colour::FromRGBA(
@@ -158,9 +158,9 @@ void CoreManager::initHandlers()
 
 void CoreManager::saveAllPlayers()
 {
-	for (const auto player : this->playerPool->players())
+	for (const auto [id, data] : this->playerData)
 	{
-		this->savePlayer(*player);
+		this->savePlayer(data);
 	}
 	spdlog::info("Saved all player data!");
 }
@@ -188,8 +188,7 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 
 void CoreManager::savePlayer(IPlayer& player)
 {
-	auto data = Player::getPlayerData(player);
-	this->savePlayer(data);
+	this->savePlayer(this->playerData[player.getID()]);
 }
 
 void CoreManager::initSkinSelection()
