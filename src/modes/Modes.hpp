@@ -66,7 +66,7 @@ inline const std::string getModeColor(Mode mode)
 	case Mode::None:
 		return "FFFFFF";
 	case Mode::Duel:
-		return "FFFFFF";
+		return "789AB5";
 	}
 	return "FFFFFF";
 }

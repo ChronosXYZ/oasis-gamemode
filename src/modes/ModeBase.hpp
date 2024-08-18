@@ -72,5 +72,16 @@ protected:
 	dp::handler_registration playerOnFireBeenKilledRegistration;
 	dp::handler_registration x1ArenaWinRegistration;
 	dp::handler_registration playerJoinedModeSubsciption;
+
+	template <typename... T>
+	inline void sendModeMessage(
+		IPlayer& player, const std::string& message, const T&... args)
+	{
+		auto mode = this->getModeType();
+		player.sendClientMessage(Colour::White(),
+			fmt::sprintf("%s {%s}%s: %s", _("#LIME#>>#WHITE#", player),
+				Modes::getModeColor(mode), Modes::getModeShortName(mode),
+				fmt::sprintf(_(message, player), args...)));
+	}
 };
 }
