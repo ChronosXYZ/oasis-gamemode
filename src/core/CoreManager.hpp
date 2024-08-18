@@ -11,6 +11,7 @@
 
 #include <Server/Components/Classes/classes.hpp>
 #include <future>
+#include <map>
 #include <player.hpp>
 #include <eventbus/event_bus.hpp>
 
@@ -78,10 +79,10 @@ private:
 	std::promise<void> saveThreadExitSignal;
 	std::shared_ptr<Utils::IDPool> virtualWorldIdPool;
 	std::shared_ptr<ModeManager> modeManager;
+	std::map<unsigned int, std::shared_ptr<PlayerModel>> playerData;
 
 	// Controllers
 	std::unique_ptr<Auth::AuthController> _authController;
-	std::unique_ptr<ServiceLocator> _modes;
 	std::unique_ptr<ServiceLocator> _playerControllers;
 };
 }
