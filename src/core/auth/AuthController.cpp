@@ -1,5 +1,4 @@
 #include "AuthController.hpp"
-#include "../CoreManager.hpp"
 #include "../utils/Localization.hpp"
 #include "../SQLQueryManager.hpp"
 #include "../utils/QueryNames.hpp"
@@ -9,23 +8,24 @@
 #include <fmt/printf.h>
 #include <Server/Components/Timers/timers.hpp>
 #include <Server/Components/Timers/Impl/timers_impl.hpp>
+#include <spdlog/spdlog.h>
+#include <component.hpp>
+
 #include <functional>
 #include <memory>
-#include <spdlog/spdlog.h>
 
 namespace Core::Auth
 {
-
-AuthController::AuthController(IPlayerPool* playerPool,
-	std::shared_ptr<DialogManager> dialogManager,
-	std::weak_ptr<CoreManager> coreManager)
-	: _coreManager(coreManager)
-	, playerPool(playerPool)
-	, classesComponent(
-		  coreManager.lock()->components->queryComponent<IClassesComponent>())
-	, timersComponent(
-		  coreManager.lock()->components->queryComponent<ITimersComponent>())
+AuthController::AuthController(IComponentList* components,
+	IPlayerPool* playerPool, cp::connection_pool& pool,
+	std::weak_ptr<ModeManager> modeManager,
+	std::shared_ptr<DialogManager> dialogManager)
+	: playerPool(playerPool)
+	, classesComponent(components->queryComponent<IClassesComponent>())
+	, timersComponent(components->queryComponent<ITimersComponent>())
+	, modeManager(modeManager)
 	, dialogManager(dialogManager)
+	, pool(pool)
 {
 	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
 }
@@ -39,7 +39,7 @@ void AuthController::onPlayerConnect(IPlayer& player)
 {
 	player.setSpectating(true);
 
-	if (!this->_coreManager.lock()->refreshPlayerData(player))
+	if (!this->loadPlayerData(player))
 	{
 		this->showLanguageDialog(player);
 	}
@@ -152,7 +152,7 @@ void AuthController::onLoginSubmit(IPlayer& player, const std::string& password)
 			playerExt->sendInfoMessage(__("You have been logged in!"));
 			playerData->lastLoginAt = Utils::SQL::get_current_timestamp();
 			playerData->lastIP = playerExt->getIP();
-			this->_coreManager.lock()->onPlayerLoggedIn(player);
+			this->onPlayerLoggedIn(player);
 			return;
 		}
 	}
@@ -178,33 +178,31 @@ void AuthController::onPasswordSubmit(
 		return;
 	}
 	auto hashedPassword = Utils::argon2HashPassword(password);
-	auto pData = this->_coreManager.lock()->getPlayerData(player);
-	pData->passwordHash = hashedPassword;
+	auto playerData = Player::getPlayerData(player);
+	playerData->passwordHash = hashedPassword;
 	this->showEmailDialog(player);
-	pData->tempData->auth->plainTextPassword = password;
+	playerData->tempData->auth->plainTextPassword = password;
 }
 
 void AuthController::onRegistrationSubmit(IPlayer& player)
 {
 	auto playerExt = Player::getPlayerExt(player);
-	auto db = this->_coreManager.lock()->getDBConnection();
 
-	pqxx::work txn(*db);
+	auto playerData = Player::getPlayerData(player);
 
-	auto pData = this->_coreManager.lock()->getPlayerData(player);
 	try
 	{
-		pqxx::result res = txn.exec_params(
+		auto basic_tx = cp::tx(this->pool);
+		pqxx::result res = basic_tx.get().exec_params(
 			SQLQueryManager::Get()
 				->getQueryByName(Utils::SQL::Queries::CREATE_PLAYER)
 				.value(),
-			player.getName().to_string(), pData->passwordHash, pData->language,
-			pData->email, 1, playerExt->getIP());
-		txn.commit();
+			player.getName().to_string(), playerData->passwordHash,
+			playerData->language, playerData->email, 1, playerExt->getIP());
+		basic_tx.commit();
 	}
 	catch (const std::exception& e)
 	{
-		txn.abort();
 		spdlog::error(std::format("Error occurred when trying to create new "
 								  "user entry in DB. Error: {}",
 			e.what()));
@@ -213,8 +211,18 @@ void AuthController::onRegistrationSubmit(IPlayer& player)
 		playerExt->delayedKick();
 		return;
 	}
-	this->_coreManager.lock()->refreshPlayerData(player);
+	this->loadPlayerData(player);
 	this->showRegistrationInfoDialog(player);
+}
+
+void AuthController::onPlayerLoggedIn(IPlayer& player)
+{
+	auto playerData = Player::getPlayerData(player);
+	playerData->tempData->auth.reset();
+	playerData->tempData->core->isLoggedIn = true;
+
+	// hack to get class selection buttons appear again
+	player.setSpectating(false);
 }
 
 void AuthController::showLanguageDialog(IPlayer& player)
@@ -231,7 +239,7 @@ void AuthController::showLanguageDialog(IPlayer& player)
 			{
 			case DialogResponse_Left:
 			{
-				auto pData = this->_coreManager.lock()->getPlayerData(player);
+				auto pData = Player::getPlayerData(player);
 				pData->language
 					= Localization::LANGUAGE_CODE_NAMES.at(result.listItem());
 				showRegistrationDialog(player);
@@ -290,7 +298,7 @@ void AuthController::onEmailSubmit(IPlayer& player, const std::string& email)
 		return;
 	}
 
-	auto data = this->_coreManager.lock()->getPlayerData(player);
+	auto data = Player::getPlayerData(player);
 	data->email = email;
 	onRegistrationSubmit(player);
 }
@@ -313,12 +321,12 @@ void AuthController::showRegistrationInfoDialog(IPlayer& player)
 			pData->tempData->auth->plainTextPassword,
 			std::format("{:%Y-%m-%d}", pData->registrationDate)),
 		_("OK", player), ""));
-	this->_coreManager.lock()->getDialogManager()->showDialog(player, dialog,
+	this->dialogManager->showDialog(player, dialog,
 		[&](DialogResult result)
 		{
 			Player::getPlayerExt(player)->sendInfoMessage(
 				_("You have successfully registered!", player));
-			this->_coreManager.lock()->onPlayerLoggedIn(player);
+			this->onPlayerLoggedIn(player);
 		});
 }
 
@@ -329,5 +337,32 @@ void AuthController::interpolatePlayerCamera(IPlayer& player)
 	player.interpolateCameraLookAt(Vector3(384.0, -1557.0, 20.0),
 		Vector3(455.1533, -1868.1967, 31.9840), 15000,
 		PlayerCameraCutType_Move);
+}
+
+bool AuthController::loadPlayerData(IPlayer& player)
+{
+	cp::query loadPlayerQuery(
+		SQLQueryManager::Get()
+			->getQueryByName(Utils::SQL::Queries::LOAD_PLAYER)
+			.value());
+	auto tx = cp::tx(this->pool, loadPlayerQuery);
+	pqxx::result res = loadPlayerQuery(player.getName().to_string());
+
+	if (res.size() == 0)
+	{
+		return false;
+	}
+	spdlog::info(
+		"Found player data for " + player.getName().to_string() + " in DB");
+
+	auto row = res[0];
+	auto data = Player::getPlayerData(player);
+	data->updateFromRow(row);
+
+	this->modeManager.lock()->loadPlayerData(data, tx.get());
+
+	tx.commit();
+
+	return true;
 }
 }

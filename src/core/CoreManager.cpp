@@ -1,11 +1,10 @@
 #include "CoreManager.hpp"
+#include "ModeManager.hpp"
 #include "SQLQueryManager.hpp"
 #include "Server/Components/Vehicles/vehicles.hpp"
 #include "commands/CommandManager.hpp"
 #include "controllers/PlayerOnFireController.hpp"
 #include "controllers/SpeedometerController.hpp"
-#include "dialogs/DialogResult.hpp"
-#include "dialogs/Dialogs.hpp"
 #include "eventbus/event_bus.hpp"
 #include "player.hpp"
 #include "player/PlayerExtension.hpp"
@@ -15,6 +14,8 @@
 #include "types.hpp"
 #include "utils/Colors.hpp"
 #include "utils/Common.hpp"
+#include "utils/ConnectionPool.hpp"
+#include "utils/IDPool.hpp"
 #include "utils/QueryNames.hpp"
 #include "utils/ServiceLocator.hpp"
 #include "../modes/freeroam/FreeroamController.hpp"
@@ -37,11 +38,11 @@
 
 namespace Core
 {
-CoreManager::CoreManager(
-	IComponentList* components, ICore* core, IPlayerPool* playerPool)
+CoreManager::CoreManager(IComponentList* components, ICore* core,
+	IPlayerPool* playerPool, const std::string& connection_string)
 	: components(components)
 	, _core(core)
-	, _playerPool(playerPool)
+	, playerPool(playerPool)
 	, _dialogManager(
 		  std::shared_ptr<DialogManager>(new DialogManager(components)))
 	, _commandManager(std::shared_ptr<Commands::CommandManager>(
@@ -50,34 +51,31 @@ CoreManager::CoreManager(
 	, _playerControllers(std::make_unique<ServiceLocator>())
 	, _modes(std::make_unique<ServiceLocator>())
 	, bus(std::make_shared<dp::event_bus>())
+	, connectionPool(connection_string, 8)
+	, virtualWorldIdPool(std::make_shared<Utils::IDPool>())
 {
 	this->initSkinSelection();
 
-	_playerPool->getPlayerConnectDispatcher().addEventHandler(this);
-	_playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
-	_playerPool->getPlayerTextDispatcher().addEventHandler(this);
-	_playerPool->getPlayerDamageDispatcher().addEventHandler(this);
+	playerPool->getPlayerConnectDispatcher().addEventHandler(this);
+	playerPool->getPlayerSpawnDispatcher().addEventHandler(this);
+	playerPool->getPlayerTextDispatcher().addEventHandler(this);
+	playerPool->getPlayerDamageDispatcher().addEventHandler(this);
 
 	_classesComponent->getEventDispatcher().addEventHandler(this);
 
-	auto dbConnectionString = getenv("DB_CONNECTION_STRING");
-	if (dbConnectionString == NULL)
-	{
-		throw std::runtime_error(
-			"DB_CONNECTION_STRING environment variable is not set!");
-	}
-	this->_dbConnection
-		= std::make_shared<pqxx::connection>(dbConnectionString);
 	this->saveThread = std::thread(&CoreManager::runSaveThread, this,
 		std::move(this->saveThreadExitSignal.get_future()));
 	this->saveThread.detach();
+
+	this->modeManager = std::make_shared<ModeManager>(this->_dialogManager);
 }
 
-std::shared_ptr<CoreManager> CoreManager::create(
-	IComponentList* components, ICore* core, IPlayerPool* playerPool)
+std::unique_ptr<CoreManager> CoreManager::create(IComponentList* components,
+	ICore* core, IPlayerPool* playerPool,
+	const std::string& db_connection_string)
 {
-	std::shared_ptr<CoreManager> pManager(
-		new CoreManager(components, core, playerPool));
+	std::unique_ptr<CoreManager> pManager(
+		new CoreManager(components, core, playerPool, db_connection_string));
 	pManager->initHandlers();
 	return pManager;
 }
@@ -86,25 +84,12 @@ CoreManager::~CoreManager()
 {
 	this->saveThreadExitSignal.set_value();
 	saveAllPlayers();
-	_playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
-	_playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
-	_playerPool->getPlayerTextDispatcher().removeEventHandler(this);
-	_playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
+	playerPool->getPlayerConnectDispatcher().removeEventHandler(this);
+	playerPool->getPlayerSpawnDispatcher().removeEventHandler(this);
+	playerPool->getPlayerTextDispatcher().removeEventHandler(this);
+	playerPool->getPlayerDamageDispatcher().removeEventHandler(this);
 
 	_classesComponent->getEventDispatcher().removeEventHandler(this);
-}
-
-std::shared_ptr<PlayerModel> CoreManager::getPlayerData(IPlayer& player)
-{
-	auto ext = queryExtension<Player::OasisPlayerExt>(player);
-	if (ext)
-	{
-		if (auto data = ext->getPlayerData())
-		{
-			return data;
-		}
-	}
-	return {};
 }
 
 void CoreManager::onPlayerConnect(IPlayer& player)
@@ -112,7 +97,6 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 	auto data = std::shared_ptr<PlayerModel>(new PlayerModel());
 	auto playerExt = new Player::OasisPlayerExt(
 		data, player, components->queryComponent<ITimersComponent>());
-	this->_playerData[player.getID()] = data;
 	player.addExtension(playerExt, true);
 
 	player.setColour(Colour::FromRGBA(
@@ -129,86 +113,54 @@ void CoreManager::onPlayerConnect(IPlayer& player)
 	txdManager->add(TextDraws::Notification::NAME, notificationTxd);
 	logo->show();
 
-	_playerPool->sendDeathMessageToAll(NULL, player, 200);
+	playerPool->sendDeathMessageToAll(NULL, player, 200);
 }
 
 void CoreManager::onPlayerDisconnect(
 	IPlayer& player, PeerDisconnectReason reason)
 {
 	this->savePlayer(player);
-	this->_playerData.erase(player.getID());
-	this->removePlayerFromCurrentMode(player);
-	_playerPool->sendDeathMessageToAll(NULL, player, 201);
-}
-
-std::shared_ptr<DialogManager> CoreManager::getDialogManager()
-{
-	return this->_dialogManager;
+	this->modeManager->removePlayerFromCurrentMode(player);
+	playerPool->sendDeathMessageToAll(NULL, player, 201);
 }
 
 void CoreManager::initHandlers()
 {
-	_authController = std::make_unique<Auth::AuthController>(
-		_playerPool, _dialogManager, weak_from_this());
+	_authController = std::make_unique<Auth::AuthController>(this->components,
+		this->playerPool, this->connectionPool, this->modeManager,
+		this->_dialogManager);
 
-	_modes->registerInstance(Modes::Freeroam::FreeroamController::create(
-		weak_from_this(), _playerPool, this->_dialogManager, bus));
-	_modes->registerInstance(Modes::Deathmatch::DeathmatchController::create(
-		weak_from_this(), _commandManager, _dialogManager, _playerPool,
+	modeManager->addMode(
+		std::make_unique<Modes::Freeroam::FreeroamController>(this->components,
+			this->playerPool, this->virtualWorldIdPool, this->modeManager,
+			this->_dialogManager, this->_commandManager, this->bus));
+	modeManager->addMode(
+		std::make_unique<Modes::Deathmatch::DeathmatchController>(
+			this->modeManager, this->_commandManager, _dialogManager,
+			playerPool, components->queryComponent<ITimersComponent>(),
+			this->bus, connectionPool, this->virtualWorldIdPool));
+	modeManager->addMode(std::make_unique<Modes::X1::X1Controller>(
+		this->modeManager, this->virtualWorldIdPool, _commandManager,
+		_dialogManager, playerPool,
+		components->queryComponent<ITimersComponent>(), this->bus));
+	modeManager->addMode(std::make_unique<Modes::Duel::DuelController>(
+		modeManager, _commandManager, _dialogManager, playerPool,
 		components->queryComponent<ITimersComponent>(), this->bus,
-		_dbConnection));
-	_modes->registerInstance(Modes::X1::X1Controller::create(weak_from_this(),
-		_commandManager, _dialogManager, _playerPool,
-		components->queryComponent<ITimersComponent>(), this->bus));
-	_modes->registerInstance(Modes::Duel::DuelController::create(
-		weak_from_this(), _commandManager, _dialogManager, _playerPool,
-		components->queryComponent<ITimersComponent>(), this->bus));
+		this->virtualWorldIdPool));
+
 	_playerControllers->registerInstance(new Controllers::SpeedometerController(
-		_playerPool, components->queryComponent<IVehiclesComponent>(),
+		playerPool, components->queryComponent<IVehiclesComponent>(),
 		components->queryComponent<ITimersComponent>()));
 	_playerControllers->registerInstance(
-		new Controllers::PlayerOnFireController(this->_playerPool, this->bus,
+		new Controllers::PlayerOnFireController(this->playerPool, this->bus,
 			this->_commandManager, this->_dialogManager));
-}
-
-std::shared_ptr<pqxx::connection> CoreManager::getDBConnection()
-{
-	return this->_dbConnection;
-}
-
-bool CoreManager::refreshPlayerData(IPlayer& player)
-{
-	auto db = this->getDBConnection();
-	pqxx::work txn(*db);
-	pqxx::result res
-		= txn.exec_params(SQLQueryManager::Get()
-							  ->getQueryByName(Utils::SQL::Queries::LOAD_PLAYER)
-							  .value(),
-			player.getName().to_string());
-
-	if (res.size() == 0)
-	{
-		return false;
-	}
-	spdlog::info(
-		"Found player data for " + player.getName().to_string() + " in DB");
-
-	auto row = res[0];
-	auto data = Player::getPlayerData(player);
-	data->updateFromRow(row);
-
-	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
-		->onPlayerLoad(data, txn);
-	this->_modes->resolve<Modes::X1::X1Controller>()->onPlayerLoad(data, txn);
-	txn.commit();
-	return true;
 }
 
 void CoreManager::saveAllPlayers()
 {
-	for (const auto [id, data] : this->_playerData)
+	for (const auto player : this->playerPool->players())
 	{
-		this->savePlayer(data);
+		this->savePlayer(*player);
 	}
 	spdlog::info("Saved all player data!");
 }
@@ -218,8 +170,8 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 	if (!data->tempData->core->isLoggedIn)
 		return;
 
-	auto db = this->getDBConnection();
-	pqxx::work txn(*db);
+	auto basic_tx = cp::tx(this->connectionPool);
+	auto& txn = basic_tx.get();
 
 	// save general player info
 	txn.exec_params(SQLQueryManager::Get()
@@ -228,35 +180,16 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 		data->language, data->lastSkinId, data->lastIP, data->lastLoginAt,
 		data->userId);
 
-	// save DM info
-	this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
-		->onPlayerSave(data, txn);
+	this->modeManager->savePlayer(data, txn);
+	basic_tx.commit();
 
-	// save X1 info
-	this->_modes->resolve<Modes::X1::X1Controller>()->onPlayerSave(data, txn);
-
-	// save duel info
-	this->_modes->resolve<Modes::Duel::DuelController>()->onPlayerSave(
-		data, txn);
-
-	txn.commit();
 	spdlog::info("Player {} has been successfully saved", data->name);
 }
 
 void CoreManager::savePlayer(IPlayer& player)
 {
-	this->savePlayer(this->_playerData[player.getID()]);
-}
-
-void CoreManager::onFree(IComponent* component)
-{
-	if (component->getUID() == DialogsComponent_UID)
-	{
-		// this->_authController.reset();
-		// this->_modes->clear();
-		// this->_playerControllers->clear();
-		this->_dialogManager.reset();
-	}
+	auto data = Player::getPlayerData(player);
+	this->savePlayer(data);
 }
 
 void CoreManager::initSkinSelection()
@@ -274,13 +207,13 @@ void CoreManager::initSkinSelection()
 
 bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 {
-	auto pData = this->getPlayerData(player);
-	if (!pData->tempData->core->isLoggedIn)
+	auto playerData = Player::getPlayerData(player);
+	if (!playerData->tempData->core->isLoggedIn)
 		return true;
-	if (!pData->tempData->core->skinSelectionMode)
+	if (!playerData->tempData->core->skinSelectionMode)
 	{
 		// first player request class call
-		pData->tempData->core->skinSelectionMode = true;
+		playerData->tempData->core->skinSelectionMode = true;
 
 		Vector4 classSelectionPoint
 			= CLASS_SELECTION_POINTS[random() % CLASS_SELECTION_POINTS.size()];
@@ -295,26 +228,16 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 			Vector3(classSelectionPoint.x + 5.0 * std::sin(-angleRad),
 				classSelectionPoint.y + 5.0 * std::cos(-angleRad),
 				classSelectionPoint.z));
-		player.setSkin(pData->lastSkinId);
-		this->removePlayerFromCurrentMode(player);
+		player.setSkin(playerData->lastSkinId);
+		this->modeManager->removePlayerFromCurrentMode(player);
 	}
 
 	return true;
 }
 
-void CoreManager::onPlayerLoggedIn(IPlayer& player)
-{
-	auto pData = this->getPlayerData(player);
-	pData->tempData->auth.reset();
-	pData->tempData->core->isLoggedIn = true;
-
-	// hack to get class selection buttons appear again
-	player.setSpectating(false);
-}
-
 bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 {
-	auto pData = this->getPlayerData(player);
+	auto pData = Player::getPlayerData(player);
 	if (!pData->tempData->core->isLoggedIn)
 	{
 		Player::getPlayerExt(player)->sendErrorMessage(
@@ -327,7 +250,7 @@ bool CoreManager::onPlayerRequestSpawn(IPlayer& player)
 	}
 	pData->lastSkinId = player.getSkin();
 
-	showModeSelectionDialog(player);
+	this->modeManager->showModeSelectionDialog(player);
 
 	return false;
 }
@@ -336,171 +259,6 @@ void CoreManager::onPlayerSpawn(IPlayer& player)
 {
 	auto playerData = Player::getPlayerData(player);
 	playerData->tempData->core->isDying = false;
-}
-
-void CoreManager::showModeSelectionDialog(IPlayer& player)
-{
-	auto dialog = std::shared_ptr<TabListHeadersDialog>(
-		new TabListHeadersDialog(_("Modes", player),
-			{ _("Mode", player), _("Command", player), _("Players", player) },
-			{ { _("Freeroam", player), "/fr",
-				  std::to_string(
-					  _modes->resolve<Modes::Freeroam::FreeroamController>()
-						  ->playerCount()) },
-				{ _("Deathmatch", player), "/dm",
-					std::to_string(
-						_modes
-							->resolve<Modes::Deathmatch::DeathmatchController>()
-							->playerCount()) },
-				{ _("Protect the President", player), "/ptp",
-					std::to_string(0) },
-				{ _("Derby", player), "/derby", std::to_string(0) },
-				{ _("Cops and Robbers", player), "/cnr", std::to_string(0) } },
-			_("Select", player), ""));
-	this->getDialogManager()->showDialog(player, dialog,
-		[&](DialogResult result)
-		{
-			selectMode(player, static_cast<Modes::Mode>(result.listItem()));
-		});
-}
-
-unsigned int CoreManager::allocateVirtualWorldId()
-{
-	return this->virtualWorldIdPool.allocateId();
-}
-
-void CoreManager::freeVirtualWorldId(unsigned int id)
-{
-	this->virtualWorldIdPool.freeId(id);
-}
-
-void CoreManager::selectMode(IPlayer& player, Modes::Mode mode)
-{
-	switch (mode)
-	{
-	case Modes::Mode::Freeroam:
-	{
-		this->_modes->resolve<Modes::Freeroam::FreeroamController>()
-			->onModeSelect(player);
-		break;
-	}
-	case Modes::Mode::Deathmatch:
-	{
-		this->_modes->resolve<Modes::Deathmatch::DeathmatchController>()
-			->onModeSelect(player);
-		break;
-	}
-	case Modes::Mode::X1:
-	{
-		this->_modes->resolve<Modes::X1::X1Controller>()->onModeSelect(player);
-		break;
-	}
-	default:
-	{
-		Player::getPlayerExt(player)->sendErrorMessage(
-			__("Mode is not implemented yet"));
-		this->showModeSelectionDialog(player);
-		break;
-	}
-	}
-}
-
-bool CoreManager::joinMode(IPlayer& player, Modes::Mode mode,
-	std::unordered_map<std::string, Core::PrimitiveType> joinData)
-{
-	auto pData = Player::getPlayerData(player);
-	auto playerExt = Player::getPlayerExt(player);
-	if (pData->tempData->core->isDying)
-	{
-		playerExt->sendErrorMessage(__("You cannot join a mode while dying"));
-		return false;
-	}
-	this->removePlayerFromCurrentMode(player);
-
-	pData->tempData->core->lastMode = pData->tempData->core->currentMode;
-	pData->tempData->core->currentMode = mode;
-
-	std::shared_ptr<Modes::ModeBase> modeBase;
-	switch (mode)
-	{
-	case Modes::Mode::Freeroam:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Freeroam::FreeroamController>());
-		break;
-	}
-	case Modes::Mode::Deathmatch:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Deathmatch::DeathmatchController>());
-		break;
-	}
-	case Modes::Mode::X1:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::X1::X1Controller>());
-		break;
-	}
-	case Modes::Mode::Duel:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Duel::DuelController>());
-		break;
-	}
-	default:
-	{
-		Player::getPlayerExt(player)->sendErrorMessage(
-			__("Mode is not implemented yet!"));
-		this->showModeSelectionDialog(player);
-		break;
-	}
-	}
-	if (modeBase.get() == nullptr)
-		return false;
-	modeBase->onModeJoin(player, joinData);
-	return true;
-}
-
-void CoreManager::removePlayerFromCurrentMode(IPlayer& player)
-{
-	auto mode = Player::getPlayerExt(player)->getMode();
-	if (mode == Modes::Mode::None)
-		return;
-	std::shared_ptr<Modes::ModeBase> modeBase;
-	switch (mode)
-	{
-	case Modes::Mode::Freeroam:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Freeroam::FreeroamController>());
-		break;
-	}
-	case Modes::Mode::Deathmatch:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Deathmatch::DeathmatchController>());
-		break;
-	}
-	case Modes::Mode::X1:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::X1::X1Controller>());
-		break;
-	}
-	case Modes::Mode::Duel:
-	{
-		modeBase = static_pointer_cast<Modes::ModeBase>(
-			this->_modes->resolve<Modes::Duel::DuelController>());
-		break;
-	}
-	default:
-	{
-		break;
-	}
-	}
-	if (modeBase.get() == nullptr)
-		return;
-	modeBase->onModeLeave(player);
 }
 
 void CoreManager::runSaveThread(std::future<void> exitSignal)
@@ -513,11 +271,6 @@ void CoreManager::runSaveThread(std::future<void> exitSignal)
 	}
 }
 
-std::shared_ptr<Commands::CommandManager> CoreManager::getCommandManager()
-{
-	return _commandManager;
-}
-
 bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 {
 	auto playerExt = Player::getPlayerExt(player);
@@ -526,7 +279,7 @@ bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 	player.setChatBubble(
 		message, Colour::White(), 100.0, Milliseconds(CHAT_BUBBLE_EXPIRATION));
 
-	for (auto sPlayer : _playerPool->players())
+	for (auto sPlayer : playerPool->players())
 	{
 		if (!playerExt->isInAnyMode())
 			sPlayer->sendClientMessage(Colour::White(),
@@ -549,7 +302,7 @@ bool CoreManager::onPlayerText(IPlayer& player, StringView message)
 
 void CoreManager::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 {
-	_playerPool->sendDeathMessageToAll(killer, player, reason);
+	playerPool->sendDeathMessageToAll(killer, player, reason);
 
 	auto playerData = Player::getPlayerData(player);
 	playerData->tempData->core->isDying = true;

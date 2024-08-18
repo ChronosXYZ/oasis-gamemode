@@ -1,8 +1,11 @@
 #pragma once
 
 #include "../ModeBase.hpp"
-#include "../../core/CoreManager.hpp"
+#include "../../core/ModeManager.hpp"
+#include "../../core/commands/CommandManager.hpp"
+#include "../../core/dialogs/DialogManager.hpp"
 #include "../../core/utils/IDPool.hpp"
+#include "../../core/utils/ConnectionPool.hpp"
 #include "Room.hpp"
 #include "Server/Components/Timers/timers.hpp"
 #include "WeaponSet.hpp"
@@ -28,13 +31,6 @@ class DeathmatchController : public Modes::ModeBase,
 							 public PlayerSpawnEventHandler,
 							 public PlayerChangeEventHandler
 {
-	DeathmatchController(std::weak_ptr<Core::CoreManager> coreManager,
-		std::shared_ptr<Core::Commands::CommandManager> commandManager,
-		std::shared_ptr<Core::DialogManager> dialogManager,
-		IPlayerPool* playerPool, ITimersComponent* timersComponent,
-		std::shared_ptr<dp::event_bus> bus,
-		std::shared_ptr<pqxx::connection> dbConnection);
-
 	void initCommand();
 	void initRooms();
 	void showRoomSelectionDialog(IPlayer& player, bool modeSelection = true);
@@ -73,19 +69,26 @@ class DeathmatchController : public Modes::ModeBase,
 
 	std::map<unsigned int, std::shared_ptr<Room>> rooms;
 	std::unique_ptr<Core::Utils::IDPool> roomIdPool;
-	std::unordered_map<std::string, ITimer*> _cbugFreezeTimers;
 
-	std::weak_ptr<Core::CoreManager> coreManager;
+	std::weak_ptr<Core::ModeManager> modeManager;
 	std::shared_ptr<Core::Commands::CommandManager> commandManager;
 	std::shared_ptr<Core::DialogManager> dialogManager;
+	std::shared_ptr<Core::Utils::IDPool> virtualWorldIdPool;
 	IPlayerPool* _playerPool;
 	ITimersComponent* _timersComponent;
-	std::shared_ptr<pqxx::connection> dbConnection;
+	cp::connection_pool& dbPool;
 
 	ITimer* _ticker;
 
 public:
+	DeathmatchController(std::weak_ptr<Core::ModeManager> modeManager,
+		std::shared_ptr<Core::Commands::CommandManager> commandManager,
+		std::shared_ptr<Core::DialogManager> dialogManager,
+		IPlayerPool* playerPool, ITimersComponent* timersComponent,
+		std::shared_ptr<dp::event_bus> bus, cp::connection_pool& dbPool,
+		std::shared_ptr<Core::Utils::IDPool> virtualWorldIdPool);
 	virtual ~DeathmatchController();
+
 	void onModeJoin(IPlayer& player,
 		std::unordered_map<std::string, Core::PrimitiveType> joinData) override;
 	void onModeSelect(IPlayer& player) override;
@@ -105,13 +108,5 @@ public:
 	void onPlayerOnFire(Core::Utils::Events::PlayerOnFireEvent event) override;
 	void onPlayerOnFireBeenKilled(
 		Core::Utils::Events::PlayerOnFireBeenKilled event) override;
-
-	static DeathmatchController* create(
-		std::weak_ptr<Core::CoreManager> coreManager,
-		std::shared_ptr<Core::Commands::CommandManager> commandManager,
-		std::shared_ptr<Core::DialogManager> dialogManager,
-		IPlayerPool* playerPool, ITimersComponent* timersComponent,
-		std::shared_ptr<dp::event_bus> bus,
-		std::shared_ptr<pqxx::connection> dbConnection);
 };
 }

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../dialogs/DialogManager.hpp"
+#include "../ModeManager.hpp"
+#include "../utils/ConnectionPool.hpp"
 
 #include <Server/Components/Timers/timers.hpp>
 #include <Server/Components/Classes/classes.hpp>
@@ -8,11 +10,6 @@
 
 #include <regex>
 #include <memory>
-
-namespace Core
-{
-class CoreManager;
-}
 
 namespace Core::Auth
 {
@@ -24,9 +21,9 @@ class AuthController : public PlayerConnectEventHandler,
 					   public ClassEventHandler
 {
 public:
-	AuthController(IPlayerPool* playerPool,
-		std::shared_ptr<DialogManager> dialogManager,
-		std::weak_ptr<Core::CoreManager> coreManager);
+	AuthController(IComponentList* components, IPlayerPool* playerPool,
+		cp::connection_pool& pool, std::weak_ptr<ModeManager> modeManager,
+		std::shared_ptr<DialogManager> dialogManager);
 	~AuthController();
 
 	void onPlayerConnect(IPlayer& player) override;
@@ -36,7 +33,9 @@ private:
 	IClassesComponent* const classesComponent;
 	ITimersComponent* const timersComponent;
 	std::shared_ptr<DialogManager> dialogManager;
-	std::weak_ptr<Core::CoreManager> _coreManager;
+	std::weak_ptr<ModeManager> modeManager;
+	cp::connection_pool& pool;
+	// std::weak_ptr<Core::CoreManager> _coreManager;
 
 	void showLanguageDialog(IPlayer& player);
 	void showRegistrationDialog(IPlayer& player);
@@ -44,11 +43,13 @@ private:
 	void showLoginDialog(IPlayer& player, bool wrongPass);
 	void showRegistrationInfoDialog(IPlayer& player);
 	void interpolatePlayerCamera(IPlayer& player);
+	bool loadPlayerData(IPlayer& player);
 
 	// Callbacks
 	void onLoginSubmit(IPlayer& player, const std::string& password);
 	void onPasswordSubmit(IPlayer& player, const std::string& password);
 	void onEmailSubmit(IPlayer& player, const std::string& email);
 	void onRegistrationSubmit(IPlayer& player);
+	void onPlayerLoggedIn(IPlayer& player);
 };
 }

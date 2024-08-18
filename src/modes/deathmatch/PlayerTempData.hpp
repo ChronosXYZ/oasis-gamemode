@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Room.hpp"
+#include "Server/Components/Timers/timers.hpp"
 #include <cstddef>
 #include <ctime>
 #include <optional>
@@ -13,7 +14,7 @@ struct PlayerTempData
 	unsigned int roomId;
 	std::time_t lastShootTime = 0;
 	bool cbugging = false;
-	std::optional<std::string> cbugFreezeTimerId;
+	std::optional<ITimer*> cbugFreezeTimer;
 	std::optional<Room> temporaryRoomSettings; // used for rooms creating
 
 	unsigned int kills = 0;

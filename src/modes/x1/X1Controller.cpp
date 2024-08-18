@@ -6,6 +6,8 @@
 #include "../../core/SQLQueryManager.hpp"
 #include "X1PlayerTempData.hpp"
 
+#include <Server/Components/Classes/classes.hpp>
+
 #include <bits/chrono.h>
 #include <player.hpp>
 #include <chrono>
@@ -67,7 +69,7 @@ void X1Controller::initRooms()
 
 void X1Controller::createRoom(std::shared_ptr<Room> room)
 {
-	room->virtualWorld = this->coreManager.lock()->allocateVirtualWorldId();
+	room->virtualWorld = this->virtualWorldIdPool->allocateId();
 	auto roomId = this->roomIdPool->allocateId();
 	this->rooms[roomId] = room;
 }
@@ -242,7 +244,7 @@ void X1Controller::showArenaSelectionDialog(IPlayer& player)
 					this->showArenaSelectionDialog(player);
 					return;
 				}
-				this->coreManager.lock()->joinMode(
+				this->modeManager.lock()->joinMode(
 					player, Mode::X1, { { X1_ROOM_INDEX, roomIndex } });
 			}
 		});
@@ -334,7 +336,7 @@ void X1Controller::onPlayerSpawn(IPlayer& player)
 	if (pData->tempData->x1->endArena)
 	{
 		pData->tempData->x1->endArena = false;
-		this->coreManager.lock()->joinMode(player, Mode::Freeroam, {});
+		this->modeManager.lock()->joinMode(player, Mode::Freeroam);
 		return;
 	}
 	auto roomId = pData->tempData->x1->roomId;
@@ -382,16 +384,18 @@ void X1Controller::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 
 	auto winnerData = Core::Player::getPlayerData(*winner);
 	winnerData->tempData->x1->subsequentKills++;
-	this->coreManager.lock()->joinMode(*winner, Mode::Freeroam, {});
+	this->modeManager.lock()->joinMode(*winner, Mode::Freeroam, {});
 }
 
-X1Controller::X1Controller(std::weak_ptr<Core::CoreManager> coreManager,
+X1Controller::X1Controller(std::weak_ptr<Core::ModeManager> coreManager,
+	std::shared_ptr<Core::Utils::IDPool> virtualWorldIdPool,
 	std::shared_ptr<Core::Commands::CommandManager> commandManager,
 	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
 	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
 	: super(Mode::X1, bus, playerPool)
+	, virtualWorldIdPool(virtualWorldIdPool)
 	, roomIdPool(std::make_unique<Core::Utils::IDPool>())
-	, coreManager(coreManager)
+	, modeManager(coreManager)
 	, commandManager(commandManager)
 	, dialogManager(dialogManager)
 	, playerPool(playerPool)
@@ -411,6 +415,9 @@ X1Controller::X1Controller(std::weak_ptr<Core::CoreManager> coreManager,
 		= this->hookEvent<Core::Utils::Events::PlayerOnFireBeenKilled>(
 			this->playerOnFireBeenKilledRegistration, this,
 			&X1Controller::onPlayerOnFireBeenKilled);
+
+	this->initRooms();
+	this->initCommands();
 }
 
 X1Controller::~X1Controller()
@@ -427,7 +434,7 @@ void X1Controller::initCommands()
 		{
 			if (!args.empty())
 				return false;
-			this->coreManager.lock()->selectMode(player, Mode::X1);
+			this->modeManager.lock()->selectMode(player, Mode::X1);
 			return true;
 		},
 		Core::Commands::CommandInfo { .args = {},
@@ -533,17 +540,5 @@ void X1Controller::onPlayerSave(
 		data->x1Stats->smgKills, data->x1Stats->assaultRiflesKills,
 		data->x1Stats->riflesKills, data->x1Stats->heavyWeaponKills,
 		data->x1Stats->explosivesKills, data->userId);
-}
-
-X1Controller* X1Controller::create(std::weak_ptr<Core::CoreManager> coreManager,
-	std::shared_ptr<Core::Commands::CommandManager> commandManager,
-	std::shared_ptr<Core::DialogManager> dialogManager, IPlayerPool* playerPool,
-	ITimersComponent* timersComponent, std::shared_ptr<dp::event_bus> bus)
-{
-	auto controller = new X1Controller(coreManager, commandManager,
-		dialogManager, playerPool, timersComponent, bus);
-	controller->initRooms();
-	controller->initCommands();
-	return controller;
 }
 }

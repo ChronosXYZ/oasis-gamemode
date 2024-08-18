@@ -1,8 +1,12 @@
 #pragma once
 
-#include "../../core/CoreManager.hpp"
 #include "../ModeBase.hpp"
 #include "../../core/utils/VehicleList.hpp"
+#include "../../core/dialogs/DialogManager.hpp"
+#include "../../core/commands/CommandManager.hpp"
+#include "../../core/ModeManager.hpp"
+#include "../../core/utils/IDPool.hpp"
+#include "component.hpp"
 
 #include <types.hpp>
 #include <Server/Components/Vehicles/vehicle_components.hpp>
@@ -22,16 +26,12 @@ inline const auto SPAWN_ANGLE = 99.7903;
 class FreeroamController : public Modes::ModeBase,
 						   public PlayerSpawnEventHandler
 {
-	FreeroamController(std::weak_ptr<Core::CoreManager> coreManager,
-		IPlayerPool* playerPool,
-		std::shared_ptr<Core::DialogManager> dialogManager,
-		std::shared_ptr<dp::event_bus> bus);
+	IPlayerPool* playerPool;
+	IVehiclesComponent* vehiclesComponent;
 
-	std::weak_ptr<Core::CoreManager> _coreManager;
-	IPlayerPool* _playerPool;
-	IVehiclesComponent* _vehiclesComponent;
-
+	std::weak_ptr<Core::ModeManager> modeManager;
 	std::shared_ptr<Core::DialogManager> dialogManager;
+	std::shared_ptr<Core::Commands::CommandManager> commandManager;
 	unsigned int virtualWorldId;
 
 	void initCommands();
@@ -44,12 +44,13 @@ class FreeroamController : public Modes::ModeBase,
 		IPlayer& player, Core::Utils::VehicleType vehicleTypeSelected);
 
 public:
-	virtual ~FreeroamController();
-
-	static FreeroamController* create(
-		std::weak_ptr<Core::CoreManager> coreManager, IPlayerPool* playerPool,
+	FreeroamController(IComponentList* components, IPlayerPool* playerPool,
+		std::shared_ptr<Core::Utils::IDPool> virtualWorldIdPool,
+		std::weak_ptr<Core::ModeManager> modeManager,
 		std::shared_ptr<Core::DialogManager> dialogManager,
+		std::shared_ptr<Core::Commands::CommandManager> commandManager,
 		std::shared_ptr<dp::event_bus> bus);
+	virtual ~FreeroamController();
 
 	void onModeJoin(IPlayer& player,
 		std::unordered_map<std::string, Core::PrimitiveType> joinData) override;

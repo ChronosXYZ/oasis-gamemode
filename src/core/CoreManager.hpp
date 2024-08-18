@@ -1,10 +1,11 @@
 #pragma once
 
+#include "ModeManager.hpp"
 #include "dialogs/DialogManager.hpp"
 #include "auth/AuthController.hpp"
 #include "commands/CommandManager.hpp"
 #include "player/PlayerModel.hpp"
-#include "../modes/Modes.hpp"
+#include "utils/ConnectionPool.hpp"
 #include "utils/IDPool.hpp"
 #include "utils/ServiceLocator.hpp"
 
@@ -31,7 +32,6 @@ inline const auto GENERAL_COMMAND_CATEGORY = "general"s;
 inline const auto CHAT_BUBBLE_EXPIRATION = 10000;
 
 class CoreManager : public PlayerConnectEventHandler,
-					public std::enable_shared_from_this<CoreManager>,
 					public ClassEventHandler,
 					public PlayerSpawnEventHandler,
 					public PlayerTextEventHandler,
@@ -40,23 +40,10 @@ class CoreManager : public PlayerConnectEventHandler,
 public:
 	IComponentList* const components;
 
-	static std::shared_ptr<CoreManager> create(
-		IComponentList* components, ICore* core, IPlayerPool* playerPool);
+	static std::unique_ptr<CoreManager> create(IComponentList* components,
+		ICore* core, IPlayerPool* playerPool,
+		const std::string& db_connection_string);
 	~CoreManager();
-
-	std::shared_ptr<PlayerModel> getPlayerData(IPlayer& player);
-	std::shared_ptr<DialogManager> getDialogManager();
-	std::shared_ptr<Commands::CommandManager> getCommandManager();
-	std::shared_ptr<pqxx::connection> getDBConnection();
-
-	bool refreshPlayerData(IPlayer& player);
-	void selectMode(IPlayer& player, Modes::Mode mode);
-	bool joinMode(
-		IPlayer& player, Modes::Mode mode, Modes::JoinData joinData = {});
-	void showModeSelectionDialog(IPlayer& player);
-
-	unsigned int allocateVirtualWorldId();
-	void freeVirtualWorldId(unsigned int id);
 
 	void onPlayerConnect(IPlayer& player) override;
 	void onPlayerDisconnect(
@@ -67,23 +54,18 @@ public:
 	bool onPlayerText(IPlayer& player, StringView message) override;
 	void onPlayerDeath(IPlayer& player, IPlayer* killer, int reason) override;
 
-	void onPlayerLoggedIn(IPlayer& player);
-
-	void onFree(IComponent* component);
-
 private:
-	CoreManager(
-		IComponentList* components, ICore* core, IPlayerPool* playerPool);
+	CoreManager(IComponentList* components, ICore* core,
+		IPlayerPool* playerPool, const std::string& connection_string);
 
 	void initHandlers();
 	void initSkinSelection();
 	void savePlayer(std::shared_ptr<PlayerModel> data);
 	void savePlayer(IPlayer& player);
 	void saveAllPlayers();
-	void removePlayerFromCurrentMode(IPlayer& player);
 	void runSaveThread(std::future<void> exitSignal);
 
-	IPlayerPool* const _playerPool = nullptr;
+	IPlayerPool* const playerPool = nullptr;
 	ICore* const _core = nullptr;
 	IClassesComponent* const _classesComponent;
 
@@ -91,11 +73,11 @@ private:
 
 	std::shared_ptr<Commands::CommandManager> _commandManager;
 	std::shared_ptr<DialogManager> _dialogManager;
-	std::shared_ptr<pqxx::connection> _dbConnection;
-	std::map<unsigned int, std::shared_ptr<PlayerModel>> _playerData;
+	cp::connection_pool connectionPool;
 	std::thread saveThread;
 	std::promise<void> saveThreadExitSignal;
-	Utils::IDPool virtualWorldIdPool;
+	std::shared_ptr<Utils::IDPool> virtualWorldIdPool;
+	std::shared_ptr<ModeManager> modeManager;
 
 	// Controllers
 	std::unique_ptr<Auth::AuthController> _authController;
