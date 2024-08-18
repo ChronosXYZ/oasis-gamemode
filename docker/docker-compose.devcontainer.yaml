@@ -1,5 +1,4 @@
-version: "3"
-
+name: oasis-devcontainer
 services:
   builder_devenv:
     extends:
