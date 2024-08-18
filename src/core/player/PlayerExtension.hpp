@@ -75,7 +75,17 @@ public:
 	{
 		auto mode = this->getMode();
 		this->_player.sendClientMessage(Colour::White(),
-			fmt::sprintf("%s {%s}%s: %s", _("#LIME#>>#WHITE#", _player),
+			fmt::sprintf("%s {%s}%s{FFFFFF}: %s", _("#LIME#>>#WHITE#", _player),
+				Modes::getModeColor(mode), Modes::getModeShortName(mode),
+				fmt::sprintf(_(message, _player), args...)));
+	}
+
+	template <typename... T>
+	inline void sendModeMessage(
+		Modes::Mode mode, const std::string& message, const T&... args)
+	{
+		this->_player.sendClientMessage(Colour::White(),
+			fmt::sprintf("%s {%s}%s{FFFFFF}: %s", _("#LIME#>>#WHITE#", _player),
 				Modes::getModeColor(mode), Modes::getModeShortName(mode),
 				fmt::sprintf(_(message, _player), args...)));
 	}

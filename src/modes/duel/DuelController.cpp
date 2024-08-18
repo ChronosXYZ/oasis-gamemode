@@ -243,13 +243,13 @@ void DuelController::createDuelOffer(IPlayer& player)
 	auto receivingPlayerExt = Core::Player::getPlayerExt(*tempDuelSettings->to);
 	receivingPlayerData->tempData->core->duelOffersReceived[player.getID()]
 		= tempDuelSettings;
-	receivingPlayerExt->sendInfoMessage(
-		__("DUEL: {%06x}%s(%d) #WHITE#sent you a duel offer, use "
+	receivingPlayerExt->sendModeMessage(Mode::Duel,
+		__("{%06x}%s(%d) #WHITE#sent you a duel offer, use "
 		   "/duela to accept it"),
-		player.getColour().RGBA() >> 8, player.getName().to_string(),
+		playerExt->getNormalizedColor(), player.getName().to_string(),
 		player.getID());
-	playerExt->sendInfoMessage(
-		__("DUEL: You have created duel offer, wait for an answer"));
+	playerExt->sendModeMessage(
+		Mode::Duel, __("You have created duel offer, wait for an answer"));
 }
 
 void DuelController::showDuelStatsDialog(IPlayer& player, unsigned int id)
@@ -531,8 +531,9 @@ void DuelController::showDuelAcceptConfirmDialog(
 			{
 				this->deleteDuelOfferFromPlayer(*offer->from, true);
 				auto senderExt = Core::Player::getPlayerExt(*offer->from);
-				senderExt->sendInfoMessage(__("DUEL: {%06x}%s(%d) #RED#refused "
-											  "#WHITE#the duel!"),
+				senderExt->sendModeMessage(Mode::Duel,
+					__("{%06x}%s(%d) #RED#refused "
+					   "#WHITE#the duel!"),
 					player.getColour().RGBA() >> 8,
 					offer->to->getName().to_string(), offer->to->getID());
 				return;
@@ -599,9 +600,6 @@ void DuelController::onRoomJoin(IPlayer& player, unsigned int roomId)
 
 	for (auto player : room->players)
 	{
-		auto playerExt = Core::Player::getPlayerExt(*player);
-		playerExt->showNotification(_("~r~The fight has started!", *player),
-			Core::TextDraws::NotificationPosition::Bottom);
 		room->fightStarted = std::chrono::system_clock::now();
 	}
 }
@@ -687,7 +685,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 	auto pData = Core::Player::getPlayerData(player);
 	if (pData->tempData->duel->duelEnd)
 	{
-		this->modeManager.lock()->joinMode(player, Mode::Freeroam, {});
+		this->modeManager.lock()->joinMode(player, Mode::Freeroam);
 		return;
 	}
 	auto roomId = pData->tempData->duel->roomId;
@@ -759,6 +757,14 @@ void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 
 	room->lastWinner = winner;
 
+	room->sendMessageToAll(__("{%06x}> %s(%d) killed %s(%d) with %s (AP: "
+							  "%.1f HP: %.1f distance: %.1f)."),
+		killer->getColour().RGBA() >> 8, killer->getName().to_string(),
+		killer->getID(), player.getName().to_string(), player.getID(),
+		Core::Utils::getWeaponName(reason), killer->getArmour(),
+		killer->getHealth(),
+		glm::distance(killer->getPosition(), player.getPosition()));
+
 	this->setRandomSpawnPoint(*winner, room);
 	this->setRandomSpawnPoint(*loser, room);
 
@@ -799,8 +805,8 @@ void DuelController::onPlayerDisconnect(
 		}
 		auto senderData = Core::Player::getPlayerData(*offer->from);
 		auto senderExt = Core::Player::getPlayerExt(*offer->from);
-		senderExt->sendInfoMessage(
-			__("DUEL: {%06x}%s(%d) #WHITE#declined offer: "
+		senderExt->sendModeMessage(Mode::Duel,
+			__("{%06x}%s(%d) #WHITE#declined an offer: "
 			   "disconnected from the server!"),
 			player.getColour().RGBA() >> 8, player.getName().to_string(),
 			player.getID());
