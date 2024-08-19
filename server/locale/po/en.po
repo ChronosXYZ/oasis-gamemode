@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-18 19:09+0000\n"
-"PO-Revision-Date: 2024-08-18 19:09+0000\n"
+"POT-Creation-Date: 2024-08-18 23:57+0000\n"
+"PO-Revision-Date: 2024-08-18 23:57+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/core/player/PlayerExtension.hpp:50
+#: src/core/player/PlayerExtension.hpp:51
 #: src/core/player/PlayerExtension.hpp:78
 #: src/core/player/PlayerExtension.hpp:88
-#: src/core/player/PlayerExtension.cpp:61 src/modes/ModeBase.hpp:82
+#: src/core/player/PlayerExtension.cpp:61 src/modes/ModeBase.hpp:71
 #, c-format
 msgid "#LIME#>>#WHITE#"
 msgstr "#LIME#>>#WHITE#"
 
-#: src/core/player/PlayerExtension.hpp:58
+#: src/core/player/PlayerExtension.hpp:59
 msgid "#RED#[ERROR]#WHITE#"
 msgstr "#RED#[ERROR]#WHITE#"
 
@@ -76,8 +76,8 @@ msgid "Cops and Robbers"
 msgstr "Cops and Robbers"
 
 #: src/core/ModeManager.cpp:109 src/modes/x1/X1Controller.cpp:230
-#: src/modes/duel/DuelController.cpp:319 src/modes/duel/DuelController.cpp:370
-#: src/modes/duel/DuelController.cpp:402 src/modes/duel/DuelController.cpp:441
+#: src/modes/duel/DuelController.cpp:320 src/modes/duel/DuelController.cpp:371
+#: src/modes/duel/DuelController.cpp:403 src/modes/duel/DuelController.cpp:442
 #: src/modes/deathmatch/DeathmatchController.cpp:482
 #: src/modes/deathmatch/DeathmatchController.cpp:629
 #: src/modes/deathmatch/DeathmatchController.cpp:713
@@ -265,7 +265,7 @@ msgstr ""
 #: src/core/auth/AuthController.cpp:323
 #: src/core/controllers/PlayerOnFireController.cpp:33
 #: src/core/controllers/PlayerOnFireController.cpp:44
-#: src/modes/x1/X1Controller.cpp:291 src/modes/duel/DuelController.cpp:294
+#: src/modes/x1/X1Controller.cpp:291 src/modes/duel/DuelController.cpp:295
 #: src/modes/deathmatch/DeathmatchController.cpp:577
 msgid "OK"
 msgstr "OK"
@@ -278,12 +278,12 @@ msgstr "You have successfully registered!"
 msgid "You are not logged in yet!"
 msgstr "You are not logged in yet!"
 
-#: src/core/CoreManager.cpp:313
+#: src/core/CoreManager.cpp:314
 #, c-format
 msgid "~w~You got killed by~n~~r~%s(%d)"
 msgstr "~w~You got killed by~n~~r~%s(%d)"
 
-#: src/core/CoreManager.cpp:318
+#: src/core/CoreManager.cpp:319
 #, c-format
 msgid "~w~You killed~n~~r~%s(%d)"
 msgstr "~w~You killed~n~~r~%s(%d)"
@@ -321,7 +321,7 @@ msgstr "#CREAM_BRULEE#Weapon set"
 msgid "#CREAM_BRULEE#Players"
 msgstr "#CREAM_BRULEE#Players"
 
-#: src/modes/x1/X1Controller.cpp:230 src/modes/duel/DuelController.cpp:578
+#: src/modes/x1/X1Controller.cpp:230 src/modes/duel/DuelController.cpp:579
 #: src/modes/deathmatch/DeathmatchController.cpp:482
 #: src/modes/deathmatch/DeathmatchController.cpp:527
 msgid "Close"
@@ -331,7 +331,7 @@ msgstr "Close"
 msgid "This arena is #RED#full#WHITE#!"
 msgstr "This arena is #RED#full#WHITE#!"
 
-#: src/modes/x1/X1Controller.cpp:257 src/modes/duel/DuelController.cpp:259
+#: src/modes/x1/X1Controller.cpp:257 src/modes/duel/DuelController.cpp:260
 #: src/modes/deathmatch/DeathmatchController.cpp:543
 #, c-format
 msgid ""
@@ -387,7 +387,7 @@ msgstr "~r~The fight has started!"
 msgid "Enter Arena"
 msgstr "Enter Arena"
 
-#: src/modes/x1/X1Controller.cpp:462 src/modes/duel/DuelController.cpp:898
+#: src/modes/x1/X1Controller.cpp:462 src/modes/duel/DuelController.cpp:938
 #: src/modes/deathmatch/DeathmatchController.cpp:397
 msgid "Invalid player ID"
 msgstr "Invalid player ID"
@@ -396,7 +396,7 @@ msgstr "Invalid player ID"
 msgid "Show X1 stats"
 msgstr "Show X1 stats"
 
-#: src/modes/x1/X1Controller.cpp:513 src/modes/duel/DuelController.cpp:978
+#: src/modes/x1/X1Controller.cpp:513 src/modes/duel/DuelController.cpp:1018
 #: src/modes/deathmatch/DeathmatchController.cpp:332
 msgid "You killed player on fire and got 4 extra points!"
 msgstr "You killed player on fire and got 4 extra points!"
@@ -481,67 +481,67 @@ msgstr "PUMP HIM!"
 msgid "Show him who's boss!"
 msgstr "Show him who's boss!"
 
-#: src/modes/duel/DuelController.cpp:40
+#: src/modes/duel/DuelController.cpp:41
 msgid "Invalid player id"
 msgstr "Invalid player id"
 
-#: src/modes/duel/DuelController.cpp:47
+#: src/modes/duel/DuelController.cpp:48
 msgid "Player has not been authorized"
 msgstr "Player has not been authorized"
 
-#: src/modes/duel/DuelController.cpp:52
+#: src/modes/duel/DuelController.cpp:53
 msgid "You already sent a duel offer!"
 msgstr "You already sent a duel offer!"
 
-#: src/modes/duel/DuelController.cpp:101
+#: src/modes/duel/DuelController.cpp:102
 #, c-format
 msgid "Duel is over! {%06x}%s#WHITE# has #RED#quit#WHITE# the duel"
 msgstr "Duel is over! {%06x}%s#WHITE# has #RED#quit#WHITE# the duel"
 
-#: src/modes/duel/DuelController.cpp:236
+#: src/modes/duel/DuelController.cpp:237
 msgid "The player you want to call for a duel has disconnected!"
 msgstr "The player you want to call for a duel has disconnected!"
 
-#: src/modes/duel/DuelController.cpp:247
+#: src/modes/duel/DuelController.cpp:248
 #, c-format
 msgid "{%06x}%s(%d) #WHITE#sent you a duel offer, use /duela to accept it"
 msgstr "{%06x}%s(%d) #WHITE#sent you a duel offer, use /duela to accept it"
 
-#: src/modes/duel/DuelController.cpp:252
+#: src/modes/duel/DuelController.cpp:253
 msgid "You have created duel offer, wait for an answer"
 msgstr "You have created duel offer, wait for an answer"
 
-#: src/modes/duel/DuelController.cpp:293
+#: src/modes/duel/DuelController.cpp:294
 #, c-format
 msgid "Duel stats"
 msgstr "Duel stats"
 
-#: src/modes/duel/DuelController.cpp:312 src/modes/duel/DuelController.cpp:877
+#: src/modes/duel/DuelController.cpp:313 src/modes/duel/DuelController.cpp:917
 #, c-format
 msgid "Create duel"
 msgstr "Create duel"
 
-#: src/modes/duel/DuelController.cpp:313
+#: src/modes/duel/DuelController.cpp:314
 #: src/modes/deathmatch/DeathmatchController.cpp:609
 msgid "Map"
 msgstr "Map"
 
-#: src/modes/duel/DuelController.cpp:314
+#: src/modes/duel/DuelController.cpp:315
 msgid "Round count"
 msgstr "Round count"
 
-#: src/modes/duel/DuelController.cpp:316
+#: src/modes/duel/DuelController.cpp:317
 #: src/modes/deathmatch/DeathmatchController.cpp:610
 msgid "Weapon set"
 msgstr "Weapon set"
 
-#: src/modes/duel/DuelController.cpp:318
+#: src/modes/duel/DuelController.cpp:319
 msgid "Confirm"
 msgstr "Confirm"
 
-#: src/modes/duel/DuelController.cpp:319 src/modes/duel/DuelController.cpp:370
-#: src/modes/duel/DuelController.cpp:402 src/modes/duel/DuelController.cpp:441
-#: src/modes/duel/DuelController.cpp:482
+#: src/modes/duel/DuelController.cpp:320 src/modes/duel/DuelController.cpp:371
+#: src/modes/duel/DuelController.cpp:403 src/modes/duel/DuelController.cpp:442
+#: src/modes/duel/DuelController.cpp:483
 #: src/modes/deathmatch/DeathmatchController.cpp:629
 #: src/modes/deathmatch/DeathmatchController.cpp:713
 #: src/modes/deathmatch/DeathmatchController.cpp:742
@@ -557,35 +557,35 @@ msgstr "Confirm"
 msgid "Cancel"
 msgstr "Cancel"
 
-#: src/modes/duel/DuelController.cpp:369
+#: src/modes/duel/DuelController.cpp:370
 #, c-format
 msgid "Duel map selection"
 msgstr "Duel map selection"
 
-#: src/modes/duel/DuelController.cpp:401
+#: src/modes/duel/DuelController.cpp:402
 #, c-format
 msgid "Duel weapon set selection"
 msgstr "Duel weapon set selection"
 
-#: src/modes/duel/DuelController.cpp:440
+#: src/modes/duel/DuelController.cpp:441
 #, c-format
 msgid "Duel rounds"
 msgstr "Duel rounds"
 
-#: src/modes/duel/DuelController.cpp:476
+#: src/modes/duel/DuelController.cpp:477
 msgid "No duel invites received"
 msgstr "No duel invites received"
 
-#: src/modes/duel/DuelController.cpp:481
+#: src/modes/duel/DuelController.cpp:482
 #, c-format
 msgid "Duels"
 msgstr "Duels"
 
-#: src/modes/duel/DuelController.cpp:482 src/modes/duel/DuelController.cpp:526
+#: src/modes/duel/DuelController.cpp:483 src/modes/duel/DuelController.cpp:527
 msgid "Accept"
 msgstr "Accept"
 
-#: src/modes/duel/DuelController.cpp:494
+#: src/modes/duel/DuelController.cpp:495
 msgid ""
 "The player which sent you the duel offer has canceled it or disconnected "
 "from the server"
@@ -593,16 +593,16 @@ msgstr ""
 "The player which sent you the duel offer has canceled it or disconnected "
 "from the server"
 
-#: src/modes/duel/DuelController.cpp:510
+#: src/modes/duel/DuelController.cpp:511
 msgid "The player has disconnected!"
 msgstr "The player has disconnected!"
 
-#: src/modes/duel/DuelController.cpp:515
+#: src/modes/duel/DuelController.cpp:516
 #, c-format
 msgid "Duel confirmation"
 msgstr "Duel confirmation"
 
-#: src/modes/duel/DuelController.cpp:517
+#: src/modes/duel/DuelController.cpp:518
 #, c-format
 msgid ""
 "#WHITE#- Player: {%06x}%s(%d)\n"
@@ -623,76 +623,89 @@ msgstr ""
 "\n"
 "Do you accept the duel?"
 
-#: src/modes/duel/DuelController.cpp:526
+#: src/modes/duel/DuelController.cpp:527
 msgid "Refuse"
 msgstr "Refuse"
 
-#: src/modes/duel/DuelController.cpp:535
+#: src/modes/duel/DuelController.cpp:536
 #, c-format
 msgid "{%06x}%s(%d) #RED#refused #WHITE#the duel!"
 msgstr "{%06x}%s(%d) #RED#refused #WHITE#the duel!"
 
-#: src/modes/duel/DuelController.cpp:552 src/modes/duel/DuelController.cpp:554
+#: src/modes/duel/DuelController.cpp:553 src/modes/duel/DuelController.cpp:555
 msgid "One of the players cannot join duel, try again!"
 msgstr "One of the players cannot join duel, try again!"
 
-#: src/modes/duel/DuelController.cpp:571
+#: src/modes/duel/DuelController.cpp:572
 #: src/modes/deathmatch/DeathmatchController.cpp:521
 msgid "Player\tK : D\tRatio\tDamage inflicted\n"
 msgstr "Player\tK : D\tRatio\tDamage inflicted\n"
 
-#: src/modes/duel/DuelController.cpp:575
+#: src/modes/duel/DuelController.cpp:576
 #: src/modes/deathmatch/DeathmatchController.cpp:524
 #, c-format
 msgid "Deathmatch statistics"
 msgstr "Deathmatch statistics"
 
-#: src/modes/duel/DuelController.cpp:576
+#: src/modes/duel/DuelController.cpp:577
 #: src/modes/deathmatch/DeathmatchController.cpp:525
 msgid "Player"
 msgstr "Player"
 
-#: src/modes/duel/DuelController.cpp:576
+#: src/modes/duel/DuelController.cpp:577
 #: src/modes/deathmatch/DeathmatchController.cpp:525
 msgid "K : D"
 msgstr "K : D"
 
-#: src/modes/duel/DuelController.cpp:577
+#: src/modes/duel/DuelController.cpp:578
 #: src/modes/deathmatch/DeathmatchController.cpp:525
 msgid "Ratio"
 msgstr "Ratio"
 
-#: src/modes/duel/DuelController.cpp:577
+#: src/modes/duel/DuelController.cpp:578
 #: src/modes/deathmatch/DeathmatchController.cpp:526
 msgid "Damage inflicted"
 msgstr "Damage inflicted"
 
-#: src/modes/duel/DuelController.cpp:760
-#: src/modes/deathmatch/DeathmatchController.cpp:245
+#: src/modes/duel/DuelController.cpp:617
 #, c-format
-msgid ""
-"{%06x}> %s(%d) killed %s(%d) with %s (AP: %.1f HP: %.1f distance: %.1f)."
-msgstr ""
-"{%06x}> %s(%d) killed %s(%d) with %s (AP: %.1f HP: %.1f distance: %.1f)."
+msgid "DUEL~n~~w~Round %d/%d ~g~won_~n~~w~Time: %s_~n~~w~vs. ~r~%s"
+msgstr "DUEL~n~~w~Round %d/%d ~g~won_~n~~w~Time: %s_~n~~w~vs. ~r~%s"
 
-#: src/modes/duel/DuelController.cpp:809
+#: src/modes/duel/DuelController.cpp:624
+#, c-format
+msgid "DUEL~n~~w~Round %d/%d ~r~lost_~n~~w~Time: %s_~n~~w~vs. ~r~%s"
+msgstr "DUEL~n~~w~Round %d/%d ~r~lost_~n~~w~Time: %s_~n~~w~vs. ~r~%s"
+
+#: src/modes/duel/DuelController.cpp:636
+#, c-format
+msgid "Results of round %d of %d: %d-%d | time: %s"
+msgstr "Results of round %d of %d: %d-%d | time: %s"
+
+#: src/modes/duel/DuelController.cpp:813
+#, c-format
+msgid "{%06x}> %s(%d) killed %s(%d) with %s (AP: %.1f HP: %.1f distance: %.1f)"
+msgstr ""
+"{%06x}> %s(%d) killed %s(%d) with %s (AP: %.1f HP: %.1f distance: %.1f)"
+
+#: src/modes/duel/DuelController.cpp:849
 #, c-format
 msgid "{%06x}%s(%d) #WHITE#declined an offer: disconnected from the server!"
 msgstr "{%06x}%s(%d) #WHITE#declined an offer: disconnected from the server!"
 
-#: src/modes/duel/DuelController.cpp:876 src/modes/duel/DuelController.cpp:904
+#: src/modes/duel/DuelController.cpp:916 src/modes/duel/DuelController.cpp:944
 msgid "player id"
 msgstr "player id"
 
-#: src/modes/duel/DuelController.cpp:905
+#: src/modes/duel/DuelController.cpp:945
 msgid "Show Duel stats"
 msgstr "Show Duel stats"
 
-#: src/modes/duel/DuelController.cpp:917
+#: src/modes/duel/DuelController.cpp:957
 msgid "Accept duels"
 msgstr "Accept duels"
 
-#: src/modes/duel/DuelController.cpp:931
+#: src/modes/duel/DuelController.cpp:971
 msgid "Invalid duel settings!"
 msgstr "Invalid duel settings!"
 
@@ -725,6 +738,13 @@ msgstr "Only friends"
 #: src/modes/deathmatch/Room.hpp:50
 msgid "Only group members"
 msgstr "Only group members"
+
+#: src/modes/deathmatch/DeathmatchController.cpp:245
+#, c-format
+msgid ""
+"{%06x}> %s(%d) killed %s(%d) with %s (AP: %.1f HP: %.1f distance: %.1f)."
+msgstr ""
+"{%06x}> %s(%d) killed %s(%d) with %s (AP: %.1f HP: %.1f distance: %.1f)."
 
 #: src/modes/deathmatch/DeathmatchController.cpp:286
 msgid "Don't use ~r~C-bug!"
@@ -922,7 +942,7 @@ msgstr ""
 msgid "~g~~h~~h~GO!"
 msgstr "~g~~h~~h~GO!"
 
-#: src/modes/deathmatch/DeathmatchController.cpp:1394
+#: src/modes/deathmatch/DeathmatchController.cpp:1396
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d "
@@ -931,7 +951,7 @@ msgstr ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: Player %s has left the room (%d "
 "players)"
 
-#: src/modes/ModeBase.cpp:77
+#: src/modes/ModeBase.cpp:79
 #, c-format
 msgid ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on "
@@ -940,14 +960,14 @@ msgstr ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed %s(%d) and is now on "
 "fire"
 
-#: src/modes/ModeBase.cpp:87
+#: src/modes/ModeBase.cpp:89
 #, c-format
 msgid ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed player on fire %s(%d)"
 msgstr ""
 "#LIME#>> #RED#PLAYER ON FIRE#LIGHT_GRAY#: %s(%d) killed player on fire %s(%d)"
 
-#: src/modes/ModeBase.cpp:95
+#: src/modes/ModeBase.cpp:97
 #, c-format
 msgid ""
 "#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d) with %s (%.1f HP, %.1f "
@@ -956,17 +976,24 @@ msgstr ""
 "#LIME#>> #RED#X1#WHITE#: %s(%d) has defeated %s(%d) with %s (%.1f HP, %.1f "
 "AP, distance: %.1f, time: %s)"
 
-#: src/modes/ModeBase.cpp:113
+#: src/modes/ModeBase.cpp:115
 #, c-format
 msgid "#LIME#>> #RED#X1#LIGHT_GRAY#: %s(%d) has joined X1 arena (/x1)"
 msgstr "#LIME#>> #RED#X1#LIGHT_GRAY#: %s(%d) has joined X1 arena (/x1)"
 
-#: src/modes/ModeBase.cpp:123
+#: src/modes/ModeBase.cpp:125
 #, c-format
 msgid ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: %s(%d) has joined DM mode (/dm %d)"
 msgstr ""
 "#LIME#>> #DEEP_SAFFRON#DM#LIGHT_GRAY#: %s(%d) has joined DM mode (/dm %d)"
+
+#: src/modes/ModeBase.cpp:145
+#, c-format
+msgid ""
+"{%06x}%s(%d)#WHITE# has defeated {%06x}%s(%d)#WHITE# (score: %d-%d, time: %s)"
+msgstr ""
+"{%06x}%s(%d)#WHITE# has defeated {%06x}%s(%d)#WHITE# (score: %d-%d, time: %s)"
 
 #: src/modes/freeroam/FreeroamController.cpp:82
 msgid "Teleports player to the Freeroam mode"

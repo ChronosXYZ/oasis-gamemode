@@ -57,7 +57,8 @@ class DuelController : public ModeBase,
 	void deleteDuel(unsigned int id, IPlayer* initiator = nullptr);
 
 	void onRoomJoin(IPlayer& player, unsigned int roomId);
-	void onRoundEnd(IPlayer* winner, IPlayer* loser, int weaponId);
+	void onRoundEnd(IPlayer* winner, IPlayer* loser, std::shared_ptr<Room> room,
+		int weaponId);
 	void onDuelEnd(std::shared_ptr<Room> duelRoom);
 
 	void deleteDuelOfferFromPlayer(IPlayer& player, bool deleteRoom);

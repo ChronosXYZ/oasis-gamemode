@@ -51,10 +51,8 @@ struct DuelWin
 {
 	IPlayer& winner;
 	IPlayer& loser;
-	float armourLeft;
-	float healthLeft;
-	int weapon;
-	float distance;
 	std::chrono::seconds fightDuration;
+	unsigned int winnerScore;
+	unsigned int loserScore;
 };
 }

@@ -34,6 +34,7 @@ struct ModeBase : public PlayerDamageEventHandler
 		Core::Utils::Events::PlayerOnFireBeenKilled event);
 	virtual void onX1ArenaWin(Core::Utils::Events::X1ArenaWin event);
 	virtual void onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode);
+	virtual void onDuelWin(Core::Utils::Events::DuelWin event);
 
 	virtual void onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
 		unsigned int weapon, BodyPart part) override;
@@ -42,12 +43,12 @@ struct ModeBase : public PlayerDamageEventHandler
 	const Mode& getModeType();
 
 	template <typename... T>
-	inline void sendMessageToAll(const std::string& message, const T&... args)
+	inline void sendMessageToAll(const std::string& message, T&&... args)
 	{
 		for (auto player : this->players)
 		{
 			auto playerExt = Core::Player::getPlayerExt(*player);
-			playerExt->sendTranslatedMessage(message, args...);
+			playerExt->sendTranslatedMessage(message, std::forward<T>(args)...);
 		}
 	}
 
@@ -61,6 +62,17 @@ struct ModeBase : public PlayerDamageEventHandler
 			classInstance, memberFunction);
 	}
 
+	template <typename... T>
+	inline void sendModeMessage(
+		IPlayer& player, const std::string& message, T&&... args)
+	{
+		auto mode = this->getModeType();
+		player.sendClientMessage(Colour::White(),
+			fmt::sprintf("%s {%s}%s{FFFFFF}: %s", _("#LIME#>>#WHITE#", player),
+				Modes::getModeColor(mode), Modes::getModeShortName(mode),
+				fmt::sprintf(_(message, player), std::forward<T>(args)...)));
+	}
+
 protected:
 	std::unordered_set<IPlayer*> players;
 	typedef ModeBase super;
@@ -71,17 +83,7 @@ protected:
 	dp::handler_registration playerOnFireEventRegistration;
 	dp::handler_registration playerOnFireBeenKilledRegistration;
 	dp::handler_registration x1ArenaWinRegistration;
+	dp::handler_registration duelWinRegistration;
 	dp::handler_registration playerJoinedModeSubsciption;
-
-	template <typename... T>
-	inline void sendModeMessage(
-		IPlayer& player, const std::string& message, const T&... args)
-	{
-		auto mode = this->getModeType();
-		player.sendClientMessage(Colour::White(),
-			fmt::sprintf("%s {%s}%s: %s", _("#LIME#>>#WHITE#", player),
-				Modes::getModeColor(mode), Modes::getModeShortName(mode),
-				fmt::sprintf(_(message, player), args...)));
-	}
 };
 }

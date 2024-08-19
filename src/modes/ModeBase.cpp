@@ -24,6 +24,8 @@ ModeBase::ModeBase(
 	, x1ArenaWinRegistration(
 		  bus->register_handler<Core::Utils::Events::X1ArenaWin>(
 			  this, &ModeBase::onX1ArenaWin))
+	, duelWinRegistration(bus->register_handler<Core::Utils::Events::DuelWin>(
+		  this, &ModeBase::onDuelWin))
 	, playerJoinedModeSubsciption(
 		  bus->register_handler<Core::Utils::Events::PlayerJoinedMode>(
 			  this, &ModeBase::onPlayerJoinedMode))
@@ -55,8 +57,8 @@ void ModeBase::onModeJoin(IPlayer& player, JoinData joinData)
 void ModeBase::onModeLeave(IPlayer& player)
 {
 	this->players.erase(&player);
-	spdlog::info("Player {} has left mode {}", player.getName().to_string(),
-		magic_enum::enum_name(this->mode));
+	// spdlog::info("Player {} has left mode {}", player.getName().to_string(),
+	// magic_enum::enum_name(this->mode));
 }
 
 void ModeBase::onPlayerSave(
@@ -130,6 +132,23 @@ void ModeBase::onPlayerJoinedMode(Core::Utils::Events::PlayerJoinedMode event)
 	{
 		break;
 	}
+	}
+}
+
+void ModeBase::onDuelWin(Core::Utils::Events::DuelWin event)
+{
+	for (auto player : this->players)
+	{
+		auto winnerExt = Core::Player::getPlayerExt(event.winner);
+		auto loserExt = Core::Player::getPlayerExt(event.loser);
+		this->sendModeMessage(*player,
+			__("{%06x}%s(%d)#WHITE# "
+			   "has defeated {%06x}%s(%d)#WHITE# (score: %d-%d, time: %s)"),
+			winnerExt->getNormalizedColor(), event.winner.getName().to_string(),
+			event.winner.getID(), loserExt->getNormalizedColor(),
+			event.loser.getName().to_string(), event.loser.getID(),
+			event.winnerScore, event.loserScore,
+			std::format("{:%OM:%OS}", event.fightDuration));
 	}
 }
 

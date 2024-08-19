@@ -1,5 +1,6 @@
 #pragma once
 
+#include "player.hpp"
 #include <types.hpp>
 #include <string>
 
@@ -7,8 +8,7 @@ namespace Modes::Deathmatch
 {
 struct DeathmatchResult
 {
-	std::string playerName;
-	Colour playerColor;
+	IPlayer* player;
 	unsigned int kills;
 	unsigned int deaths;
 	float ratio;

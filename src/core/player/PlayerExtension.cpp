@@ -45,7 +45,7 @@ void OasisPlayerExt::setFacingAngle(float angle)
 
 void OasisPlayerExt::freeExtension()
 {
-	_playerData.reset();
+	// _playerData.reset();
 	_textDrawManager.reset();
 }
 void OasisPlayerExt::reset()

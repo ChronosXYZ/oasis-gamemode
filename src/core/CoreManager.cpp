@@ -309,10 +309,11 @@ void CoreManager::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 	if (killer)
 	{
 		auto killerExt = Player::getPlayerExt(*killer);
-		player.sendGameText(
+		auto playerExt = Player::getPlayerExt(player);
+		playerExt->showNotification(
 			fmt::sprintf(_("~w~You got killed by~n~~r~%s(%d)", player),
 				killer->getName().to_string(), killer->getID()),
-			Seconds(4), 3);
+			TextDraws::NotificationPosition::Bottom, 4);
 
 		killerExt->showNotification(
 			fmt::sprintf(_("~w~You killed~n~~r~%s(%d)", player),
