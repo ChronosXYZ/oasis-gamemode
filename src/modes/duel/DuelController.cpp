@@ -7,6 +7,7 @@
 #include "../../core/SQLQueryManager.hpp"
 #include "DuelOffer.hpp"
 #include "PlayerTempData.hpp"
+#include "Room.hpp"
 #include "events.hpp"
 #include "types.hpp"
 #include "values.hpp"
@@ -64,7 +65,7 @@ void DuelController::createDuel(IPlayer& player, int id)
 			.weapons = weapons,
 			.roundCount = 1,
 			.defaultHealth = 100.0,
-			.defaultArmour = 100.0,
+			.defaultArmor = 100.0,
 			.from = &player,
 			.to = receivingPlayer,
 		});
@@ -74,12 +75,12 @@ void DuelController::createDuel(IPlayer& player, int id)
 unsigned int DuelController::createDuelRoom(std::shared_ptr<DuelOffer> offer)
 {
 	auto roomId = this->roomIdPool->allocateId();
-	this->rooms[roomId] = std::shared_ptr<Room>(new Room {
-		.map = offer->map,
+	this->rooms[roomId] = std::shared_ptr<Room>(new Room { .map = offer->map,
 		.allowedWeapons = offer->weaponSet.getWeapons(),
 		.virtualWorld = this->virtualWorldIdPool->allocateId(),
-		.maxRounds = offer->roundCount,
-	});
+		.defaultHealth = offer->defaultHealth,
+		.defaultArmor = offer->defaultArmor,
+		.maxRounds = offer->roundCount });
 	return roomId;
 }
 
@@ -522,7 +523,7 @@ void DuelController::showDuelAcceptConfirmDialog(
 			offer->from->getColour().RGBA() >> 8,
 			offer->from->getName().to_string(), offer->from->getID(),
 			offer->map.name, offer->weaponSet.toString(player),
-			offer->roundCount, offer->defaultHealth, offer->defaultArmour),
+			offer->roundCount, offer->defaultHealth, offer->defaultArmor),
 		_("Accept", player), _("Refuse", player)));
 	this->dialogManager->showDialog(player, dialog,
 		[this, offer, &player](Core::DialogResult result)
@@ -604,16 +605,48 @@ void DuelController::onRoomJoin(IPlayer& player, unsigned int roomId)
 	}
 }
 
-void DuelController::onRoundEnd(IPlayer* winner, IPlayer* loser, int weaponId)
+void DuelController::onRoundEnd(
+	IPlayer* winner, IPlayer* loser, std::shared_ptr<Room> room, int weaponId)
 {
 	this->logStatsForPlayer(*winner, true, weaponId);
 	this->logStatsForPlayer(*loser, false, weaponId);
 
+	auto winnerExt = Core::Player::getPlayerExt(*winner);
+	auto loserExt = Core::Player::getPlayerExt(*loser);
+
+	winnerExt->sendGameText(__("DUEL~n~~w~Round %d/%d ~g~won_~n~~w~Time: "
+							   "%s_~n~~w~vs. ~r~%s"),
+		Seconds(3), 3, room->currentRound + 1, room->maxRounds,
+		std::format("{:%OM:%OS}",
+			std::chrono::system_clock::now() - room->lastRoundStarted.value()),
+		loser->getName().to_string());
+	loserExt->sendGameText(
+		__("DUEL~n~~w~Round %d/%d ~r~lost_~n~~w~Time: %s_~n~~w~vs. ~r~%s"),
+		Seconds(3), 3, room->currentRound + 1, room->maxRounds,
+		std::format("{:%OM:%OS}",
+			std::chrono::system_clock::now() - room->lastRoundStarted.value()),
+		winner->getName().to_string());
+
+	for (auto player : room->players)
+	{
+		auto playerExt = Core::Player::getPlayerExt(*player);
+		auto playerData1 = Core::Player::getPlayerData(*room->players[0]);
+		auto playerData2 = Core::Player::getPlayerData(*room->players[1]);
+		playerExt->sendModeMessage(
+			__("Results of round %d of %d: %d-%d | time: %s"),
+			room->currentRound + 1, room->maxRounds,
+			playerData1->tempData->duel->kills,
+			playerData2->tempData->duel->kills,
+			std::format("{:%OM:%OS}",
+				std::chrono::system_clock::now()
+					- room->lastRoundStarted.value()));
+	}
+
 	auto winnerData = Core::Player::getPlayerData(*winner);
 	auto loserData = Core::Player::getPlayerData(*loser);
+
 	winnerData->tempData->duel->subsequentKills++;
 
-	auto room = this->rooms.at(winnerData->tempData->duel->roomId);
 	room->currentRound++;
 	if (room->currentRound == room->maxRounds)
 	{
@@ -627,12 +660,10 @@ void DuelController::onRoundEnd(IPlayer* winner, IPlayer* loser, int weaponId)
 void DuelController::onDuelEnd(std::shared_ptr<Room> duelRoom)
 {
 	std::vector<Deathmatch::DeathmatchResult> resultArray;
-	for (auto& player : duelRoom->players)
+	for (auto player : duelRoom->players)
 	{
 		auto playerData = Core::Player::getPlayerData(*player);
-		resultArray.push_back(Deathmatch::DeathmatchResult {
-			.playerName = player->getName().to_string(),
-			.playerColor = player->getColour(),
+		resultArray.push_back(Deathmatch::DeathmatchResult { .player = player,
 			.kills = playerData->tempData->duel->kills,
 			.deaths = playerData->tempData->duel->deaths,
 			.ratio = playerData->tempData->duel->ratio,
@@ -641,7 +672,9 @@ void DuelController::onDuelEnd(std::shared_ptr<Room> duelRoom)
 	std::sort(resultArray.begin(), resultArray.end(),
 		[](Deathmatch::DeathmatchResult x1, Deathmatch::DeathmatchResult x2)
 		{
-			return x1.kills > x2.kills;
+			if (x1.kills != x2.kills)
+				return x1.kills > x2.kills;
+			return x1.damageInflicted > x2.damageInflicted;
 		});
 
 	std::vector<std::vector<std::string>> results;
@@ -649,14 +682,25 @@ void DuelController::onDuelEnd(std::shared_ptr<Room> duelRoom)
 	{
 		auto playerResult = resultArray.at(i);
 		results.push_back({ fmt::sprintf("{%06x}%d. %s",
-								playerResult.playerColor.RGBA() >> 8, i + 1,
-								playerResult.playerName),
+								playerResult.player->getColour().RGBA() >> 8,
+								i + 1,
+								playerResult.player->getName().to_string()),
 			fmt::sprintf("%d : %d", playerResult.kills, playerResult.deaths),
 			fmt::sprintf("%.2f", playerResult.ratio),
 			fmt::sprintf("%.2f", playerResult.damageInflicted) });
 	}
 	duelRoom->cachedResults = results;
 	this->showDuelResults(duelRoom);
+
+	auto now = std::chrono::system_clock::now();
+	auto fightDuration = now - duelRoom->fightStarted;
+	this->bus->fire_event(
+		Core::Utils::Events::DuelWin { .winner = *resultArray[0].player,
+			.loser = *resultArray[1].player,
+			.fightDuration
+			= std::chrono::duration_cast<std::chrono::seconds>(fightDuration),
+			.winnerScore = resultArray[0].kills,
+			.loserScore = resultArray[1].kills });
 }
 
 void DuelController::deleteDuelOfferFromPlayer(IPlayer& player, bool deleteRoom)
@@ -691,6 +735,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 	auto roomId = pData->tempData->duel->roomId;
 	auto room = this->rooms.at(roomId);
 	this->setupRoomForPlayer(player, room);
+	room->lastRoundStarted = std::chrono::system_clock::now();
 
 	player.setControllable(false);
 
@@ -727,6 +772,20 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 										*player),
 								Seconds(1), 6);
 							player->setControllable(true);
+							player->playSound(1057, Vector3(0.0, 0.0, 0.0));
+						}
+					}
+					else
+					{
+						for (auto player : room->players)
+						{
+							auto playerExt
+								= Core::Player::getPlayerExt(*player);
+							playerExt->showNotification(
+								fmt::sprintf("~r~%d", *startSecs + 1),
+								Core::TextDraws::NotificationPosition::Bottom,
+								1);
+							player->playSound(1138, Vector3(0.0, 0.0, 0.0));
 						}
 					}
 				}),
@@ -758,29 +817,16 @@ void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 	room->lastWinner = winner;
 
 	room->sendMessageToAll(__("{%06x}> %s(%d) killed %s(%d) with %s (AP: "
-							  "%.1f HP: %.1f distance: %.1f)."),
+							  "%.1f HP: %.1f distance: %.1f)"),
 		killer->getColour().RGBA() >> 8, killer->getName().to_string(),
 		killer->getID(), player.getName().to_string(), player.getID(),
 		Core::Utils::getWeaponName(reason), killer->getArmour(),
 		killer->getHealth(),
 		glm::distance(killer->getPosition(), player.getPosition()));
-
 	this->setRandomSpawnPoint(*winner, room);
 	this->setRandomSpawnPoint(*loser, room);
 
-	this->onRoundEnd(winner, loser, reason);
-	// auto now = std::chrono::system_clock::now();
-	// auto fightDuration = now - room->fightStarted;
-	// auto loserPos = loser->getPosition();
-	// auto winnerPos = winner->getPosition();
-	// this->bus->fire_event(Core::Utils::Events::DuelWin { .winner =
-	// *winner, 	.loser = *loser, 	.armourLeft = winner->getArmour(),
-	// 	.healthLeft = winner->getHealth(),
-	// 	.weapon = reason,
-	// 	.distance = glm::distance(loserPos, winnerPos),
-	// 	.fightDuration
-	// 	= std::chrono::duration_cast<std::chrono::seconds>(fightDuration)
-	// });
+	this->onRoundEnd(winner, loser, room, reason);
 }
 
 void DuelController::onPlayerGiveDamage(IPlayer& player, IPlayer& to,

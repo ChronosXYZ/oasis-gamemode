@@ -109,7 +109,7 @@ struct Room
 	std::optional<ITimer*> roundStartTimer;
 
 	template <typename... T>
-	void sendMessageToAll(const std::string& message, const T&... args);
+	void sendMessageToAll(const std::string& message, T&&... args);
 
 	std::optional<ITimer*> deletionTimer;
 };

@@ -1294,34 +1294,36 @@ void DeathmatchController::onRoundEnd(std::shared_ptr<Room> room)
 {
 	room->isRestarting = true;
 	std::vector<DeathmatchResult> resultArray;
-	for (auto& player : room->players)
+	for (auto player : room->players)
 	{
 		auto playerData = Core::Player::getPlayerData(*player);
-		resultArray.push_back(
-			DeathmatchResult { .playerName = player->getName().to_string(),
-				.playerColor = player->getColour(),
-				.kills = playerData->tempData->deathmatch->kills,
-				.deaths = playerData->tempData->deathmatch->deaths,
-				.ratio = playerData->tempData->deathmatch->ratio,
-				.damageInflicted
-				= playerData->tempData->deathmatch->damageInflicted });
+		resultArray.push_back(DeathmatchResult { .player = player,
+			.kills = playerData->tempData->deathmatch->kills,
+			.deaths = playerData->tempData->deathmatch->deaths,
+			.ratio = playerData->tempData->deathmatch->ratio,
+			.damageInflicted
+			= playerData->tempData->deathmatch->damageInflicted });
 	}
 	std::sort(resultArray.begin(), resultArray.end(),
 		[](DeathmatchResult x1, DeathmatchResult x2)
 		{
-			return x1.kills > x2.kills;
+			if (x1.kills != x2.kills)
+				return x1.kills > x2.kills;
+			return x1.damageInflicted > x2.damageInflicted;
 		});
 
 	std::vector<std::vector<std::string>> lastResults;
 	for (std::size_t i = 0; i < resultArray.size(); i++)
 	{
 		auto playerResult = resultArray.at(i);
-		lastResults.push_back({ fmt::sprintf("{%06x}%d. %s",
-									playerResult.playerColor.RGBA() >> 8, i + 1,
-									playerResult.playerName),
-			fmt::sprintf("%d : %d", playerResult.kills, playerResult.deaths),
-			fmt::sprintf("%.2f", playerResult.ratio),
-			fmt::sprintf("%.2f", playerResult.damageInflicted) });
+		lastResults.push_back(
+			{ fmt::sprintf("{%06x}%d. %s",
+				  playerResult.player->getColour().RGBA() >> 8, i + 1,
+				  playerResult.player->getName().to_string()),
+				fmt::sprintf(
+					"%d : %d", playerResult.kills, playerResult.deaths),
+				fmt::sprintf("%.2f", playerResult.ratio),
+				fmt::sprintf("%.2f", playerResult.damageInflicted) });
 	}
 	room->cachedLastResult = lastResults;
 

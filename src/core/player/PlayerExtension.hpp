@@ -16,6 +16,7 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <utility>
 
 #define DELAYED_KICK_INTERVAL_MS 500
 #define OASIS_PLAYER_EXT_UID 0xBE727855C7D51E32
@@ -44,50 +45,49 @@ public:
 	void sendInfoMessage(const std::string& message);
 
 	template <typename... T>
-	inline void sendInfoMessage(const std::string& message, const T&... args)
+	inline void sendInfoMessage(const std::string& message, T&&... args)
 	{
 		_player.sendClientMessage(Colour::White(),
 			fmt::sprintf("%s %s", _("#LIME#>>#WHITE#", _player),
-				fmt::sprintf(_(message, _player), args...)));
+				fmt::sprintf(_(message, _player), std::forward<T>(args)...)));
 	}
 
 	template <typename... T>
-	inline void sendErrorMessage(const std::string& message, const T&... args)
+	inline void sendErrorMessage(const std::string& message, T&&... args)
 	{
 		_player.sendClientMessage(Colour::White(),
 			fmt::format("{} {}", _("#RED#[ERROR]#WHITE#", _player),
-				fmt::sprintf(_(message, _player), args...)));
+				fmt::sprintf(_(message, _player), std::forward<T>(args)...)));
 	}
 
 	void showNotification(const std::string& notification,
 		TextDraws::NotificationPosition position, unsigned int seconds = 3,
 		unsigned int notificationSound = 0);
 	template <typename... T>
-	inline void sendTranslatedMessage(
-		const std::string& message, const T&... args)
+	inline void sendTranslatedMessage(const std::string& message, T&&... args)
 	{
-		_player.sendClientMessage(
-			Colour::White(), fmt::sprintf(_(message, _player), args...));
+		_player.sendClientMessage(Colour::White(),
+			fmt::sprintf(_(message, _player), std::forward<T>(args)...));
 	}
 
 	template <typename... T>
-	inline void sendModeMessage(const std::string& message, const T&... args)
+	inline void sendModeMessage(const std::string& message, T&&... args)
 	{
 		auto mode = this->getMode();
 		this->_player.sendClientMessage(Colour::White(),
 			fmt::sprintf("%s {%s}%s{FFFFFF}: %s", _("#LIME#>>#WHITE#", _player),
 				Modes::getModeColor(mode), Modes::getModeShortName(mode),
-				fmt::sprintf(_(message, _player), args...)));
+				fmt::sprintf(_(message, _player), std::forward<T>(args)...)));
 	}
 
 	template <typename... T>
 	inline void sendModeMessage(
-		Modes::Mode mode, const std::string& message, const T&... args)
+		Modes::Mode mode, const std::string& message, T&&... args)
 	{
 		this->_player.sendClientMessage(Colour::White(),
 			fmt::sprintf("%s {%s}%s{FFFFFF}: %s", _("#LIME#>>#WHITE#", _player),
 				Modes::getModeColor(mode), Modes::getModeShortName(mode),
-				fmt::sprintf(_(message, _player), args...)));
+				fmt::sprintf(_(message, _player), std::forward<T>(args)...)));
 	}
 
 	const std::string getIP();
@@ -97,6 +97,15 @@ public:
 	bool isAuthorized();
 	unsigned int getNormalizedColor();
 	const Modes::Mode& getMode();
+
+	template <typename... T>
+	inline void sendGameText(
+		const std::string& message, Milliseconds time, int style, T&&... args)
+	{
+		this->_player.sendGameText(
+			fmt::sprintf(_(message, this->_player), std::forward<T>(args)...),
+			time, style);
+	}
 
 	void freeExtension() override;
 	void reset() override;

@@ -36,6 +36,8 @@ struct Room
 	float defaultArmor = 0.0;
 
 	std::chrono::time_point<std::chrono::system_clock> fightStarted;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>>
+		lastRoundStarted;
 
 	unsigned int currentRound;
 	unsigned int maxRounds;
@@ -46,6 +48,6 @@ struct Room
 	std::optional<std::vector<std::vector<std::string>>> cachedResults;
 
 	template <typename... T>
-	void sendMessageToAll(const std::string& message, const T&... args);
+	void sendMessageToAll(const std::string& message, T&&... args);
 };
 }

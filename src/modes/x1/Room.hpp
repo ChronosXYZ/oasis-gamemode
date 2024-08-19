@@ -39,6 +39,6 @@ struct Room
 	std::chrono::time_point<std::chrono::system_clock> fightStarted;
 
 	template <typename... T>
-	void sendMessageToAll(const std::string& message, const T&... args);
+	void sendMessageToAll(const std::string& message, T&&... args);
 };
 }

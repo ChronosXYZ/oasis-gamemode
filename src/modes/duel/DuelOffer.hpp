@@ -17,7 +17,7 @@ struct DuelOffer
 	Deathmatch::WeaponSet weaponSet;
 	unsigned int roundCount;
 	float defaultHealth;
-	float defaultArmour;
+	float defaultArmor;
 	IPlayer* from;
 	IPlayer* to;
 	std::optional<unsigned int> tempRoomId;
