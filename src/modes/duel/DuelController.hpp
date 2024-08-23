@@ -36,7 +36,8 @@ class DuelController : public ModeBase,
 					   public PlayerConnectEventHandler
 {
 	void initCommands();
-	void setRandomSpawnPoint(IPlayer& player, std::shared_ptr<Room> room);
+	void setSpawnPoint(
+		IPlayer& player, std::shared_ptr<Room> room, Vector4& spawnPoint);
 	void setupRoomForPlayer(IPlayer& player, std::shared_ptr<Room> room);
 	void logStatsForPlayer(IPlayer& player, bool winner, int weapon);
 	void createDuelOffer(IPlayer& player);

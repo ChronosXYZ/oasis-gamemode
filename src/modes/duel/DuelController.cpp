@@ -1,5 +1,5 @@
 #include "DuelController.hpp"
-#include "../deathmatch/Maps.hpp"
+#include "./Maps.hpp"
 #include "../deathmatch/DeathmatchResult.hpp"
 #include "../../core/player/PlayerExtension.hpp"
 #include "../../core/utils/Common.hpp"
@@ -114,10 +114,9 @@ void DuelController::deleteDuel(unsigned int id, IPlayer* initiator)
 	this->virtualWorldIdPool->freeId(room->virtualWorld);
 }
 
-void DuelController::setRandomSpawnPoint(
-	IPlayer& player, std::shared_ptr<Room> room)
+void DuelController::setSpawnPoint(
+	IPlayer& player, std::shared_ptr<Room> room, Vector4& spawnPoint)
 {
-	auto spawnPoint = room->map.getRandomSpawn();
 	auto classData = queryExtension<IPlayerClassData>(player);
 	std::vector<WeaponSlotData> slotsVector;
 	for (const auto& weapon : room->allowedWeapons)
@@ -361,7 +360,7 @@ void DuelController::showDuelMapSelectionDialog(IPlayer& player)
 		return;
 
 	std::vector<std::string> maps;
-	for (const auto& map : Deathmatch::MAPS)
+	for (const auto& map : ARENAS)
 	{
 		maps.push_back(map.name);
 	}
@@ -375,7 +374,7 @@ void DuelController::showDuelMapSelectionDialog(IPlayer& player)
 			if (result.response())
 			{
 				playerData->tempData->core->temporaryDuelSettings.value()->map
-					= Deathmatch::MAPS[result.listItem()];
+					= ARENAS[result.listItem()];
 			}
 			this->showDuelCreationDialog(player);
 		});
@@ -596,7 +595,8 @@ void DuelController::onRoomJoin(IPlayer& player, unsigned int roomId)
 	player.setArmour(room->defaultArmor);
 	player.resetWeapons();
 
-	this->setRandomSpawnPoint(player, room);
+	this->setSpawnPoint(
+		player, room, room->map.spawnPoints[room->players.size() - 1]);
 	player.spawn();
 
 	for (auto player : room->players)
@@ -823,8 +823,8 @@ void DuelController::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 		Core::Utils::getWeaponName(reason), killer->getArmour(),
 		killer->getHealth(),
 		glm::distance(killer->getPosition(), player.getPosition()));
-	this->setRandomSpawnPoint(*winner, room);
-	this->setRandomSpawnPoint(*loser, room);
+	this->setSpawnPoint(*winner, room, room->map.spawnPoints[0]);
+	this->setSpawnPoint(*loser, room, room->map.spawnPoints[1]);
 
 	this->onRoundEnd(winner, loser, room, reason);
 }
