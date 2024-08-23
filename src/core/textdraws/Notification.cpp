@@ -24,18 +24,20 @@ Notification::Notification(IPlayer& player, ITimersComponent* timersComponent)
 	PlayerTextDrawSetProportional(player, topNotification, true);
 	PlayerTextDrawTextSize(player, topNotification, 0.0000, 0.0000);
 
-	bottomNotification = CreatePlayerTextDraw(player, 320.0000, 401.5000,
-		"_"); //"The Quick brown fucking fox fucking jumped over the fucking
-			  // bridge for no fucking reason");
+	bottomNotification
+		= CreatePlayerTextDraw(player, 320.000000, 385.000000, "_");
+
 	PlayerTextDrawFont(player, bottomNotification, 1);
-	PlayerTextDrawLetterSize(player, bottomNotification, 0.2199, 1.3000);
+	PlayerTextDrawLetterSize(player, bottomNotification, 0.487500, 1.950000);
+	PlayerTextDrawTextSize(player, bottomNotification, 401.000000, 341.500000);
+	PlayerTextDrawSetOutline(player, bottomNotification, 1);
+	PlayerTextDrawSetShadow(player, bottomNotification, 0);
 	PlayerTextDrawAlignment(player, bottomNotification, 2);
 	PlayerTextDrawColor(player, bottomNotification, -1);
-	PlayerTextDrawSetShadow(player, bottomNotification, 0);
-	PlayerTextDrawSetOutline(player, bottomNotification, 1);
-	PlayerTextDrawBackgroundColor(player, bottomNotification, 85);
-	PlayerTextDrawSetProportional(player, bottomNotification, true);
-	PlayerTextDrawTextSize(player, bottomNotification, 774.0000, 361.5000);
+	PlayerTextDrawBackgroundColor(player, bottomNotification, 255);
+	PlayerTextDrawBoxColor(player, bottomNotification, 50);
+	PlayerTextDrawUseBox(player, bottomNotification, 0);
+	PlayerTextDrawSetProportional(player, bottomNotification, 1);
 
 	this->showTimers = {
 		{ NotificationPosition::Top, {} },

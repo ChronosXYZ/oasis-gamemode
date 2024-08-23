@@ -753,7 +753,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 					room->players[0]->getName().to_string(),
 					room->players[1]->getName().to_string(),
 					room->currentRound + 1, room->maxRounds),
-				Seconds(4), 6);
+				Seconds(4), 3);
 		}
 		room->roundStartTimer = this->timersComponent->create(
 			new Impl::SimpleTimerHandler(
@@ -770,7 +770,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 											ROUND_START_TEXT[random()
 												% ROUND_START_TEXT.size()]),
 										*player),
-								Seconds(1), 6);
+								Seconds(1), 3);
 							player->setControllable(true);
 							player->playSound(1057, Vector3(0.0, 0.0, 0.0));
 						}
@@ -782,7 +782,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 							auto playerExt
 								= Core::Player::getPlayerExt(*player);
 							playerExt->showNotification(
-								fmt::sprintf("~r~%d", *startSecs + 1),
+								fmt::sprintf("~y~%d", *startSecs + 1),
 								Core::TextDraws::NotificationPosition::Bottom,
 								1);
 							player->playSound(1138, Vector3(0.0, 0.0, 0.0));
