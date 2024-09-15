@@ -60,4 +60,4 @@ RUN wget -q https://github.com/golang-migrate/migrate/releases/download/v4.17.0/
     rm tmp.deb && \
     rm server.cfg
 
-CMD /app/entrypoint.sh
+CMD /entrypoint.sh
