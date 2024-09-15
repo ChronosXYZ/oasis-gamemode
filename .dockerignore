@@ -1,4 +1,5 @@
-docker
+docker/build
+docker/conan
 build
 .cache
 .vscode
