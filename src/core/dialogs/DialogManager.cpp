@@ -81,7 +81,7 @@ void DialogManager::showDialog(IPlayer& player, std::shared_ptr<IDialog> dialog,
 
 	IPlayerDialogData* dialogData = queryExtension<IPlayerDialogData>(player);
 	dialogData->show(player, MAGIC_DIALOG_ID, dialog->style, dialog->title,
-		dialog->content, dialog->button1, dialog->button2);
+		dialog->content, dialog->leftButton, dialog->rightButton);
 }
 
 }
