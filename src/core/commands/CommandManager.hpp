@@ -16,11 +16,24 @@ namespace Core::Commands
 // double)
 template <typename F>
 concept MatchesSignature
-	= std::is_same_v<bool (F::*)(std::reference_wrapper<IPlayer>, std::string)
-						 const,
-		  decltype(&F::operator())>
+	= std::is_same_v<
+		  bool (F::*)(std::reference_wrapper<IPlayer>, std::string) const, F>
 	|| std::is_same_v<bool (*)(std::reference_wrapper<IPlayer>, std::string),
 		F>;
+// Concept for accepting std::function with two arguments: IPlayer& and
+// std::string
+template <typename F>
+concept MatchesStdFunctionSignature = requires(F f) {
+	{
+		f(std::declval<std::reference_wrapper<IPlayer>>(),
+			std::declval<std::string>())
+	} -> std::same_as<bool>;
+};
+// concept MatchesSignature
+// 	= std::is_same_v<
+// 		  bool (F::*)(std::reference_wrapper<IPlayer>, std::string) const, F>
+// 	|| std::is_same_v<bool (*)(std::reference_wrapper<IPlayer>, std::string),
+// 		F>;
 
 // Specialization for free functions
 template <typename R, typename... Args>
@@ -56,6 +69,12 @@ public:
 	~CommandManager();
 
 	template <MatchesSignature F>
+	void addCommand(std::string name, F handler, CommandInfo info)
+	{
+		this->addCommand(name, handler, info, common_tag {});
+	};
+
+	template <MatchesStdFunctionSignature F>
 	void addCommand(std::string name, F handler, CommandInfo info)
 	{
 		this->addCommand(name, handler, info, common_tag {});
