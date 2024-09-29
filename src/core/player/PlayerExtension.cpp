@@ -2,6 +2,7 @@
 #include "../utils/Localization.hpp"
 #include "TextDrawManager.hpp"
 
+#include <cstdlib>
 #include <fmt/printf.h>
 #include <player.hpp>
 #include <component.hpp>
@@ -45,7 +46,7 @@ void OasisPlayerExt::setFacingAngle(float angle)
 
 void OasisPlayerExt::freeExtension()
 {
-	// _playerData.reset();
+	_playerData.reset();
 	_textDrawManager.reset();
 }
 void OasisPlayerExt::reset()

@@ -122,6 +122,7 @@ void CoreManager::onPlayerDisconnect(
 	this->savePlayer(player);
 	this->modeManager->removePlayerFromCurrentMode(player);
 	playerPool->sendDeathMessageToAll(NULL, player, 201);
+	this->playerData.erase(player.getID());
 }
 
 void CoreManager::initHandlers()
