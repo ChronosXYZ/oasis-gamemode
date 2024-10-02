@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <random>
 
 namespace Core
 {
@@ -216,7 +217,7 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 		playerData->tempData->core->skinSelectionMode = true;
 
 		Vector4 classSelectionPoint
-			= CLASS_SELECTION_POINTS[random() % CLASS_SELECTION_POINTS.size()];
+			= CLASS_SELECTION_POINTS[rand() % CLASS_SELECTION_POINTS.size()];
 		player.setPosition(Vector3(classSelectionPoint));
 
 		auto playerExt = Player::getPlayerExt(player);

@@ -296,3 +296,4 @@ __pycache__/
 docker/conan
 .env
 compile_commands.json
+/server/samp-server.exe
