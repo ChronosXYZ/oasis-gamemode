@@ -1,6 +1,4 @@
 #include "PgTimestamp.hpp"
-#include <bits/chrono.h>
-#include <chrono>
 
 namespace Core::Utils::SQL
 {
@@ -16,7 +14,7 @@ timestamp from_iso8601_str(const std::string& s)
 bool from_iso8601_str(const std::string& s, timestamp& ts)
 {
 	std::istringstream stream { s };
-	stream >> date::parse("%F %T", ts);
+	stream >> std::chrono::parse("%F %T", ts);
 	return !stream.fail();
 }
 

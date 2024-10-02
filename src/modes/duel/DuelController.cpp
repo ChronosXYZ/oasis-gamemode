@@ -14,7 +14,6 @@
 
 #include <algorithm>
 #include <array>
-#include <bits/chrono.h>
 #include <functional>
 #include <magic_enum/magic_enum.hpp>
 #include <map>
@@ -767,7 +766,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 						{
 							player->sendGameText("~g~"
 									+ _(fmt::sprintf("%s",
-											ROUND_START_TEXT[random()
+											ROUND_START_TEXT[rand()
 												% ROUND_START_TEXT.size()]),
 										*player),
 								Seconds(1), 3);

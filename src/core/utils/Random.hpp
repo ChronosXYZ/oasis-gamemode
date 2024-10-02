@@ -1,6 +1,7 @@
 #pragma once
 
 #include <uuid.h>
+#include <random>
 
 namespace Core::Utils
 {
