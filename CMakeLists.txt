@@ -6,7 +6,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # build as 32-bit library
-if (NOT MSVC)
+if (MSVC)
+    set(CMAKE_GENERATOR_PLATFORM x86)
+    # Target system is Windows x86 (32-bit)
+    set(CMAKE_SYSTEM_NAME Windows)
+    # Specify the target architecture
+    set(CMAKE_SYSTEM_PROCESSOR x86)
+else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
 endif()
