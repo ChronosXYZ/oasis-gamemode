@@ -32,7 +32,7 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt install -y --no-install-recommends git clangd wget gdb bash make ssh psmisc
+RUN apt update && apt install -y --no-install-recommends git clangd wget gdb bash make ssh psmisc vim
 
 # install sampctl
 RUN curl -s https://api.github.com/repos/Southclaws/sampctl/releases/latest | \

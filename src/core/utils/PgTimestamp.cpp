@@ -14,7 +14,7 @@ timestamp from_iso8601_str(const std::string& s)
 bool from_iso8601_str(const std::string& s, timestamp& ts)
 {
 	std::istringstream stream { s };
-	stream >> std::chrono::parse("%F %T", ts);
+	stream >> date::parse("%F %T", ts);
 	return !stream.fail();
 }
 
