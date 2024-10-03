@@ -13,13 +13,14 @@
     },
     {
       "name": "x86-Debug",
-      "generator": "Ninja",
+      "generator": "Visual Studio 17 2022",
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
+      "cmakeCommandArgs": "-DCMAKE_BUILD_TYPE=Debug",
+      "buildCommandArgs": "-p:PreferredToolArchitecture=x86",
       "ctestCommandArgs": "",
+      "intelliSenseMode": "windows-msvc-x86",
       "inheritEnvironments": [ "msvc_x86" ],
       "variables": []
     }
