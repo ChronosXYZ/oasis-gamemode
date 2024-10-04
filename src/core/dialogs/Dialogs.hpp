@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IDialog.hpp"
-#include "../settings/SettingsStorage.hpp"
 
 #include "player.hpp"
 #include <functional>
@@ -13,6 +12,9 @@
 
 namespace Core
 {
+typedef std::variant<std::string, bool, int, double> SettingValue;
+typedef std::unordered_map<std::string, SettingValue> SettingsMap;
+
 struct DialogManager;
 
 class InputDialog : public IDialog
@@ -291,7 +293,8 @@ enum class SettingType
 	BOOLEAN,
 	INTEGER,
 	DOUBLE,
-	ENUM
+	ENUM,
+	NONE
 };
 
 struct SettingItem
@@ -305,7 +308,6 @@ struct SettingItem
 
 struct SettingStringItem : public SettingItem
 {
-	std::string defaultValue;
 };
 
 struct SettingEnumItem : public SettingItem
@@ -321,21 +323,18 @@ struct SettingEnumItem : public SettingItem
 
 struct SettingBooleanItem : public SettingItem
 {
-	bool defaultValue;
 	std::string trueText;
 	std::string falseText;
 };
 
 struct SettingIntegerItem : public SettingItem
 {
-	int defaultValue;
 	int minValue;
 	int maxValue;
 };
 
 struct SettingDoubleItem : public SettingItem
 {
-	double defaultValue;
 	double minValue;
 	double maxValue;
 };
@@ -349,21 +348,20 @@ class SettingsDialog
 	void showEnumSettingDialog(SettingEnumItem& item);
 
 	std::vector<SettingItem> items;
+	std::unordered_map<std::string, SettingValue> values;
 	std::shared_ptr<TabListDialog> innerDialog;
-	std::shared_ptr<ISettingsStorage> storage;
 	std::shared_ptr<DialogManager> dialogManager;
 	IPlayer& player;
 
-	std::function<void(bool)> onSettingsDone;
+	std::function<void(SettingsMap)> onSettingsDone;
 
 public:
 	SettingsDialog(IPlayer& player,
 		std::shared_ptr<DialogManager> dialogManager,
-		std::shared_ptr<ISettingsStorage> storage, const std::string& title,
-		std::vector<SettingItem>& items, const std::string& leftButton,
-		const std::string& rightButton, bool assignDefaultValues = true,
-		std::string doneItemText = "",
-		std::function<void(bool)> onSettingsDone = nullptr);
+		std::unordered_map<std::string, SettingValue> values,
+		const std::string& title, std::vector<SettingItem>& items,
+		const std::string& leftButton, const std::string& rightButton,
+		std::function<void(SettingsMap)> onSettingsDone = nullptr);
 	void show();
 };
 
@@ -372,22 +370,19 @@ class SettingsDialogBuilder
 private:
 	IPlayer& player;
 	std::shared_ptr<DialogManager> dialogManager;
-	std::shared_ptr<ISettingsStorage> storage;
 	std::string title;
 	std::vector<SettingItem> items;
+	std::unordered_map<std::string, SettingValue> values;
 	std::string leftButton;
 	std::string rightButton;
-	bool assignDefaultValues = true;
 	std::string doneItemText;
-	std::function<void(bool)> onSettingsDone;
+	std::function<void(SettingsMap)> onSettingsDone;
 
 public:
-	SettingsDialogBuilder(IPlayer& player,
-		std::shared_ptr<DialogManager> dialogManager,
-		std::shared_ptr<ISettingsStorage> storage)
+	SettingsDialogBuilder(
+		IPlayer& player, std::shared_ptr<DialogManager> dialogManager)
 		: player(player)
 		, dialogManager(dialogManager)
-		, storage(storage)
 	{
 	}
 
@@ -415,9 +410,10 @@ public:
 		return *this;
 	}
 
-	SettingsDialogBuilder& setAssignDefaultValues(bool assignDefaultValues)
+	SettingsDialogBuilder& setInitialValues(
+		std::unordered_map<std::string, SettingValue> initialValues)
 	{
-		this->assignDefaultValues = assignDefaultValues;
+		this->values = initialValues;
 		return *this;
 	}
 
@@ -428,7 +424,7 @@ public:
 	}
 
 	SettingsDialogBuilder& setOnSettingsDone(
-		std::function<void(bool)> onSettingsDone)
+		std::function<void(SettingsMap)> onSettingsDone)
 	{
 		this->onSettingsDone = onSettingsDone;
 		return *this;
@@ -436,9 +432,49 @@ public:
 
 	std::shared_ptr<SettingsDialog> build()
 	{
-		return std::make_shared<SettingsDialog>(player, dialogManager, storage,
-			title, items, leftButton, rightButton, assignDefaultValues,
-			doneItemText, onSettingsDone);
+		if (this->values.empty())
+		{
+			for (auto& item : items)
+			{
+				switch (item.type)
+				{
+				case SettingType::BOOLEAN:
+				{
+					values[item.id] = false;
+					break;
+				}
+				case SettingType::INTEGER:
+				{
+					auto intItem = dynamic_cast<SettingIntegerItem&>(item);
+					values[item.id] = intItem.minValue;
+					break;
+				}
+				case SettingType::DOUBLE:
+				{
+					auto doubleItem = dynamic_cast<SettingDoubleItem&>(item);
+					values[item.id] = doubleItem.minValue;
+					break;
+				}
+				case SettingType::ENUM:
+				{
+					auto enumItem = dynamic_cast<SettingEnumItem&>(item);
+					values[item.id] = enumItem.choices[0].id;
+					break;
+				}
+				case SettingType::STRING:
+				{
+					values[item.id] = "";
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+
+		return std::shared_ptr<SettingsDialog>(
+			new SettingsDialog(player, dialogManager, values, title, items,
+				leftButton, rightButton, onSettingsDone));
 	}
 };
 

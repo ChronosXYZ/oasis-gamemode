@@ -6,10 +6,14 @@
 #include "DialogResult.hpp"
 #include "player.hpp"
 #include <Server/Components/Dialogs/dialogs.hpp>
+#include <algorithm>
+#include <bits/ranges_util.h>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
+#include <ranges>
 #include "DialogManager.hpp"
 #include "../player/PlayerExtension.hpp"
 
@@ -108,7 +112,7 @@ void SettingsDialog::showStringSettingDialog(SettingStringItem& item)
 		[this, &item](DialogResult result)
 		{
 			if (result.response())
-				this->storage->set(item.id, result.inputText());
+				this->values.emplace(item.id, result.inputText());
 			this->show();
 		});
 }
@@ -121,7 +125,7 @@ void SettingsDialog::showBooleanSettingDialog(SettingBooleanItem& item)
 	this->dialogManager->showDialog(player, dialog,
 		[this, &item](DialogResult result)
 		{
-			this->storage->set(
+			this->values.emplace(
 				item.id, result.response() == DialogResponse_Left);
 			this->show();
 		});
@@ -151,7 +155,7 @@ void SettingsDialog::showIntegerSettingDialog(SettingIntegerItem& item)
 				this->showIntegerSettingDialog(item);
 				return;
 			}
-			this->storage->set(item.id, value);
+			this->values.emplace(item.id, value);
 			this->show();
 		});
 }
@@ -180,7 +184,7 @@ void SettingsDialog::showDoubleSettingDialog(SettingDoubleItem& item)
 				this->showDoubleSettingDialog(item);
 				return;
 			}
-			this->storage->set(item.id, value);
+			this->values.emplace(item.id, value);
 			this->show();
 		});
 }
@@ -202,28 +206,29 @@ void SettingsDialog::showEnumSettingDialog(SettingEnumItem& item)
 		[this, &item](DialogResult result)
 		{
 			if (result.response())
-				this->storage->set(item.id, item.choices[result.listItem()].id);
+				this->values.emplace(
+					item.id, item.choices[result.listItem()].id);
 			this->show();
 		});
 }
 
 SettingsDialog::SettingsDialog(IPlayer& player,
 	std::shared_ptr<DialogManager> dialogManager,
-	std::shared_ptr<ISettingsStorage> storage, const std::string& title,
-	std::vector<SettingItem>& items, const std::string& leftButton,
-	const std::string& rightButton, bool assignDefaultValues,
-	std::string doneItemText, std::function<void(bool)> onSettingsDone)
+	std::unordered_map<std::string, SettingValue> values,
+	const std::string& title, std::vector<SettingItem>& items,
+	const std::string& leftButton, const std::string& rightButton,
+	std::function<void(SettingsMap)> onSettingsDone)
 	: items(items)
 	, dialogManager(dialogManager)
 	, player(player)
-	, storage(storage)
+	, values(values)
 	, onSettingsDone(onSettingsDone)
 {
 
 	auto builder = TabListDialogBuilder()
 					   .setTitle(title)
-					   .setLeftButton(leftButton)
-					   .setRightButton(rightButton);
+					   .setLeftButton(_(leftButton, player))
+					   .setRightButton(_(rightButton, player));
 	std::vector<std::vector<std::string>> rows;
 	for (auto& item : items)
 	{
@@ -231,37 +236,32 @@ SettingsDialog::SettingsDialog(IPlayer& player,
 		{
 		case SettingType::STRING:
 		{
-			auto stringItem = dynamic_cast<SettingStringItem&>(item);
-			rows.push_back({ _(item.title, player), stringItem.defaultValue });
-			if (assignDefaultValues)
-				this->storage->set(stringItem.id, stringItem.defaultValue);
+			rows.push_back({ _(item.title, player),
+				std::get<std::string>(this->values.at(item.id)) });
 			break;
 		}
 		case SettingType::BOOLEAN:
 		{
 			auto boolItem = dynamic_cast<SettingBooleanItem&>(item);
 			rows.push_back({ _(item.title, player),
-				boolItem.defaultValue ? _(boolItem.trueText, player)
-									  : _(boolItem.falseText, player) });
-			if (assignDefaultValues)
-				this->storage->set(boolItem.id, boolItem.defaultValue);
+				std::get<bool>(this->values.at(boolItem.id))
+					? _(boolItem.trueText, player)
+					: _(boolItem.falseText, player) });
 			break;
 		}
 		case SettingType::INTEGER:
 		{
 			auto intItem = dynamic_cast<SettingIntegerItem&>(item);
 			rows.push_back({ _(item.title, player),
-				std::to_string(intItem.defaultValue) });
-			this->storage->set(intItem.id, intItem.defaultValue);
+				std::to_string(std::get<int>(this->values.at(item.id))) });
 			break;
 		}
 		case SettingType::DOUBLE:
 		{
 			auto doubleItem = dynamic_cast<SettingDoubleItem&>(item);
 			rows.push_back({ _(item.title, player),
-				std::to_string(doubleItem.defaultValue) });
-			if (assignDefaultValues)
-				this->storage->set(doubleItem.id, doubleItem.defaultValue);
+				std::to_string(
+					std::get<double>(this->values.at(doubleItem.id))) });
 			break;
 		}
 		case SettingType::ENUM:
@@ -271,16 +271,16 @@ SettingsDialog::SettingsDialog(IPlayer& player,
 			rows.push_back({ _(item.title, player),
 				enumItem.translateChoices ? _(value.text, player)
 										  : value.text });
-			if (assignDefaultValues)
-				this->storage->set(enumItem.id, value.id);
+			break;
+		}
+		case SettingType::NONE:
+		{
+			rows.push_back(
+				{ _(item.title, player), _(item.description, player) });
 			break;
 		}
 		}
 	}
-
-	if (!doneItemText.empty())
-		rows.push_back({ _(doneItemText, player) });
-	rows.push_back({ _("Done", player) });
 
 	builder.setItems(rows);
 	this->innerDialog = builder.build();
@@ -292,7 +292,17 @@ void SettingsDialog::show()
 		[this](DialogResult result)
 		{
 			if (!result.response())
+			{
+				auto it = std::find_if(this->items.begin(), this->items.end(),
+					[](const auto& item)
+					{
+						return item.type == SettingType::NONE;
+					});
+				if (it == this->items.end())
+					if (this->onSettingsDone)
+						this->onSettingsDone(this->values);
 				return;
+			}
 			auto& item = this->items[result.listItem()];
 			switch (item.type)
 			{
@@ -324,6 +334,12 @@ void SettingsDialog::show()
 			{
 				this->showEnumSettingDialog(
 					dynamic_cast<SettingEnumItem&>(item));
+				break;
+			}
+			case SettingType::NONE:
+			{
+				if (this->onSettingsDone)
+					this->onSettingsDone(this->values);
 				break;
 			}
 			}
