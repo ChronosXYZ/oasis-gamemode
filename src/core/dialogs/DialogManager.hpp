@@ -45,11 +45,18 @@ public:
 	void showDialog(IPlayer& player,
 		std::shared_ptr<TabListHeadersDialog> dialog,
 		DialogManager::Callback callback);
+
+	void addSettingsDialog(
+		unsigned int playerId, std::shared_ptr<SettingsDialog> dialog);
+	void removeSettingsDialog(unsigned int playerId);
+
 	void hideDialog(IPlayer& player);
 
 private:
 	// player id -> dialog callback
 	std::map<unsigned int, DialogManager::Callback> dialogs;
+	std::unordered_map<unsigned int, std::shared_ptr<SettingsDialog>>
+		settingsDialogs;
 	IDialogsComponent* dialogsComponent = nullptr;
 	void showDialog(IPlayer& player, std::shared_ptr<IDialog> dialog,
 		DialogManager::Callback callback);

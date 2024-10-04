@@ -42,6 +42,7 @@ class FreeroamController : public Modes::ModeBase,
 	void showVehicleSpawningDialog(IPlayer& player);
 	void showVehicleListDialog(
 		IPlayer& player, Core::Utils::VehicleType vehicleTypeSelected);
+	void showCreateWeaponSetDialog(IPlayer& player);
 
 public:
 	FreeroamController(IComponentList* components, IPlayerPool* playerPool,

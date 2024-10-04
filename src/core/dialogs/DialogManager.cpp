@@ -1,5 +1,6 @@
 #include "DialogManager.hpp"
 #include "DialogResult.hpp"
+#include "Dialogs.hpp"
 #include "IDialog.hpp"
 #include <memory>
 
@@ -72,6 +73,17 @@ void DialogManager::showDialog(IPlayer& player,
 {
 	this->showDialog(
 		player, std::static_pointer_cast<IDialog>(dialog), callback);
+}
+
+void DialogManager::addSettingsDialog(
+	unsigned int playerId, std::shared_ptr<SettingsDialog> dialog)
+{
+	this->settingsDialogs[playerId] = dialog;
+}
+
+void DialogManager::removeSettingsDialog(unsigned int playerId)
+{
+	this->settingsDialogs.erase(playerId);
 }
 
 void DialogManager::showDialog(IPlayer& player, std::shared_ptr<IDialog> dialog,

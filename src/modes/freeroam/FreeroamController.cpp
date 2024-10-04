@@ -195,6 +195,47 @@ void FreeroamController::initCommands()
 			.description = __("Set player skin"),
 			.category = MODE_NAME,
 		});
+	this->commandManager->addCommand(
+		"w",
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
+		{
+			auto dialog = Core::ListDialogBuilder()
+							  .setTitle(fmt::sprintf(DIALOG_HEADER_TITLE,
+								  _("Weapon set editor", player)))
+							  .setItems({
+								  _("Create", player),
+								  _("Load", player),
+								  _("Edit", player),
+								  _("Delete", player),
+							  })
+							  .setLeftButton(_("Ok", player))
+							  .setRightButton(_("Cancel", player))
+							  .build();
+			this->dialogManager->showDialog(player, dialog,
+				[this, player](auto result)
+				{
+					if (!result.response())
+						return;
+					switch (result.listItem())
+					{
+					case 0:
+					{
+						this->showCreateWeaponSetDialog(player);
+						break;
+					}
+					default:
+					{
+						break;
+					}
+					};
+				});
+			return true;
+		},
+		Core::Commands::CommandInfo {
+			.args = {},
+			.description = __("Weapon set editor"),
+			.category = MODE_NAME,
+		});
 }
 
 void FreeroamController::initVehicles()
@@ -417,5 +458,55 @@ void FreeroamController::showVehicleListDialog(
 				this->showVehicleSpawningDialog(player);
 			}
 		});
+}
+
+void FreeroamController::showCreateWeaponSetDialog(IPlayer& player)
+{
+	auto dialog
+		= Core::SettingsDialogBuilder(player, this->dialogManager)
+			  .setTitle(fmt::sprintf(
+				  DIALOG_HEADER_TITLE, _("Create weapon set", player)))
+			  .setItems(std::vector<std::shared_ptr<Core::SettingItem>> {
+				  std::make_shared<Core::SettingStringItem>("name",
+					  _("Weapon set name", player),
+					  _("Enter the name of new weapon set", player)),
+				  std::make_shared<Core::SettingEnumItem>("slot1",
+					  _("Handheld weapon", player),
+					  std::vector<Core::SettingEnumItem::EnumChoice> {
+						  Core::SettingEnumItem::EnumChoice {
+							  .id = "WEAPON_GOLFCLUB",
+							  .text = __("Golf club"),
+						  },
+						  Core::SettingEnumItem::EnumChoice {
+							  .id = "WEAPON_NITESTICK",
+							  .text = __("Nightstick"),
+						  },
+						  Core::SettingEnumItem::EnumChoice {
+							  .id = "WEAPON_KNIFE",
+							  .text = __("Knife"),
+						  },
+						  Core::SettingEnumItem::EnumChoice {
+							  .id = "WEAPON_SHOVEL",
+							  .text = __("Shovel"),
+						  },
+						  Core::SettingEnumItem::EnumChoice {
+							  .id = "WEAPON_POOLSTICK",
+							  .text = __("Pool cue"),
+						  },
+						  Core::SettingEnumItem::EnumChoice {
+							  .id = "WEAPON_KATANA",
+							  .text = __("Katana"),
+						  },
+						  Core::SettingEnumItem::EnumChoice {
+							  .id = "WEAPON_CHAINSAW",
+							  .text = __("Chainsaw"),
+						  },
+					  },
+					  true),
+			  })
+			  .setLeftButton(__("Ok"))
+			  .setRightButton(__("Cancel"))
+			  .build();
+	dialog->show();
 }
 }

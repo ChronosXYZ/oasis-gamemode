@@ -4,6 +4,7 @@
 
 #include "player.hpp"
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -303,11 +304,19 @@ struct SettingItem
 	std::string description;
 	std::string id;
 	SettingType type;
-	virtual ~SettingItem() = default;
+	virtual ~SettingItem() {};
 };
 
 struct SettingStringItem : public SettingItem
 {
+	SettingStringItem(const std::string& id, const std::string& title,
+		const std::string& description)
+	{
+		this->title = title;
+		this->description = description;
+		this->id = id;
+		this->type = SettingType::STRING;
+	}
 };
 
 struct SettingEnumItem : public SettingItem
@@ -319,37 +328,81 @@ struct SettingEnumItem : public SettingItem
 	};
 	std::vector<EnumChoice> choices;
 	bool translateChoices;
+
+	SettingEnumItem(const std::string& id, const std::string& title,
+		const std::vector<EnumChoice>& choices, bool translateChoices)
+	{
+		this->title = title;
+		this->id = id;
+		this->type = SettingType::ENUM;
+		this->choices = choices;
+		this->translateChoices = translateChoices;
+	}
 };
 
 struct SettingBooleanItem : public SettingItem
 {
 	std::string trueText;
 	std::string falseText;
+
+	SettingBooleanItem(const std::string& id, const std::string& title,
+		const std::string& description, const std::string& trueText,
+		const std::string& falseText)
+	{
+		this->title = title;
+		this->description = description;
+		this->id = id;
+		this->type = SettingType::BOOLEAN;
+		this->trueText = trueText;
+		this->falseText = falseText;
+	}
 };
 
 struct SettingIntegerItem : public SettingItem
 {
 	int minValue;
 	int maxValue;
+
+	SettingIntegerItem(const std::string& id, const std::string& title,
+		const std::string& description, int minValue, int maxValue)
+	{
+		this->title = title;
+		this->description = description;
+		this->id = id;
+		this->type = SettingType::INTEGER;
+		this->minValue = minValue;
+		this->maxValue = maxValue;
+	}
 };
 
 struct SettingDoubleItem : public SettingItem
 {
 	double minValue;
 	double maxValue;
+
+	SettingDoubleItem(const std::string& id, const std::string& title,
+		const std::string& description, double minValue, double maxValue)
+	{
+		this->title = title;
+		this->description = description;
+		this->id = id;
+		this->type = SettingType::DOUBLE;
+		this->minValue = minValue;
+		this->maxValue = maxValue;
+	}
 };
 
-class SettingsDialog
+class SettingsDialog : public std::enable_shared_from_this<SettingsDialog>
 {
-	void showStringSettingDialog(SettingStringItem& item);
-	void showBooleanSettingDialog(SettingBooleanItem& item);
-	void showIntegerSettingDialog(SettingIntegerItem& item);
-	void showDoubleSettingDialog(SettingDoubleItem& item);
-	void showEnumSettingDialog(SettingEnumItem& item);
+	void showStringSettingDialog(std::shared_ptr<SettingStringItem> item);
+	void showBooleanSettingDialog(std::shared_ptr<SettingBooleanItem> item);
+	void showIntegerSettingDialog(std::shared_ptr<SettingIntegerItem> item);
+	void showDoubleSettingDialog(std::shared_ptr<SettingDoubleItem> item);
+	void showEnumSettingDialog(std::shared_ptr<SettingEnumItem> item);
 
-	std::vector<SettingItem> items;
+	std::vector<std::shared_ptr<SettingItem>> items;
 	std::unordered_map<std::string, SettingValue> values;
-	std::shared_ptr<TabListDialog> innerDialog;
+	TabListDialogBuilder innerDialogBuilder;
 	std::shared_ptr<DialogManager> dialogManager;
 	IPlayer& player;
 
@@ -359,7 +412,8 @@ public:
 	SettingsDialog(IPlayer& player,
 		std::shared_ptr<DialogManager> dialogManager,
 		std::unordered_map<std::string, SettingValue> values,
-		const std::string& title, std::vector<SettingItem>& items,
+		const std::string& title,
+		std::vector<std::shared_ptr<SettingItem>> items,
 		const std::string& leftButton, const std::string& rightButton,
 		std::function<void(SettingsMap)> onSettingsDone = nullptr);
 	void show();
@@ -371,11 +425,10 @@ private:
 	IPlayer& player;
 	std::shared_ptr<DialogManager> dialogManager;
 	std::string title;
-	std::vector<SettingItem> items;
+	std::vector<std::shared_ptr<SettingItem>> items;
 	std::unordered_map<std::string, SettingValue> values;
 	std::string leftButton;
 	std::string rightButton;
-	std::string doneItemText;
 	std::function<void(SettingsMap)> onSettingsDone;
 
 public:
@@ -392,7 +445,8 @@ public:
 		return *this;
 	}
 
-	SettingsDialogBuilder& setItems(const std::vector<SettingItem>& items)
+	SettingsDialogBuilder& setItems(
+		const std::vector<std::shared_ptr<SettingItem>> items)
 	{
 		this->items = items;
 		return *this;
@@ -417,12 +471,6 @@ public:
 		return *this;
 	}
 
-	SettingsDialogBuilder& setDoneItemText(const std::string& doneItemText)
-	{
-		this->doneItemText = doneItemText;
-		return *this;
-	}
-
 	SettingsDialogBuilder& setOnSettingsDone(
 		std::function<void(SettingsMap)> onSettingsDone)
 	{
@@ -436,34 +484,37 @@ public:
 		{
 			for (auto& item : items)
 			{
-				switch (item.type)
+				switch (item->type)
 				{
 				case SettingType::BOOLEAN:
 				{
-					values[item.id] = false;
+					values[item->id] = false;
 					break;
 				}
 				case SettingType::INTEGER:
 				{
-					auto intItem = dynamic_cast<SettingIntegerItem&>(item);
-					values[item.id] = intItem.minValue;
+					auto intItem
+						= std::dynamic_pointer_cast<SettingIntegerItem>(item);
+					values[item->id] = intItem->minValue;
 					break;
 				}
 				case SettingType::DOUBLE:
 				{
-					auto doubleItem = dynamic_cast<SettingDoubleItem&>(item);
-					values[item.id] = doubleItem.minValue;
+					auto doubleItem
+						= std::dynamic_pointer_cast<SettingDoubleItem>(item);
+					values[item->id] = doubleItem->minValue;
 					break;
 				}
 				case SettingType::ENUM:
 				{
-					auto enumItem = dynamic_cast<SettingEnumItem&>(item);
-					values[item.id] = enumItem.choices[0].id;
+					auto enumItem
+						= std::dynamic_pointer_cast<SettingEnumItem>(item);
+					values[item->id] = enumItem->choices[0].id;
 					break;
 				}
 				case SettingType::STRING:
 				{
-					values[item.id] = "";
+					values[item->id] = "";
 					break;
 				}
 				default:
