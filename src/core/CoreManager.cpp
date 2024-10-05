@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <random>
 
 namespace Core
 {
@@ -122,6 +123,7 @@ void CoreManager::onPlayerDisconnect(
 	this->savePlayer(player);
 	this->modeManager->removePlayerFromCurrentMode(player);
 	playerPool->sendDeathMessageToAll(NULL, player, 201);
+	this->playerData.erase(player.getID());
 }
 
 void CoreManager::initHandlers()
@@ -215,7 +217,7 @@ bool CoreManager::onPlayerRequestClass(IPlayer& player, unsigned int classId)
 		playerData->tempData->core->skinSelectionMode = true;
 
 		Vector4 classSelectionPoint
-			= CLASS_SELECTION_POINTS[random() % CLASS_SELECTION_POINTS.size()];
+			= CLASS_SELECTION_POINTS[rand() % CLASS_SELECTION_POINTS.size()];
 		player.setPosition(Vector3(classSelectionPoint));
 
 		auto playerExt = Player::getPlayerExt(player);

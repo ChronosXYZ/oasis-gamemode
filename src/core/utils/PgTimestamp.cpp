@@ -1,6 +1,4 @@
 #include "PgTimestamp.hpp"
-#include <bits/chrono.h>
-#include <chrono>
 
 namespace Core::Utils::SQL
 {

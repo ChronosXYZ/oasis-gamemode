@@ -19,7 +19,7 @@
 namespace Core::Utils
 {
 using random_bytes_engine = std::independent_bits_engine<
-	std::default_random_engine, CHAR_BIT, unsigned char>;
+	std::default_random_engine, CHAR_BIT, unsigned short>;
 
 static std::string argon2HashPassword(const std::string& password)
 {

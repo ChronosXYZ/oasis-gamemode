@@ -6,8 +6,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # build as 32-bit library
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+if (MSVC)
+    set(CMAKE_GENERATOR_PLATFORM x86)
+    # Target system is Windows x86 (32-bit)
+    set(CMAKE_SYSTEM_NAME Windows)
+    # Specify the target architecture
+    set(CMAKE_SYSTEM_PROCESSOR x86)
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
@@ -61,6 +69,7 @@ conan_cmake_configure(REQUIRES
                             magic_enum/0.9.5
                             stduuid/1.2.3
                             scnlib/3.0.1
+                            libiconv/1.17
                         OPTIONS "date:use_system_tz_db=True"
                         GENERATORS CMakeDeps)
 
@@ -103,11 +112,19 @@ find_package(scn REQUIRED CONFIG)
 
 add_library(${PROJECT_NAME} SHARED ${source_list})
 
-
-target_compile_options(${PROJECT_NAME} PRIVATE
+# Check if the compiler is MSVC
+if (MSVC)
+    # Add the /permissive- flag to the compiler
+    target_compile_options(${PROJECT_NAME} PRIVATE
+                            /permissive-)
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE
                         -fsanitize=address
                         -fno-omit-frame-pointer)
-target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+    target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+endif()
+
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     OMP-SDK
     tinygettext
