@@ -195,6 +195,55 @@ void FreeroamController::initCommands()
 			.description = __("Set player skin"),
 			.category = MODE_NAME,
 		});
+	this->commandManager->addCommand(
+		"pm",
+		[&](std::reference_wrapper<IPlayer> player, std::string args) {
+			auto result = scn::scan<int, std::string>(args, "{} {}");
+			if (!result)
+				return false;
+			auto [recipientId, message] = result->values();
+			auto recipient = this->playerPool->get(recipientId);
+			auto senderExt = Core::Player::getPlayerExt(player);
+			if (!Core::Player::getPlayerData(player)->pmsEnabled) {
+				senderExt->sendErrorMessage(__("Your PMs are disabled. Enable them to send PMs."));
+				return true;
+			}
+			if (!recipient) {
+				senderExt->sendErrorMessage(__("This ID is not online!"));
+				return true;
+			}
+			if (!Core::Player::getPlayerData(*recipient)->pmsEnabled) {
+				senderExt->sendErrorMessage(__("This player has disabled their PMs."));
+				return true;
+			}
+			auto senderName = Core::Player::getPlayerData(player)->name;
+			auto recipientExt = Core::Player::getPlayerExt(*recipient);
+			recipientExt->sendInfoMessage(fmt::sprintf(
+				_("[PM] %s: %s", *recipient), senderName, message));
+			return true;
+		},
+		Core::Commands::CommandInfo {
+			.args = { __("recipient ID"), __("message content") },
+			.description = __("Send a private message"),
+			.category = MODE_NAME,
+		});
+	this->commandManager->addCommand(
+		"pms",
+		[&](std::reference_wrapper<IPlayer> player, std::string args) {
+			auto playerData = Core::Player::getPlayerData(player);
+			auto playerExt = Core::Player::getPlayerExt(player);
+			playerData->pmsEnabled = !(playerData->pmsEnabled);
+			if (playerData->pmsEnabled)
+				playerExt->sendInfoMessage(__("You have enabled your PMs."));
+			else
+			 	playerExt->sendInfoMessage(__("You have disabled your DMs."));
+			return true;
+		},
+		Core::Commands::CommandInfo {
+			.args = {},
+			.description = __("Toggle private messages"),
+			.category = MODE_NAME,
+		});
 }
 
 void FreeroamController::initVehicles()
