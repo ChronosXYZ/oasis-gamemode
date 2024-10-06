@@ -217,9 +217,10 @@ void FreeroamController::initCommands()
 				return true;
 			}
 			auto senderName = Core::Player::getPlayerData(player)->name;
+			int senderId = player.get().getID();
 			auto recipientExt = Core::Player::getPlayerExt(*recipient);
-			recipientExt->sendInfoMessage(fmt::sprintf(
-				_("[PM] %s: %s", *recipient), senderName, message));
+			recipientExt->sendInfoMessage(
+				__("[PM] %s (%d): %s"), senderName, senderId, message);
 			return true;
 		},
 		Core::Commands::CommandInfo {
