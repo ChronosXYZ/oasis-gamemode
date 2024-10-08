@@ -180,7 +180,7 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 						->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER)
 						.value(),
 		data->language, data->lastSkinId, data->lastIP, data->lastLoginAt,
-		data->pmsEnabled, data->userId);
+		data->settings->pmsEnabled, data->userId);
 
 	this->modeManager->savePlayer(data, txn);
 	basic_tx.commit();

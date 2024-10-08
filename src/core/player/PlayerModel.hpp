@@ -4,6 +4,7 @@
 #include "BanData.hpp"
 #include "../utils/PgTimestamp.hpp"
 #include "../utils/Localization.hpp"
+#include "PlayerSettings.hpp"
 #include "PlayerTempData.hpp"
 #include "../../modes/deathmatch/DeathmatchStats.hpp"
 #include "../../modes/x1/X1Stats.hpp"
@@ -36,7 +37,6 @@ struct PlayerModel
 	unsigned short lastSkinId;
 	Utils::SQL::timestamp lastLoginAt;
 	Utils::SQL::timestamp registrationDate;
-	bool pmsEnabled;
 
 	std::unique_ptr<Ban> ban;
 	std::unique_ptr<AdminData> adminData;
@@ -48,6 +48,8 @@ struct PlayerModel
 		= std::make_unique<Modes::Duel::DuelStats>();
 	std::unique_ptr<Player::PlayerTempData> tempData
 		= std::make_unique<Player::PlayerTempData>();
+	std::unique_ptr<Player::PlayerSettings> settings
+		= std::make_unique<Player::PlayerSettings>();
 
 	PlayerModel() = default;
 
@@ -62,7 +64,7 @@ struct PlayerModel
 		lastSkinId = row["last_skin_id"].as<unsigned short>();
 		lastLoginAt = row["last_login_at"].as<Utils::SQL::timestamp>();
 		registrationDate = row["registration_date"].as<Utils::SQL::timestamp>();
-		pmsEnabled = row["pms_enabled"].as<bool>();
+		settings->pmsEnabled = row["pms_enabled"].as<bool>();
 
 		if (!row["ban_expires_at"].is_null())
 		{
