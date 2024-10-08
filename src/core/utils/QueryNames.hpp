@@ -15,4 +15,6 @@ inline const auto UPDATE_X1_STATS = "update_x1_stats"s;
 inline const auto LOAD_X1_STATS_FOR_PLAYER = "load_x1_stats_for_player"s;
 inline const auto UPDATE_DUEL_STATS = "update_duel_stats"s;
 inline const auto LOAD_DUEL_STATS_FOR_PLAYER = "load_duel_stats_for_player"s;
+inline const auto LOAD_PLAYER_SETTINGS = "load_player_settings"s;
+inline const auto SAVE_PLAYER_SETTINGS = "save_player_settings"s;
 }

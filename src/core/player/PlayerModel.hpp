@@ -64,7 +64,6 @@ struct PlayerModel
 		lastSkinId = row["last_skin_id"].as<unsigned short>();
 		lastLoginAt = row["last_login_at"].as<Utils::SQL::timestamp>();
 		registrationDate = row["registration_date"].as<Utils::SQL::timestamp>();
-		settings->pmsEnabled = row["pms_enabled"].as<bool>();
 
 		if (!row["ban_expires_at"].is_null())
 		{
