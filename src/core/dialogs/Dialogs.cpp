@@ -114,7 +114,12 @@ void SettingsDialog::showStringSettingDialog(
 		[this, item](DialogResult result)
 		{
 			if (result.response())
+			{
 				this->values[item->id] = result.inputText();
+				if (this->onConfigurationChangedCallback)
+					this->onConfigurationChangedCallback(
+						{ item->id, result.inputText() });
+			}
 			this->show();
 		});
 }
@@ -128,7 +133,10 @@ void SettingsDialog::showBooleanSettingDialog(
 	this->dialogManager->showDialog(player, dialog,
 		[this, item](DialogResult result)
 		{
-			this->values[item->id] = result.response() == DialogResponse_Left;
+			auto value = result.response() == DialogResponse_Left;
+			this->values[item->id] = value;
+			if (this->onConfigurationChangedCallback)
+				this->onConfigurationChangedCallback({ item->id, value });
 			this->show();
 		});
 }
@@ -159,6 +167,8 @@ void SettingsDialog::showIntegerSettingDialog(
 				return;
 			}
 			this->values[item->id] = value;
+			if (this->onConfigurationChangedCallback)
+				this->onConfigurationChangedCallback({ item->id, value });
 			this->show();
 		});
 }
@@ -189,6 +199,8 @@ void SettingsDialog::showDoubleSettingDialog(
 				return;
 			}
 			this->values[item->id] = value;
+			if (this->onConfigurationChangedCallback)
+				this->onConfigurationChangedCallback({ item->id, value });
 			this->show();
 		});
 }
@@ -211,7 +223,12 @@ void SettingsDialog::showEnumSettingDialog(
 		[this, item](DialogResult result)
 		{
 			if (result.response())
-				this->values[item->id] = item->choices[result.listItem()].id;
+			{
+				auto value = item->choices[result.listItem()].id;
+				this->values[item->id] = value;
+				if (this->onConfigurationChangedCallback)
+					this->onConfigurationChangedCallback({ item->id, value });
+			}
 			this->show();
 		});
 }
@@ -221,12 +238,15 @@ SettingsDialog::SettingsDialog(IPlayer& player,
 	std::unordered_map<std::string, SettingValue> values,
 	const std::string& title, std::vector<std::shared_ptr<SettingItem>> items,
 	const std::string& leftButton, const std::string& rightButton,
-	std::function<void(SettingsMap)> onSettingsDone)
+	std::function<void(SettingsMap)> onConfigurationDone,
+	std::function<void(std::pair<std::string, SettingValue>)>
+		onConfigurationChanged)
 	: items(items)
 	, dialogManager(dialogManager)
 	, player(player)
 	, values(values)
-	, onSettingsDone(onSettingsDone)
+	, onConfigurationDoneCallback(onConfigurationDone)
+	, onConfigurationChangedCallback(onConfigurationChanged)
 {
 
 	this->innerDialogBuilder = TabListDialogBuilder()
@@ -313,8 +333,8 @@ void SettingsDialog::show()
 						return item->type == SettingType::NONE;
 					});
 				if (it == this->items.end())
-					if (this->onSettingsDone)
-						this->onSettingsDone(this->values);
+					if (this->onConfigurationDoneCallback)
+						this->onConfigurationDoneCallback(this->values);
 				this->dialogManager->removeSettingsDialog(this->player.getID());
 				return;
 			}
@@ -353,8 +373,8 @@ void SettingsDialog::show()
 			}
 			case SettingType::NONE:
 			{
-				if (this->onSettingsDone)
-					this->onSettingsDone(this->values);
+				if (this->onConfigurationDoneCallback)
+					this->onConfigurationDoneCallback(this->values);
 				this->dialogManager->removeSettingsDialog(this->player.getID());
 				break;
 			}

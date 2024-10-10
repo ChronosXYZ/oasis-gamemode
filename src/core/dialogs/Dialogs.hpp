@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -406,7 +407,9 @@ class SettingsDialog : public std::enable_shared_from_this<SettingsDialog>
 	std::shared_ptr<DialogManager> dialogManager;
 	IPlayer& player;
 
-	std::function<void(SettingsMap)> onSettingsDone;
+	std::function<void(SettingsMap)> onConfigurationDoneCallback;
+	std::function<void(std::pair<std::string, SettingValue>)>
+		onConfigurationChangedCallback;
 
 public:
 	SettingsDialog(IPlayer& player,
@@ -415,7 +418,10 @@ public:
 		const std::string& title,
 		std::vector<std::shared_ptr<SettingItem>> items,
 		const std::string& leftButton, const std::string& rightButton,
-		std::function<void(SettingsMap)> onSettingsDone = nullptr);
+		std::function<void(SettingsMap)> onConfigurationDone = nullptr,
+		std::function<void(std::pair<std::string, SettingValue>)>
+			onConfigurationChanged
+		= nullptr);
 	void show();
 };
 
@@ -429,7 +435,9 @@ private:
 	std::unordered_map<std::string, SettingValue> values;
 	std::string leftButton;
 	std::string rightButton;
-	std::function<void(SettingsMap)> onSettingsDone;
+	std::function<void(SettingsMap)> onConfigurationDoneCallback;
+	std::function<void(std::pair<std::string, SettingValue>)>
+		onConfigurationChangedCallback;
 
 public:
 	SettingsDialogBuilder(
@@ -471,10 +479,18 @@ public:
 		return *this;
 	}
 
-	SettingsDialogBuilder& setOnSettingsDone(
-		std::function<void(SettingsMap)> onSettingsDone)
+	SettingsDialogBuilder& setOnConfigurationDone(
+		std::function<void(SettingsMap)> onConfigurationDone)
 	{
-		this->onSettingsDone = onSettingsDone;
+		this->onConfigurationDoneCallback = onConfigurationDone;
+		return *this;
+	}
+
+	SettingsDialogBuilder& setOnConfigurationChanged(
+		std::function<void(std::pair<std::string, SettingValue>)>
+			onConfigurationChangedCallback)
+	{
+		this->onConfigurationChangedCallback = onConfigurationChangedCallback;
 		return *this;
 	}
 
@@ -525,7 +541,7 @@ public:
 
 		return std::shared_ptr<SettingsDialog>(
 			new SettingsDialog(player, dialogManager, values, title, items,
-				leftButton, rightButton, onSettingsDone));
+				leftButton, rightButton, onConfigurationDoneCallback));
 	}
 };
 
