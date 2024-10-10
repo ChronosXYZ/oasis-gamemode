@@ -4,6 +4,7 @@
 #include "BanData.hpp"
 #include "../utils/PgTimestamp.hpp"
 #include "../utils/Localization.hpp"
+#include "PlayerSettings.hpp"
 #include "PlayerTempData.hpp"
 #include "../../modes/deathmatch/DeathmatchStats.hpp"
 #include "../../modes/x1/X1Stats.hpp"
@@ -47,6 +48,8 @@ struct PlayerModel
 		= std::make_unique<Modes::Duel::DuelStats>();
 	std::unique_ptr<Player::PlayerTempData> tempData
 		= std::make_unique<Player::PlayerTempData>();
+	std::unique_ptr<Player::PlayerSettings> settings
+		= std::make_unique<Player::PlayerSettings>();
 
 	PlayerModel() = default;
 
