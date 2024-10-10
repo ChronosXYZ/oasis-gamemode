@@ -1,0 +1,1 @@
+SELECT * FROM player_settings WHERE account_id = $1;

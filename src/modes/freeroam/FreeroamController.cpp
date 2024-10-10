@@ -204,7 +204,7 @@ void FreeroamController::initCommands()
 			auto [recipientId, message] = result->values();
 			auto recipient = this->playerPool->get(recipientId);
 			auto senderExt = Core::Player::getPlayerExt(player);
-			if (!Core::Player::getPlayerData(player)->pmsEnabled) {
+			if (!Core::Player::getPlayerData(player)->settings->pmsEnabled) {
 				senderExt->sendErrorMessage(__("Your PMs are disabled. Enable them to send PMs."));
 				return true;
 			}
@@ -212,7 +212,7 @@ void FreeroamController::initCommands()
 				senderExt->sendErrorMessage(__("This ID is not online!"));
 				return true;
 			}
-			if (!Core::Player::getPlayerData(*recipient)->pmsEnabled) {
+			if (!Core::Player::getPlayerData(*recipient)->settings->pmsEnabled) {
 				senderExt->sendErrorMessage(__("This player has disabled their PMs."));
 				return true;
 			}
@@ -233,8 +233,8 @@ void FreeroamController::initCommands()
 		[&](std::reference_wrapper<IPlayer> player, std::string args) {
 			auto playerData = Core::Player::getPlayerData(player);
 			auto playerExt = Core::Player::getPlayerExt(player);
-			playerData->pmsEnabled = !(playerData->pmsEnabled);
-			if (playerData->pmsEnabled)
+			playerData->settings->pmsEnabled = !(playerData->settings->pmsEnabled);
+			if (playerData->settings->pmsEnabled)
 				playerExt->sendInfoMessage(__("You have enabled your PMs."));
 			else
 			 	playerExt->sendInfoMessage(__("You have disabled your DMs."));

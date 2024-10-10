@@ -359,9 +359,19 @@ bool AuthController::loadPlayerData(IPlayer& player)
 	auto data = Player::getPlayerData(player);
 	data->updateFromRow(row);
 
+	cp::query loadPlayerSettingsQuery(SQLQueryManager::Get()
+			->getQueryByName(Utils::SQL::Queries::LOAD_PLAYER_SETTINGS)
+			.value());
+	auto tx_s = cp::tx(this->pool, loadPlayerSettingsQuery);
+	pqxx::result res_s = loadPlayerSettingsQuery(data->userId);
+
+	auto row_s = res_s[0];
+	data->settings->updateFromRow(row_s);
+
 	this->modeManager.lock()->loadPlayerData(data, tx.get());
 
 	tx.commit();
+	tx_s.commit();
 
 	return true;
 }
