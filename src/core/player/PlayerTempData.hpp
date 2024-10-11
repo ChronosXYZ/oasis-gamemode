@@ -3,6 +3,7 @@
 #include "../PlayerTempData.hpp"
 #include "../auth/PlayerTempData.hpp"
 #include "../../modes/deathmatch/PlayerTempData.hpp"
+#include "../../modes/derby/PlayerTempData.hpp"
 #include "../../modes/x1/X1PlayerTempData.hpp"
 #include "../../modes/freeroam/PlayerTempData.hpp"
 #include "../../modes/duel/PlayerTempData.hpp"
@@ -21,6 +22,7 @@ struct PlayerTempData
 	std::unique_ptr<Modes::Freeroam::PlayerTempData> freeroam
 		= std::make_unique<Modes::Freeroam::PlayerTempData>();
 	std::unique_ptr<Modes::Deathmatch::PlayerTempData> deathmatch;
+	std::unique_ptr<Modes::Derby::PlayerTempData> derby;
 	std::unique_ptr<Modes::X1::X1PlayerTempData> x1
 		= std::make_unique<Modes::X1::X1PlayerTempData>();
 	std::unique_ptr<Modes::Duel::PlayerTempData> duel;

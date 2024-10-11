@@ -7,6 +7,7 @@
 #include "PlayerSettings.hpp"
 #include "PlayerTempData.hpp"
 #include "../../modes/deathmatch/DeathmatchStats.hpp"
+#include "../../modes/derby/DerbyStats.hpp"
 #include "../../modes/x1/X1Stats.hpp"
 #include "../../modes/duel/DuelStats.hpp"
 
@@ -42,6 +43,8 @@ struct PlayerModel
 	std::unique_ptr<AdminData> adminData;
 	std::unique_ptr<Modes::Deathmatch::DeathmatchStats> dmStats
 		= std::make_unique<Modes::Deathmatch::DeathmatchStats>();
+	std::unique_ptr<Modes::Derby::DerbyStats> derbyStats
+		= std::make_unique<Modes::Derby::DerbyStats>();
 	std::unique_ptr<Modes::X1::X1Stats> x1Stats
 		= std::make_unique<Modes::X1::X1Stats>();
 	std::unique_ptr<Modes::Duel::DuelStats> duelStats
