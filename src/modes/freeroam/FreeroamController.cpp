@@ -294,6 +294,41 @@ void FreeroamController::initCommands()
 			.description = __("Toggle private messages"),
 			.category = MODE_NAME,
 		});
+	this->commandManager->addCommand(
+		"settings",
+		[&](std::reference_wrapper<IPlayer> player, std::string args)
+		{
+			auto playerData = Core::Player::getPlayerData(player);
+			auto dialog = Core::SettingsDialogBuilder(player, this->dialogManager)
+				.setTitle(fmt::sprintf(DIALOG_HEADER_TITLE,
+				_("Player settings", player)))
+				.setItems(std::vector<std::shared_ptr<Core::SettingItem>>
+				{
+					std::make_shared<Core::SettingBooleanItem>("pmsEnabled",
+					"Private messages", "Enable private messages?", "Yes", "No")
+				})
+				.setInitialValues(std::unordered_map<std::string, Core::SettingValue> 
+				{
+					{"pmsEnabled", playerData->settings->pmsEnabled}
+				})
+				.setOnConfigurationChanged([playerData](std::pair<std::string, Core::SettingValue> pair) 
+				{
+					std::string item = std::get<std::string>(pair);
+					Core::SettingValue state = std::get<Core::SettingValue>(pair);
+					// if (item that we need) our field = std::get<our type>(state);
+					if (item == "pmsEnabled") playerData->settings->pmsEnabled = std::get<bool>(state);
+				})
+				.setLeftButton(__("Select"))
+				.setRightButton(__("Exit"))
+				.build();
+			dialog->show();
+			return true;
+		},
+		Core::Commands::CommandInfo {
+			.args = {},
+			.description = __("Edit player settings"),
+			.category = MODE_NAME,
+		});
 }
 
 void FreeroamController::initVehicles()

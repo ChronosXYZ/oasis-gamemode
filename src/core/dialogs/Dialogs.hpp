@@ -541,7 +541,7 @@ public:
 
 		return std::shared_ptr<SettingsDialog>(
 			new SettingsDialog(player, dialogManager, values, title, items,
-				leftButton, rightButton, onConfigurationDoneCallback));
+				leftButton, rightButton, onConfigurationDoneCallback, onConfigurationChangedCallback));
 	}
 };
 
