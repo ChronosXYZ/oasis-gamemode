@@ -1,11 +1,13 @@
 #pragma once
 
 #include <pqxx/pqxx>
+#include "../textdraws/Notification.hpp"
 
 namespace Core::Player
 {
 struct PlayerSettings {
     bool pmsEnabled;
+    TextDraws::NotificationPosition notificationPos = TextDraws::NotificationPosition::Bottom;
 
     PlayerSettings() = default;
 

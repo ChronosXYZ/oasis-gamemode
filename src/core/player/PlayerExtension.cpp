@@ -62,8 +62,7 @@ void OasisPlayerExt::sendInfoMessage(const std::string& message)
 			"%s %s", _("#LIME#>>#WHITE#", _player), _(message, _player)));
 }
 
-void OasisPlayerExt::showNotification(const std::string& notification,
-	TextDraws::NotificationPosition position, unsigned int seconds,
+void OasisPlayerExt::showNotification(const std::string& notification, unsigned int seconds,
 	unsigned int notificationSound)
 {
 	if (auto notificationViewOpt
@@ -73,7 +72,7 @@ void OasisPlayerExt::showNotification(const std::string& notification,
 			= std::dynamic_pointer_cast<TextDraws::Notification>(
 				*notificationViewOpt);
 		notificationView->show(
-			notification, position, notificationSound, seconds);
+			notification, this->_playerData->settings->notificationPos, notificationSound, seconds);
 	}
 }
 

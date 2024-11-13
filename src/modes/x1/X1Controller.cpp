@@ -319,8 +319,7 @@ void X1Controller::onRoomJoin(IPlayer& player, unsigned int roomId)
 		for (auto player : room->players)
 		{
 			auto playerExt = Core::Player::getPlayerExt(*player);
-			playerExt->showNotification(_("~r~The fight has started!", *player),
-				Core::TextDraws::NotificationPosition::Bottom);
+			playerExt->showNotification(_("~r~The fight has started!", *player));
 			room->fightStarted = std::chrono::system_clock::now();
 		}
 	}

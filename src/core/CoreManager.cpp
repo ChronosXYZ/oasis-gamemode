@@ -319,13 +319,11 @@ void CoreManager::onPlayerDeath(IPlayer& player, IPlayer* killer, int reason)
 		auto playerExt = Player::getPlayerExt(player);
 		playerExt->showNotification(
 			fmt::sprintf(_("~w~You got killed by~n~~r~%s(%d)", player),
-				killer->getName().to_string(), killer->getID()),
-			TextDraws::NotificationPosition::Bottom, 4);
+				killer->getName().to_string(), killer->getID()), 4);
 
 		killerExt->showNotification(
 			fmt::sprintf(_("~w~You killed~n~~r~%s(%d)", player),
-				player.getName().to_string(), player.getID()),
-			TextDraws::NotificationPosition::Bottom, 6);
+				player.getName().to_string(), player.getID()), 6);
 	}
 }
 }

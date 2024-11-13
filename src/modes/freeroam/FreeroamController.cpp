@@ -305,11 +305,48 @@ void FreeroamController::initCommands()
 				.setItems(std::vector<std::shared_ptr<Core::SettingItem>>
 				{
 					std::make_shared<Core::SettingBooleanItem>("pmsEnabled",
-					"Private messages", "Enable private messages?", "Yes", "No")
+					"Private messages", "Enable private messages?", "Yes", "No"),
+					std::make_shared<Core::SettingEnumItem>("notificationPos",
+					_("Notification position", player),
+					std::vector<Core::SettingEnumItem::EnumChoice> {
+						Core::SettingEnumItem::EnumChoice {
+							.id = "BOTTOM",
+							.text = __("Bottom")
+						},
+						Core::SettingEnumItem::EnumChoice {
+							.id = "TOP",
+							.text = __("Top")
+						},
+						Core::SettingEnumItem::EnumChoice {
+							.id = "LEFT",
+							.text = __("Left")
+						},
+						Core::SettingEnumItem::EnumChoice {
+							.id = "RIGHT",
+							.text = __("Right")
+						}
+					}, true)
 				})
 				.setInitialValues(std::unordered_map<std::string, Core::SettingValue> 
 				{
-					{"pmsEnabled", playerData->settings->pmsEnabled}
+					{"pmsEnabled", playerData->settings->pmsEnabled},
+					{"notificationPos", [playerData]
+						{
+							switch ((int)playerData->settings->notificationPos)
+							{
+								case (int)Core::TextDraws::NotificationPosition::Bottom:
+									return "BOTTOM";
+								case (int)Core::TextDraws::NotificationPosition::Top:
+									return "TOP";
+								case (int)Core::TextDraws::NotificationPosition::Left:
+									return "LEFT";
+								case (int)Core::TextDraws::NotificationPosition::Right:
+									return "RIGHT";
+								default:
+									return "BOTTOM";
+							}
+						}()
+					}
 				})
 				.setOnConfigurationChanged([playerData](std::pair<std::string, Core::SettingValue> pair) 
 				{
@@ -317,6 +354,17 @@ void FreeroamController::initCommands()
 					Core::SettingValue state = std::get<Core::SettingValue>(pair);
 					// if (item that we need) our field = std::get<our type>(state);
 					if (item == "pmsEnabled") playerData->settings->pmsEnabled = std::get<bool>(state);
+					if (item == "notificationPos") {
+						std::string pos = std::get<std::string>(state);
+						if (pos == "BOTTOM") 
+							playerData->settings->notificationPos = Core::TextDraws::NotificationPosition::Bottom;
+						else if (pos == "TOP")
+							playerData->settings->notificationPos = Core::TextDraws::NotificationPosition::Top;
+						else if (pos == "LEFT")
+							playerData->settings->notificationPos = Core::TextDraws::NotificationPosition::Left;
+						else if (pos == "RIGHT")
+							playerData->settings->notificationPos = Core::TextDraws::NotificationPosition::Right;
+					};
 				})
 				.setLeftButton(__("Select"))
 				.setRightButton(__("Exit"))
@@ -329,6 +377,19 @@ void FreeroamController::initCommands()
 			.description = __("Edit player settings"),
 			.category = MODE_NAME,
 		});
+		this->commandManager->addCommand(
+			"notify",
+			[&](std::reference_wrapper<IPlayer> player, std::string args){
+				auto playerExt = Core::Player::getPlayerExt(player);
+				playerExt->showNotification(args);
+				return true;
+			},
+			Core::Commands::CommandInfo {
+				.args = { __("text") },
+				.description = __("Notify yourself"),
+				.category = MODE_NAME
+			}
+		);
 }
 
 void FreeroamController::initVehicles()

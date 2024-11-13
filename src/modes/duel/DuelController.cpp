@@ -781,9 +781,7 @@ void DuelController::onPlayerSpawn(IPlayer& player)
 							auto playerExt
 								= Core::Player::getPlayerExt(*player);
 							playerExt->showNotification(
-								fmt::sprintf("~y~%d", *startSecs + 1),
-								Core::TextDraws::NotificationPosition::Bottom,
-								1);
+								fmt::sprintf("~y~%d", *startSecs + 1), 1);
 							player->playSound(1138, Vector3(0.0, 0.0, 0.0));
 						}
 					}

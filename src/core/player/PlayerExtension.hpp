@@ -60,8 +60,7 @@ public:
 				fmt::sprintf(_(message, _player), std::forward<T>(args)...)));
 	}
 
-	void showNotification(const std::string& notification,
-		TextDraws::NotificationPosition position, unsigned int seconds = 3,
+	void showNotification(const std::string& notification, unsigned int seconds = 3,
 		unsigned int notificationSound = 0);
 	template <typename... T>
 	inline void sendTranslatedMessage(const std::string& message, T&&... args)
