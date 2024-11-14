@@ -7,12 +7,13 @@ namespace Core::Player
 {
 struct PlayerSettings {
     bool pmsEnabled;
-    TextDraws::NotificationPosition notificationPos = TextDraws::NotificationPosition::Bottom;
+    TextDraws::NotificationPosition notificationPos;
 
     PlayerSettings() = default;
 
     void updateFromRow(const pqxx::row& row) {
         pmsEnabled = row["pms_enabled"].as<bool>();
+        notificationPos = (TextDraws::NotificationPosition)row["notification_position"].as<int>();
     }
 };
 }

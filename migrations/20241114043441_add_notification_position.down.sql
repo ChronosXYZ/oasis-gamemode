@@ -1,0 +1,2 @@
+ALTER TABLE public.player_settings
+DROP COLUMN notification_position

@@ -185,7 +185,7 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 	txn.exec_params(SQLQueryManager::Get()
 						->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER_SETTINGS)
 						.value(),
-		data->settings->pmsEnabled, data->userId);
+		data->settings->pmsEnabled, (int)data->settings->notificationPos, data->userId);
 
 	this->modeManager->savePlayer(data, txn);
 	basic_tx.commit();
