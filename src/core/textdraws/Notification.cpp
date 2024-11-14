@@ -14,22 +14,21 @@ Notification::Notification(IPlayer& player, ITimersComponent* timersComponent)
 {
 	topNotification = CreatePlayerTextDraw(
 		player, 319.0000, 16.0000, "_"); //"Starboy~n~~w~1");
-	PlayerTextDrawFont(player, topNotification, 2);
-	PlayerTextDrawLetterSize(player, topNotification, 0.3199, 1.6000);
+	PlayerTextDrawFont(player, topNotification, 1);
+	PlayerTextDrawLetterSize(player, topNotification, 0.450000, 1.950000);
+	PlayerTextDrawTextSize(player, topNotification, 400.000000, 400.000000);
 	PlayerTextDrawAlignment(player, topNotification, 2);
-	PlayerTextDrawColor(player, topNotification, -301989633);
+	PlayerTextDrawColor(player, topNotification, -1); // red = -301989633
 	PlayerTextDrawSetShadow(player, topNotification, 0);
 	PlayerTextDrawSetOutline(player, topNotification, 1);
 	PlayerTextDrawBackgroundColor(player, topNotification, 255);
 	PlayerTextDrawSetProportional(player, topNotification, true);
-	PlayerTextDrawTextSize(player, topNotification, 0.0000, 0.0000);
 
 	bottomNotification
 		= CreatePlayerTextDraw(player, 320.000000, 385.000000, "_");
-
 	PlayerTextDrawFont(player, bottomNotification, 1);
-	PlayerTextDrawLetterSize(player, bottomNotification, 0.487500, 1.950000);
-	PlayerTextDrawTextSize(player, bottomNotification, 401.000000, 341.500000);
+	PlayerTextDrawLetterSize(player, bottomNotification, 0.450000, 1.950000);
+	PlayerTextDrawTextSize(player, bottomNotification, 400.000000, 400.000000);
 	PlayerTextDrawSetOutline(player, bottomNotification, 1);
 	PlayerTextDrawSetShadow(player, bottomNotification, 0);
 	PlayerTextDrawAlignment(player, bottomNotification, 2);
@@ -38,6 +37,34 @@ Notification::Notification(IPlayer& player, ITimersComponent* timersComponent)
 	PlayerTextDrawBoxColor(player, bottomNotification, 50);
 	PlayerTextDrawUseBox(player, bottomNotification, 0);
 	PlayerTextDrawSetProportional(player, bottomNotification, 1);
+
+	leftNotification
+		= CreatePlayerTextDraw(player, 13.000000, 195.000000, "_");
+	PlayerTextDrawFont(player, leftNotification, 1);
+	PlayerTextDrawLetterSize(player, leftNotification, 0.450000, 1.950000);
+	PlayerTextDrawTextSize(player, leftNotification, 400.000000, 17.000000);
+	PlayerTextDrawSetOutline(player, leftNotification, 1);
+	PlayerTextDrawSetShadow(player, leftNotification, 0);
+	PlayerTextDrawAlignment(player, leftNotification, 1);
+	PlayerTextDrawColor(player, leftNotification, -1);
+	PlayerTextDrawBackgroundColor(player, leftNotification, 255);
+	PlayerTextDrawBoxColor(player, leftNotification, 50);
+	PlayerTextDrawUseBox(player, leftNotification, 0);
+	PlayerTextDrawSetProportional(player, leftNotification, 1);
+
+	rightNotification
+		= CreatePlayerTextDraw(player, 625.000000, 195.000000, "_");
+	PlayerTextDrawFont(player, rightNotification, 1);
+	PlayerTextDrawLetterSize(player, rightNotification, 0.450000, 1.950000);
+	PlayerTextDrawTextSize(player, rightNotification, 400.000000, 17.000000);
+	PlayerTextDrawSetOutline(player, rightNotification, 1);
+	PlayerTextDrawSetShadow(player, rightNotification, 0);
+	PlayerTextDrawAlignment(player, rightNotification, 3);
+	PlayerTextDrawColor(player, rightNotification, -1);
+	PlayerTextDrawBackgroundColor(player, rightNotification, 255);
+	PlayerTextDrawBoxColor(player, rightNotification, 50);
+	PlayerTextDrawUseBox(player, rightNotification, 0);
+	PlayerTextDrawSetProportional(player, rightNotification, 1);
 
 	this->showTimers = {
 		{ NotificationPosition::Top, {} },
@@ -68,11 +95,21 @@ void Notification::show(std::string text, NotificationPosition position,
 	switch (position)
 	{
 	case NotificationPosition::Top:
-	case NotificationPosition::Left:
-	case NotificationPosition::Right:
 	{
 		topNotification->setText(text);
 		topNotification->show();
+		break;
+	}
+	case NotificationPosition::Left:
+	{
+		leftNotification->setText(text);
+		leftNotification->show();
+		break;
+	}
+	case NotificationPosition::Right:
+	{
+		rightNotification->setText(text);
+		rightNotification->show();
 		break;
 	}
 	case NotificationPosition::Bottom:
@@ -106,7 +143,15 @@ void Notification::hide(NotificationPosition position)
 		break;
 	}
 	case NotificationPosition::Left:
+	{
+		this->leftNotification->hide();
+		break;
+	}
 	case NotificationPosition::Right:
+	{
+		this->rightNotification->hide();
+		break;
+	}
 	case NotificationPosition::Bottom:
 	{
 		this->bottomNotification->hide();
@@ -122,6 +167,8 @@ void Notification::hide() { this->topNotification->hide(); }
 void Notification::destroy()
 {
 	this->playerTextDrawData->release(this->topNotification->getID());
+	this->playerTextDrawData->release(this->leftNotification->getID());
+	this->playerTextDrawData->release(this->rightNotification->getID());
 	this->playerTextDrawData->release(this->bottomNotification->getID());
 }
 }

@@ -28,6 +28,8 @@ class Notification : public ITextDrawWrapper
 
 	IPlayerTextDraw* topNotification;
 	IPlayerTextDraw* bottomNotification;
+	IPlayerTextDraw* leftNotification;
+	IPlayerTextDraw* rightNotification;
 	std::unordered_map<NotificationPosition, std::optional<ITimer*>> showTimers;
 
 public:
