@@ -1041,13 +1041,12 @@ void DuelController::onPlayerSave(
 		Core::SQLQueryManager::Get()
 			->getQueryByName(Core::Utils::SQL::Queries::UPDATE_DUEL_STATS)
 			.value(),
-		data->duelStats->score, data->duelStats->highestKillStreak,
+		data->userId, data->duelStats->score, data->duelStats->highestKillStreak,
 		data->duelStats->kills, data->duelStats->deaths,
 		data->x1Stats->handKills, data->duelStats->handheldWeaponKills,
 		data->duelStats->meleeKills, data->duelStats->handgunKills,
 		data->duelStats->shotgunKills, data->duelStats->smgKills,
 		data->duelStats->assaultRiflesKills, data->duelStats->riflesKills,
-		data->duelStats->heavyWeaponKills, data->duelStats->explosivesKills,
-		data->userId);
+		data->duelStats->heavyWeaponKills, data->duelStats->explosivesKills);
 }
 }

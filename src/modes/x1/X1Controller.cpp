@@ -531,12 +531,12 @@ void X1Controller::onPlayerSave(
 		Core::SQLQueryManager::Get()
 			->getQueryByName(Core::Utils::SQL::Queries::UPDATE_X1_STATS)
 			.value(),
-		data->x1Stats->score, data->x1Stats->highestKillStreak,
+		data->userId, data->x1Stats->score, data->x1Stats->highestKillStreak,
 		data->x1Stats->kills, data->x1Stats->deaths, data->x1Stats->handKills,
 		data->x1Stats->handheldWeaponKills, data->x1Stats->meleeKills,
 		data->x1Stats->handgunKills, data->x1Stats->shotgunKills,
 		data->x1Stats->smgKills, data->x1Stats->assaultRiflesKills,
 		data->x1Stats->riflesKills, data->x1Stats->heavyWeaponKills,
-		data->x1Stats->explosivesKills, data->userId);
+		data->x1Stats->explosivesKills);
 }
 }

@@ -121,13 +121,13 @@ void DeathmatchController::onPlayerSave(
 		Core::SQLQueryManager::Get()
 			->getQueryByName(Core::Utils::SQL::Queries::UPDATE_DM_STATS)
 			.value(),
-		data->dmStats->score, data->dmStats->highestKillStreak,
+		data->userId, data->dmStats->score, data->dmStats->highestKillStreak,
 		data->dmStats->kills, data->dmStats->deaths, data->dmStats->handKills,
 		data->dmStats->handheldWeaponKills, data->dmStats->meleeKills,
 		data->dmStats->handgunKills, data->dmStats->shotgunKills,
 		data->dmStats->smgKills, data->dmStats->assaultRiflesKills,
 		data->dmStats->riflesKills, data->dmStats->heavyWeaponKills,
-		data->dmStats->explosivesKills, data->userId);
+		data->dmStats->explosivesKills);
 }
 
 void DeathmatchController::onPlayerLoad(

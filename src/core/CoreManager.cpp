@@ -179,13 +179,13 @@ void CoreManager::savePlayer(std::shared_ptr<PlayerModel> data)
 	txn.exec_params(SQLQueryManager::Get()
 						->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER)
 						.value(),
-		data->language, data->lastSkinId, data->lastIP, data->lastLoginAt, data->userId);
+		data->userId, data->language, data->lastSkinId, data->lastIP, data->lastLoginAt);
 
 	// save player settings
 	txn.exec_params(SQLQueryManager::Get()
 						->getQueryByName(Utils::SQL::Queries::SAVE_PLAYER_SETTINGS)
 						.value(),
-		data->settings->pmsEnabled, (int)data->settings->notificationPos, data->userId);
+		data->userId, data->settings->pmsEnabled, (int)data->settings->notificationPos);
 
 	this->modeManager->savePlayer(data, txn);
 	basic_tx.commit();
