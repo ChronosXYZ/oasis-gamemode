@@ -1,0 +1,2 @@
+ALTER TABLE public.player_settings
+DROP COLUMN notify_on_give_damage

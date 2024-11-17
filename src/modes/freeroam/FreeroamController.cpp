@@ -325,7 +325,9 @@ void FreeroamController::initCommands()
 							.id = "RIGHT",
 							.text = __("Right")
 						}
-					}, true)
+					}, true),
+					std::make_shared<Core::SettingBooleanItem>("notifyOnGiveDamage",
+					"Hit notifications", "Notify when dealing damage?", "Yes", "No")
 				})
 				.setInitialValues(std::unordered_map<std::string, Core::SettingValue> 
 				{
@@ -346,7 +348,8 @@ void FreeroamController::initCommands()
 									return "BOTTOM";
 							}
 						}()
-					}
+					},
+					{"notifyOnGiveDamage", playerData->settings->notifyOnGiveDamage}
 				})
 				.setOnConfigurationChanged([playerData](std::pair<std::string, Core::SettingValue> pair) 
 				{
@@ -365,6 +368,7 @@ void FreeroamController::initCommands()
 						else if (pos == "RIGHT")
 							playerData->settings->notificationPos = Core::TextDraws::NotificationPosition::Right;
 					};
+					if (item == "notifyOnGiveDamage") playerData->settings->notifyOnGiveDamage = std::get<bool>(state);
 				})
 				.setLeftButton(__("Select"))
 				.setRightButton(__("Exit"))
@@ -387,7 +391,7 @@ void FreeroamController::initCommands()
 			Core::Commands::CommandInfo {
 				.args = { __("text") },
 				.description = __("Notify yourself"),
-				.category = MODE_NAME
+				.category = "test"
 			}
 		);
 }

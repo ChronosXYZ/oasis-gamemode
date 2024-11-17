@@ -154,11 +154,13 @@ void ModeBase::onDuelWin(Core::Utils::Events::DuelWin event)
 void ModeBase::onPlayerGiveDamage(IPlayer& player, IPlayer& to, float amount,
 	unsigned int weapon, BodyPart part)
 {
-	auto playerExt = Core::Player::getPlayerExt(player);
-	playerExt->showNotification(
-		fmt::sprintf("%s(%d)~n~~w~%.1f%%", to.getName().to_string(), to.getID(),
-			(to.getArmour() + to.getHealth()) - amount), 3);
-	player.playSound(17802, Vector3(0.0, 0.0, 0.0));
+	if (Core::Player::getPlayerData(player)->settings->notifyOnGiveDamage) {
+		auto playerExt = Core::Player::getPlayerExt(player);
+		playerExt->showNotification(
+			fmt::sprintf("%s(%d)~n~~w~%.1f%%", to.getName().to_string(), to.getID(),
+				(to.getArmour() + to.getHealth()) - amount), 3);
+		player.playSound(17802, Vector3(0.0, 0.0, 0.0));
+	}
 }
 
 unsigned int ModeBase::playerCount() { return this->players.size(); }
