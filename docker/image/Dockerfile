@@ -1,4 +1,4 @@
-FROM ubuntu:23.10 as builder
+FROM ubuntu:24.04 as builder
 ARG BUILD_TYPE=Release
 ENV DEBIAN_FRONTEND=noninteractive
 RUN \

@@ -1,4 +1,4 @@
-FROM ubuntu:23.10 as base_builder
+FROM ubuntu:24.04 as base_builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 

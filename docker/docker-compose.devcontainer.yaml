@@ -6,7 +6,7 @@ services:
       service: builder
     image: oasis/devenv
     build:
-      context: ./ubuntu-23.10
+      context: ./devenv
       target: devenv
     command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
