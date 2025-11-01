@@ -1,4 +1,4 @@
-FROM ubuntu:23.10 as base_builder
+FROM ubuntu:24.04 AS base_builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -8,7 +8,7 @@ RUN \
     apt install -y \
     cmake \
     ninja-build \
-    g++-13 \
+    build-essential \
     python3-pip \
     gcc-multilib \
     g++-multilib \
@@ -22,7 +22,7 @@ USER ubuntu
 ENV PATH=~/.local/bin:${PATH}
 
 COPY docker-entrypoint.sh /
-CMD /docker-entrypoint.sh
+CMD ["/docker-entrypoint.sh"]
 
 
 # vscode devcontainers image

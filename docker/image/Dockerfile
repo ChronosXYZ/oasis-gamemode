@@ -1,4 +1,4 @@
-FROM ubuntu:23.10 as builder
+FROM ubuntu:24.04 AS builder
 ARG BUILD_TYPE=Release
 ENV DEBIAN_FRONTEND=noninteractive
 RUN \
@@ -7,7 +7,7 @@ RUN \
     apt-get install -y \
     cmake \
     ninja-build \
-    g++-13 \
+    build-essential \
     python3-pip \
     gcc-multilib \
     g++-multilib \
@@ -32,7 +32,7 @@ RUN cmake \
     --parallel $(nproc)
 RUN make copy_output
 
-FROM ubuntu:23.10
+FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ARG OPEN_MP_VERSION=1.2.0.2670
 COPY --from=builder /app/server /app
@@ -60,4 +60,4 @@ RUN wget -q https://github.com/golang-migrate/migrate/releases/download/v4.17.0/
     rm tmp.deb && \
     rm server.cfg
 
-CMD /entrypoint.sh
+CMD ["/entrypoint.sh"]
